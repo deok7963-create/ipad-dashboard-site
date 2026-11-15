@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "periods": [
+    {
+      "id": "morning",
+      "from": "06:00",
+      "to": "09:00",
+      "images": [
+        "ditto-pikachu.jpg",
+        "ditto-psyduck.jpg",
+        "ditto-charmander.jpg"
+      ]
+    },
+    {
+      "id": "forenoon",
+      "from": "09:00",
+      "to": "12:00",
+      "images": [
+        "ditto-squirtle.jpg",
+        "ditto-bulbasaur.jpg",
+        "ditto-eevee.jpg"
+      ]
+    },
+    {
+      "id": "noon",
+      "from": "12:00",
+      "to": "14:00",
+      "images": [
+        "ditto-jigglypuff.jpg",
+        "ditto-clefairy.jpg",
+        "ditto-meowth.jpg"
+      ]
+    },
+    {
+      "id": "afternoon",
+      "from": "14:00",
+      "to": "18:00",
+      "images": [
+        "ditto-dragonite.jpg",
+        "ditto-slowpoke.jpg",
+        "ditto-muk.jpg"
+      ]
+    },
+    {
+      "id": "evening",
+      "from": "18:00",
+      "to": "21:00",
+      "images": [
+        "ditto-haunter.jpg",
+        "ditto-koffing.jpg"
+      ]
+    },
+    {
+      "id": "night",
+      "from": "21:00",
+      "to": "06:00",
+      "images": [
+        "ditto-snorlax.jpg",
+        "ditto-original.jpg"
+      ]
+    }
+  ],
+  "images": {
+    "ditto-bulbasaur.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 98,
+      "lowRes": false
+    },
+    "ditto-charmander.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 99,
+      "lowRes": false
+    },
+    "ditto-clefairy.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 100,
+      "lowRes": false
+    },
+    "ditto-dragonite.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 102,
+      "lowRes": false
+    },
+    "ditto-eevee.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 100,
+      "lowRes": false
+    },
+    "ditto-haunter.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 100,
+      "lowRes": false
+    },
+    "ditto-jigglypuff.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 99,
+      "lowRes": false
+    },
+    "ditto-koffing.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 100,
+      "lowRes": false
+    },
+    "ditto-meowth.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 98,
+      "lowRes": false
+    },
+    "ditto-muk.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 100,
+      "lowRes": false
+    },
+    "ditto-original.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 99,
+      "lowRes": false
+    },
+    "ditto-pikachu.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 98,
+      "lowRes": false
+    },
+    "ditto-psyduck.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 98,
+      "lowRes": false
+    },
+    "ditto-slowpoke.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 97,
+      "lowRes": false
+    },
+    "ditto-snorlax.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 98,
+      "lowRes": false
+    },
+    "ditto-squirtle.jpg": {
+      "w": 800,
+      "h": 1000,
+      "kb": 100,
+      "lowRes": false
+    }
+  }
+}

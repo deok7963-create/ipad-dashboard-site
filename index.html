@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="대시보드">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>배포 점검</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #f4f4f7; color: #222; }
+  body { font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; font-size: 18px; padding: 16px; }
+  h1 { font-size: 24px; margin: 0 0 4px 0; }
+  .note { color: #666; font-size: 14px; margin: 0 0 16px 0; }
+  h2 { font-size: 20px; margin: 20px 0 8px 0; }
+  table { border-collapse: collapse; width: 100%; background: #fff; }
+  th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; vertical-align: top; font-size: 16px; }
+  th { background: #e6e6ee; }
+  td.thumb { width: 96px; }
+  td.thumb img { display: block; width: 80px; height: 100px; background: #ddd; }
+  .ok { color: #0a7a2a; font-weight: bold; }
+  .bad { color: #b00020; font-weight: bold; }
+  #summary { margin: 8px 0; }
+</style>
+</head>
+<body>
+<h1>배포 점검 페이지 (임시)</h1>
+<p class="note">이 페이지는 임시 점검용이며 본 화면(IPD-TASK-004)으로 교체됩니다.</p>
+
+<h2>환경 정보</h2>
+<table>
+  <tr><th>주소</th><td id="env-url">-</td></tr>
+  <tr><th>innerWidth × innerHeight</th><td id="env-size">-</td></tr>
+  <tr><th>방향 (innerWidth &gt; innerHeight)</th><td id="env-orient">-</td></tr>
+  <tr><th>navigator.standalone</th><td id="env-standalone">-</td></tr>
+  <tr><th>devicePixelRatio</th><td id="env-dpr">-</td></tr>
+  <tr><th>버전 (VERSION)</th><td id="env-version">-</td></tr>
+  <tr><th>마지막 갱신 시각</th><td id="env-updated">-</td></tr>
+</table>
+
+<h2>이미지 manifest</h2>
+<div id="summary">불러오는 중…</div>
+<table id="periods">
+  <tr><th>구간</th><th>시간</th><th>이미지 풀</th><th>첫 이미지</th></tr>
+</table>
+
+<script>
+(function () {
+  // 배포할 때마다 이 숫자만 올리면 manifest·이미지 주소가 바뀌어 캐시를 피한다.
+  var VERSION = 1;
+  var BASE = 'assets/ditto/';
+
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function nowText() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
+      pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+  function withVersion(url) { return url + '?v=' + VERSION; }
+
+  function updateEnv() {
+    var w = window.innerWidth, h = window.innerHeight;
+    $('env-url').textContent = location.href;
+    $('env-size').textContent = w + ' × ' + h;
+    $('env-orient').textContent = w > h ? '가로' : '세로';
+    $('env-standalone').textContent = String(navigator.standalone);
+    $('env-dpr').textContent = String(window.devicePixelRatio);
+    $('env-version').textContent = String(VERSION);
+    $('env-updated').textContent = nowText();
+  }
+  function onResize() {
+    updateEnv();
+    setTimeout(updateEnv, 300);
+  }
+  window.addEventListener('resize', onResize);
+  window.addEventListener('orientationchange', onResize);
+  updateEnv();
+
+  var total = 0, loaded = 0, failed = 0;
+  function refreshSummary() {
+    var s = '첫 이미지 ' + total + '장 중 로드 ' + loaded + '장';
+    if (failed > 0) { s += ', 실패 ' + failed + '장'; }
+    $('summary').innerHTML = '<span class="' + (failed > 0 ? 'bad' : (loaded === total ? 'ok' : '')) + '">' + s + '</span>';
+  }
+
+  function addRow(p) {
+    var tr = document.createElement('tr');
+    var tdId = document.createElement('td');
+    tdId.textContent = p.id;
+    var tdTime = document.createElement('td');
+    tdTime.textContent = p.from + '–' + p.to;
+    var tdList = document.createElement('td');
+    tdList.textContent = (p.images || []).join(', ');
+    var tdThumb = document.createElement('td');
+    tdThumb.className = 'thumb';
+    tr.appendChild(tdId); tr.appendChild(tdTime); tr.appendChild(tdList); tr.appendChild(tdThumb);
+    $('periods').appendChild(tr);
+
+    if (!p.images || p.images.length === 0) {
+      tdThumb.innerHTML = '<span class="bad">이미지 없음</span>';
+      return;
+    }
+    total++;
+    var img = new Image();
+    img.alt = p.images[0];
+    img.onload = function () { loaded++; refreshSummary(); };
+    img.onerror = function () {
+      failed++;
+      tdThumb.innerHTML = '<span class="bad">로드 실패</span>';
+      refreshSummary();
+    };
+    img.src = withVersion(BASE + p.images[0]);
+    tdThumb.appendChild(img);
+  }
+
+  fetch(withVersion(BASE + 'manifest.json'))
+    .then(function (res) {
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      return res.json();
+    })
+    .then(function (m) {
+      var periods = m.periods || [];
+      for (var i = 0; i < periods.length; i++) { addRow(periods[i]); }
+      refreshSummary();
+      updateEnv();
+    })
+    .catch(function (e) {
+      $('summary').innerHTML = '<span class="bad">manifest 불러오기 실패: ' + String(e && e.message) + '</span>';
+    });
+})();
+</script>
+</body>
+</html>
