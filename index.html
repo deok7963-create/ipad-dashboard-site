@@ -7,113 +7,462 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="대시보드">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>배포 점검</title>
+<title>대시보드</title>
 <style>
-  html, body { margin: 0; padding: 0; background: #f4f4f7; color: #222; }
-  body { font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; font-size: 18px; padding: 16px; }
-  h1 { font-size: 24px; margin: 0 0 4px 0; }
-  .note { color: #666; font-size: 14px; margin: 0 0 16px 0; }
-  h2 { font-size: 20px; margin: 20px 0 8px 0; }
-  table { border-collapse: collapse; width: 100%; background: #fff; }
-  th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; vertical-align: top; font-size: 16px; }
-  th { background: #e6e6ee; }
-  td.thumb { width: 96px; }
-  td.thumb img { display: block; width: 80px; height: 100px; background: #ddd; }
-  .ok { color: #0a7a2a; font-weight: bold; }
-  .bad { color: #b00020; font-weight: bold; }
-  #summary { margin: 8px 0; }
+  html, body {
+    margin: 0; padding: 0; overflow: hidden;
+    background: #f6f3ee; color: #222;
+  }
+  body {
+    position: relative;
+    font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-text-size-adjust: 100%;
+  }
+  .box { position: absolute; }
+
+  /* 메타몽 */
+  #frame {
+    position: absolute; overflow: hidden;
+    border-radius: 24px; background: #ddd;
+  }
+  #frame img {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    opacity: 0;
+    -webkit-transition: opacity 0.8s ease; transition: opacity 0.8s ease;
+  }
+  #frame img.on { opacity: 1; }
+  #ph-label {
+    position: absolute; left: 0; right: 0; top: 50%;
+    margin-top: -36px; height: 72px; line-height: 72px;
+    text-align: center; font-size: 56px; font-weight: bold; color: #333;
+    display: none;
+  }
+  #frame.dark #ph-label { color: #fff; }
+  #bubble {
+    position: absolute;
+    background: #fff; border: 3px solid #333; border-radius: 24px;
+    padding: 10px 20px; font-size: 30px; line-height: 40px; font-weight: bold;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
+  }
+  #bubble.time { background: #fff6c8; }
+  #bubble.side:before {
+    content: ""; position: absolute; left: -18px; top: 50%; margin-top: -12px;
+    border-style: solid; border-width: 12px 18px 12px 0;
+    border-color: transparent #333 transparent transparent;
+  }
+
+  /* 시계 */
+  #clock { cursor: pointer; }
+  #clock svg { display: block; width: 100%; height: 100%; }
+  #digital { text-align: center; white-space: nowrap; }
+  #d-time { font-size: 52px; font-weight: bold; line-height: 56px; vertical-align: middle; }
+  #d-date { font-size: 28px; line-height: 56px; vertical-align: middle; margin-left: 16px; color: #444; }
+
+  /* 일정 (가짜 예시) */
+  #sch-title { font-size: 22px; line-height: 26px; height: 26px; color: #666; font-weight: bold; }
+  .card {
+    height: 56px; margin-top: 6px; padding: 0 14px;
+    background: #fff; border-radius: 14px; border: 2px solid #e2ddd4;
+    white-space: nowrap; overflow: hidden;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
+  }
+  .card span { display: inline-block; vertical-align: middle; line-height: 52px; }
+  .c-time { font-size: 26px; font-weight: bold; color: #555; width: 84px; }
+  .c-icon { font-size: 30px; width: 46px; text-align: center; }
+  .c-text { font-size: 28px; }
+
+  /* 통화 버튼 (가짜, 동작 없음) */
+  .call {
+    position: absolute; border-radius: 24px;
+    text-align: center; font-size: 36px; font-weight: bold; color: #fff;
+    cursor: pointer;
+  }
+  .call.mom { background: #e2657f; }
+  .call.dad { background: #3f7fd0; }
+  .call:active { opacity: 0.7; }
 </style>
 </head>
-<body>
-<h1>배포 점검 페이지 (임시)</h1>
-<p class="note">이 페이지는 임시 점검용이며 본 화면(IPD-TASK-004)으로 교체됩니다.</p>
+<body ontouchstart="">
 
-<h2>환경 정보</h2>
-<table>
-  <tr><th>주소</th><td id="env-url">-</td></tr>
-  <tr><th>innerWidth × innerHeight</th><td id="env-size">-</td></tr>
-  <tr><th>방향 (innerWidth &gt; innerHeight)</th><td id="env-orient">-</td></tr>
-  <tr><th>navigator.standalone</th><td id="env-standalone">-</td></tr>
-  <tr><th>devicePixelRatio</th><td id="env-dpr">-</td></tr>
-  <tr><th>버전 (VERSION)</th><td id="env-version">-</td></tr>
-  <tr><th>마지막 갱신 시각</th><td id="env-updated">-</td></tr>
-</table>
-
-<h2>이미지 manifest</h2>
-<div id="summary">불러오는 중…</div>
-<table id="periods">
-  <tr><th>구간</th><th>시간</th><th>이미지 풀</th><th>첫 이미지</th></tr>
-</table>
+<div id="ditto" class="box">
+  <div id="frame"><div id="ph-label"></div></div>
+  <div id="bubble"></div>
+</div>
+<div id="clock" class="box"></div>
+<div id="digital" class="box"><span id="d-time"></span><span id="d-date"></span></div>
+<div id="schedule" class="box"><div id="sch-title">오늘 할 일</div></div>
+<div id="call-0" class="call mom"></div>
+<div id="call-1" class="call dad"></div>
 
 <script>
 (function () {
   // 배포할 때마다 이 숫자만 올리면 manifest·이미지 주소가 바뀌어 캐시를 피한다.
-  var VERSION = 1;
+  var VERSION = 2;
   var BASE = 'assets/ditto/';
+
+  // ---------------------------------------------------------------
+  // 가짜 예시 (IPD-TASK-005·006에서 설정 데이터로 교체할 자리)
+  // 실제 이름·전화번호·Apple ID는 넣지 않는다.
+  // ---------------------------------------------------------------
+  var FAKE_SCHEDULE = [
+    { time: '07:30', icon: '😁', text: '이를 닦아요' },      // 😁
+    { time: '15:00', icon: '📚', text: '책을 읽어요' },      // 📚
+    { time: '20:30', icon: '🛁', text: '씻고 잘 준비해요' }  // 🛁
+  ];
+  var FAKE_CALLS = [
+    { label: '엄마 FaceTime' },
+    { label: '아빠 FaceTime' }
+  ];
+  var PHONE_ICON = '📞 '; // 📞
+
+  // 구간별 이름·말풍선·자리표시 색. manifest에는 이 값이 없어서 여기 둔다 (A5-2).
+  var PERIOD_TEXT = {
+    morning:   { name: '아침', bubble: '좋은 아침!',     color: '#ffe7a8', dark: false },
+    forenoon:  { name: '오전', bubble: '오늘도 힘내자',  color: '#cdebff', dark: false },
+    noon:      { name: '점심', bubble: '점심 시간이야',  color: '#ffd6c2', dark: false },
+    afternoon: { name: '오후', bubble: '간식 먹을까?',   color: '#d9f2c9', dark: false },
+    evening:   { name: '저녁', bubble: '저녁이야',       color: '#e3d3f5', dark: false },
+    night:     { name: '밤',   bubble: '잘 자',          color: '#2e3a63', dark: true }
+  };
+  // manifest를 못 읽었을 때 쓰는 기본 구간 (이미지 없음 → 자리표시)
+  var periods = [
+    { id: 'morning',   from: '06:00', to: '09:00', images: [] },
+    { id: 'forenoon',  from: '09:00', to: '12:00', images: [] },
+    { id: 'noon',      from: '12:00', to: '14:00', images: [] },
+    { id: 'afternoon', from: '14:00', to: '18:00', images: [] },
+    { id: 'evening',   from: '18:00', to: '21:00', images: [] },
+    { id: 'night',     from: '21:00', to: '06:00', images: [] }
+  ];
+
+  var DAY_NAMES = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+  var TAP_MS = 5000;
 
   function $(id) { return document.getElementById(id); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
-  function nowText() {
-    var d = new Date();
-    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
-      pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-  }
   function withVersion(url) { return url + '?v=' + VERSION; }
-
-  function updateEnv() {
-    var w = window.innerWidth, h = window.innerHeight;
-    $('env-url').textContent = location.href;
-    $('env-size').textContent = w + ' × ' + h;
-    $('env-orient').textContent = w > h ? '가로' : '세로';
-    $('env-standalone').textContent = String(navigator.standalone);
-    $('env-dpr').textContent = String(window.devicePixelRatio);
-    $('env-version').textContent = String(VERSION);
-    $('env-updated').textContent = nowText();
-  }
-  function onResize() {
-    updateEnv();
-    setTimeout(updateEnv, 300);
-  }
-  window.addEventListener('resize', onResize);
-  window.addEventListener('orientationchange', onResize);
-  updateEnv();
-
-  var total = 0, loaded = 0, failed = 0;
-  function refreshSummary() {
-    var s = '첫 이미지 ' + total + '장 중 로드 ' + loaded + '장';
-    if (failed > 0) { s += ', 실패 ' + failed + '장'; }
-    $('summary').innerHTML = '<span class="' + (failed > 0 ? 'bad' : (loaded === total ? 'ok' : '')) + '">' + s + '</span>';
+  function toMin(hhmm) {
+    var p = String(hhmm).split(':');
+    return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
   }
 
-  function addRow(p) {
-    var tr = document.createElement('tr');
-    var tdId = document.createElement('td');
-    tdId.textContent = p.id;
-    var tdTime = document.createElement('td');
-    tdTime.textContent = p.from + '–' + p.to;
-    var tdList = document.createElement('td');
-    tdList.textContent = (p.images || []).join(', ');
-    var tdThumb = document.createElement('td');
-    tdThumb.className = 'thumb';
-    tr.appendChild(tdId); tr.appendChild(tdTime); tr.appendChild(tdList); tr.appendChild(tdThumb);
-    $('periods').appendChild(tr);
+  // ---------------------------------------------------------------
+  // 시각 (개발용 시각 가정은 콘솔의 IPD_DEV.setTime으로만 한다. 화면·주소에는 없음)
+  // ---------------------------------------------------------------
+  var devOffset = 0;
+  function now() { return new Date(new Date().getTime() + devOffset); }
 
-    if (!p.images || p.images.length === 0) {
-      tdThumb.innerHTML = '<span class="bad">이미지 없음</span>';
+  // 날짜 번호: 1970-01-01부터 센 일수 (지역 날짜 기준)
+  function dayNumber(y, m, d) {
+    var t = new Date(y, m, d); // 범위 밖 날짜(예: d-1=0)를 정상 날짜로 맞춘다
+    return Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 86400000);
+  }
+
+  // 현재 구간과 그 구간의 시작 날짜 번호. from 포함, to 미포함, 자정 넘는 구간 처리 (A5-4)
+  function findPeriod(d) {
+    var m = d.getHours() * 60 + d.getMinutes();
+    for (var i = 0; i < periods.length; i++) {
+      var p = periods[i];
+      var f = toMin(p.from), t = toMin(p.to);
+      var inside, prevDay = false;
+      if (f < t) {
+        inside = (m >= f && m < t);
+      } else {
+        inside = (m >= f || m < t);
+        prevDay = (m < t);
+      }
+      if (inside) {
+        return {
+          period: p,
+          dayNo: dayNumber(d.getFullYear(), d.getMonth(), d.getDate() - (prevDay ? 1 : 0))
+        };
+      }
+    }
+    return null;
+  }
+
+  function pickImage(p, dayNo) {
+    var list = p.images || [];
+    if (list.length === 0) { return null; }
+    return list[dayNo % list.length];
+  }
+
+  // 시계 탭 문장 (A5-4): 12시간제, 정각은 "정각", 0시는 12시
+  function timeSentence(h, m) {
+    var h12 = h % 12;
+    if (h12 === 0) { h12 = 12; }
+    if (m === 0) { return '지금은 ' + h12 + '시 정각이야'; }
+    return '지금은 ' + h12 + '시 ' + m + '분이야';
+  }
+
+  // ---------------------------------------------------------------
+  // 아날로그 시계 (SVG, viewBox 200×200)
+  // ---------------------------------------------------------------
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var hands = {};
+  function svgEl(name, attrs, parent) {
+    var el = document.createElementNS(SVGNS, name);
+    for (var k in attrs) {
+      if (attrs.hasOwnProperty(k)) { el.setAttribute(k, attrs[k]); }
+    }
+    if (parent) { parent.appendChild(el); }
+    return el;
+  }
+  function buildClock() {
+    var svg = svgEl('svg', { viewBox: '0 0 200 200' });
+    svgEl('circle', { cx: 100, cy: 100, r: 96, fill: '#ffffff', stroke: '#333333', 'stroke-width': 4 }, svg);
+    var i, a, x1, y1, x2, y2;
+    for (i = 0; i < 60; i++) {
+      a = i * 6 * Math.PI / 180;
+      var major = (i % 5 === 0);
+      var r1 = major ? 82 : 87;
+      x1 = 100 + Math.sin(a) * r1; y1 = 100 - Math.cos(a) * r1;
+      x2 = 100 + Math.sin(a) * 92; y2 = 100 - Math.cos(a) * 92;
+      svgEl('line', {
+        x1: x1.toFixed(2), y1: y1.toFixed(2), x2: x2.toFixed(2), y2: y2.toFixed(2),
+        stroke: major ? '#333333' : '#bbbbbb', 'stroke-width': major ? 3 : 1, 'stroke-linecap': 'round'
+      }, svg);
+    }
+    for (i = 1; i <= 12; i++) {
+      a = i * 30 * Math.PI / 180;
+      var t = svgEl('text', {
+        x: (100 + Math.sin(a) * 68).toFixed(2),
+        y: (100 - Math.cos(a) * 68 + 6).toFixed(2),
+        'text-anchor': 'middle', 'font-size': 17, 'font-weight': 'bold', fill: '#222222',
+        'font-family': '-apple-system, Helvetica, Arial, sans-serif'
+      }, svg);
+      t.textContent = String(i);
+    }
+    // 시침: 짧고 굵게(남색) / 분침: 길고 가늘게(주황) / 초침: 가늘고 흐리게
+    hands.hour = svgEl('line', { x1: 100, y1: 108, x2: 100, y2: 52, stroke: '#1f4e9c', 'stroke-width': 8, 'stroke-linecap': 'round' }, svg);
+    hands.minute = svgEl('line', { x1: 100, y1: 110, x2: 100, y2: 26, stroke: '#e0662c', 'stroke-width': 4, 'stroke-linecap': 'round' }, svg);
+    hands.second = svgEl('line', { x1: 100, y1: 114, x2: 100, y2: 22, stroke: '#c4c4c4', 'stroke-width': 1.2, 'stroke-linecap': 'round' }, svg);
+    svgEl('circle', { cx: 100, cy: 100, r: 5, fill: '#333333' }, svg);
+    $('clock').appendChild(svg);
+  }
+  var angles = { hour: 0, minute: 0, second: 0 };
+  function setHands(d) {
+    var h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
+    angles.hour = (h % 12) * 30 + m * 0.5 + s / 120;
+    angles.minute = m * 6 + s * 0.1;
+    angles.second = s * 6;
+    hands.hour.setAttribute('transform', 'rotate(' + angles.hour.toFixed(2) + ' 100 100)');
+    hands.minute.setAttribute('transform', 'rotate(' + angles.minute.toFixed(2) + ' 100 100)');
+    hands.second.setAttribute('transform', 'rotate(' + angles.second + ' 100 100)');
+  }
+
+  // ---------------------------------------------------------------
+  // 메타몽 이미지 (구간이 바뀔 때만 교체, 짧은 페이드)
+  // ---------------------------------------------------------------
+  var state = { key: null, current: null, image: null, manifestDone: false };
+  var curImg = null;
+  var loadToken = 0;
+
+  function showPlaceholder(show) {
+    $('ph-label').style.display = show ? 'block' : 'none';
+  }
+  function removeLater(el) {
+    setTimeout(function () {
+      if (el.parentNode) { el.parentNode.removeChild(el); }
+    }, 900);
+  }
+  function showPeriod(info) {
+    var p = info.period;
+    var txt = PERIOD_TEXT[p.id] || { name: p.id, bubble: '', color: '#dddddd', dark: false };
+    var frame = $('frame');
+    frame.style.backgroundColor = txt.color;
+    frame.className = txt.dark ? 'dark' : '';
+    $('ph-label').textContent = txt.name;
+    var name = pickImage(p, info.dayNo);
+    state.image = name;
+    var token = ++loadToken;
+
+    if (!name) {
+      if (curImg) { curImg.className = ''; removeLater(curImg); curImg = null; }
+      showPlaceholder(state.manifestDone);
       return;
     }
-    total++;
-    var img = new Image();
-    img.alt = p.images[0];
-    img.onload = function () { loaded++; refreshSummary(); };
-    img.onerror = function () {
-      failed++;
-      tdThumb.innerHTML = '<span class="bad">로드 실패</span>';
-      refreshSummary();
+    var img = document.createElement('img');
+    img.alt = '';
+    img.onload = function () {
+      if (token !== loadToken) { if (img.parentNode) { img.parentNode.removeChild(img); } return; }
+      showPlaceholder(false);
+      var old = curImg;
+      curImg = img;
+      img.offsetWidth; // 페이드가 일어나도록 먼저 그리게 한다
+      img.className = 'on';
+      if (old) { old.className = ''; removeLater(old); }
     };
-    img.src = withVersion(BASE + p.images[0]);
-    tdThumb.appendChild(img);
+    img.onerror = function () {
+      if (img.parentNode) { img.parentNode.removeChild(img); }
+      if (token !== loadToken) { return; }
+      if (curImg) { curImg.className = ''; removeLater(curImg); curImg = null; }
+      showPlaceholder(true);
+    };
+    frame.appendChild(img);
+    img.src = withVersion(BASE + name);
   }
+
+  // ---------------------------------------------------------------
+  // 매초 그리기
+  // ---------------------------------------------------------------
+  var tapUntil = 0;
+  function render() {
+    var d = now();
+    setHands(d);
+    $('d-time').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
+    $('d-date').textContent = (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + DAY_NAMES[d.getDay()];
+
+    var info = findPeriod(d);
+    if (info) {
+      var key = info.period.id + '|' + info.dayNo;
+      if (key !== state.key) {
+        state.key = key;
+        state.current = info;
+        showPeriod(info);
+      }
+    }
+    var bubble = $('bubble');
+    var side = bubble.className.indexOf('side') >= 0 ? 'side' : 'top';
+    if (new Date().getTime() < tapUntil) {
+      bubble.textContent = timeSentence(d.getHours(), d.getMinutes());
+      bubble.className = side + ' time';
+    } else {
+      var t = state.current ? PERIOD_TEXT[state.current.period.id] : null;
+      bubble.textContent = t ? t.bubble : '';
+      bubble.className = side;
+    }
+  }
+
+  // 1초 타이머는 하나만: 다음 초 경계에 맞춰 setTimeout을 다시 건다.
+  var timer = null;
+  function tick() {
+    timer = null;
+    render();
+    timer = setTimeout(tick, 1000 - (new Date().getTime() % 1000) + 20);
+  }
+  function restartTimer() {
+    if (timer !== null) { clearTimeout(timer); timer = null; }
+    tick();
+  }
+
+  // ---------------------------------------------------------------
+  // 레이아웃: 방향은 innerWidth > innerHeight (A3-6)
+  // ---------------------------------------------------------------
+  var PAD = 16, CALL_H = 124, DIGI_H = 56, SCH_H = 26 + 3 * 62;
+  function place(el, x, y, w, h) {
+    el.style.left = Math.round(x) + 'px';
+    el.style.top = Math.round(y) + 'px';
+    el.style.width = Math.round(w) + 'px';
+    if (h !== null) { el.style.height = Math.round(h) + 'px'; }
+  }
+  function placeDitto(x, y, w, h) {
+    var box = $('ditto'), frame = $('frame'), bubble = $('bubble');
+    place(box, x, y, w, h);
+    var ih = h, iw = Math.round(h * 0.8);
+    if (iw > w) { iw = w; ih = Math.round(w * 1.25); }
+    var isTime = bubble.className.indexOf('time') >= 0 ? ' time' : '';
+    if (w - iw >= 300) {
+      // 옆 자리가 넉넉하면 그림 오른쪽에 말풍선
+      var bw = Math.min(380, w - iw - 28);
+      var left = Math.round((w - (iw + 28 + bw)) / 2);
+      place(frame, left, (h - ih) / 2, iw, ih);
+      bubble.className = 'side' + isTime;
+      place(bubble, left + iw + 28, 0, bw, null);
+      bubble.style.top = Math.round((h - bubble.offsetHeight) / 2) + 'px';
+    } else {
+      // 아니면 그림 위쪽에 겹쳐서
+      var fx = Math.round((w - iw) / 2), fy = Math.round((h - ih) / 2);
+      place(frame, fx, fy, iw, ih);
+      bubble.className = 'top' + isTime;
+      bubble.style.width = 'auto';
+      bubble.style.maxWidth = (iw - 32) + 'px';
+      bubble.style.left = (fx + 16) + 'px';
+      bubble.style.top = (fy + 16) + 'px';
+    }
+  }
+  function layout() {
+    var W = window.innerWidth, H = window.innerHeight;
+    document.body.style.width = W + 'px';
+    document.body.style.height = H + 'px';
+    var landscape = W > H;
+    document.body.className = landscape ? 'landscape' : 'portrait';
+
+    var callY = H - PAD - CALL_H;
+    var callW = (W - PAD * 3) / 2;
+    place($('call-0'), PAD, callY, callW, CALL_H);
+    place($('call-1'), PAD * 2 + callW, callY, callW, CALL_H);
+    $('call-0').style.lineHeight = CALL_H + 'px';
+    $('call-1').style.lineHeight = CALL_H + 'px';
+
+    var topH = callY - PAD * 2; // 위쪽 영역 높이
+    var c;
+    if (landscape) {
+      // 왼쪽 55%: 메타몽 / 오른쪽: 시계 → 디지털 → 일정
+      var leftW = Math.round(W * 0.55) - PAD - PAD / 2;
+      var rx = PAD + leftW + PAD, rw = W - rx - PAD;
+      placeDitto(PAD, PAD, leftW, topH);
+      c = Math.min(300, rw, topH - DIGI_H - SCH_H - 16);
+      place($('clock'), rx + (rw - c) / 2, PAD, c, c);
+      place($('digital'), rx, PAD + c + 4, rw, DIGI_H);
+      place($('schedule'), rx, PAD + topH - SCH_H, rw, SCH_H);
+    } else {
+      // 세로: 메타몽 → 시계 → 디지털 → 일정 → 통화
+      var cw = W - PAD * 2;
+      var schY = callY - PAD - SCH_H;
+      var digiY = schY - 8 - DIGI_H;
+      var avail = digiY - 8 - PAD;
+      c = Math.min(300, Math.round(avail * 0.48));
+      var dittoH = avail - c - 12;
+      placeDitto(PAD, PAD, cw, dittoH);
+      place($('clock'), (W - c) / 2, PAD + dittoH + 12, c, c);
+      place($('digital'), PAD, digiY, cw, DIGI_H);
+      place($('schedule'), PAD, schY, cw, SCH_H);
+    }
+  }
+  function onResize() {
+    layout();
+    setTimeout(layout, 300);
+  }
+
+  // ---------------------------------------------------------------
+  // 가짜 일정·통화 버튼 그리기 (동작 없음)
+  // ---------------------------------------------------------------
+  function buildFakes() {
+    var sch = $('schedule');
+    for (var i = 0; i < FAKE_SCHEDULE.length && i < 3; i++) {
+      var s = FAKE_SCHEDULE[i];
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = '<span class="c-time"></span><span class="c-icon"></span><span class="c-text"></span>';
+      card.childNodes[0].textContent = s.time;
+      card.childNodes[1].textContent = s.icon;
+      card.childNodes[2].textContent = s.text;
+      sch.appendChild(card);
+    }
+    for (var j = 0; j < FAKE_CALLS.length && j < 2; j++) {
+      $('call-' + j).textContent = PHONE_ICON + FAKE_CALLS[j].label;
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // 시작
+  // ---------------------------------------------------------------
+  buildClock();
+  buildFakes();
+  render();
+  layout();
+
+  $('clock').addEventListener('click', function () {
+    tapUntil = new Date().getTime() + TAP_MS;
+    render();
+    layout(); // 말풍선 길이가 바뀌므로 위치를 다시 맞춘다
+    setTimeout(function () { render(); layout(); }, TAP_MS + 50);
+  });
+  window.addEventListener('resize', onResize);
+  window.addEventListener('orientationchange', onResize);
 
   fetch(withVersion(BASE + 'manifest.json'))
     .then(function (res) {
@@ -121,14 +470,43 @@
       return res.json();
     })
     .then(function (m) {
-      var periods = m.periods || [];
-      for (var i = 0; i < periods.length; i++) { addRow(periods[i]); }
-      refreshSummary();
-      updateEnv();
+      if (m && m.periods && m.periods.length) { periods = m.periods; }
     })
-    .catch(function (e) {
-      $('summary').innerHTML = '<span class="bad">manifest 불러오기 실패: ' + String(e && e.message) + '</span>';
+    .catch(function () { /* 기본 구간 + 자리표시로 계속 동작 */ })
+    .then(function () {
+      state.manifestDone = true;
+      state.key = null; // 구간 다시 계산·이미지 다시 고르기
+      render();
+      layout();
     });
+
+  tick();
+
+  // 개발 확인용 (콘솔에서만 호출. 화면·주소에는 노출하지 않는다)
+  window.IPD_DEV = {
+    setTime: function (str) {
+      var p = String(str).split(/[- :]/);
+      var t = new Date(+p[0], +p[1] - 1, +p[2], +p[3], +p[4], +(p[5] || 0));
+      devOffset = t.getTime() - new Date().getTime();
+      restartTimer();
+      layout();
+      return this.info();
+    },
+    reset: function () { devOffset = 0; restartTimer(); layout(); return this.info(); },
+    info: function () {
+      var d = now();
+      var cur = state.current;
+      return {
+        time: pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()),
+        digital: $('d-time').textContent,
+        hourAngle: angles.hour, minuteAngle: angles.minute,
+        period: cur ? cur.period.id : null,
+        dayNo: cur ? cur.dayNo : null,
+        image: state.image
+      };
+    },
+    sentence: timeSentence
+  };
 })();
 </script>
 </body>
