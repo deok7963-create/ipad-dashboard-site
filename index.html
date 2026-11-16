@@ -359,8 +359,12 @@
 
 <script>
 (function () {
-  // 배포할 때마다 이 숫자만 올리면 manifest·이미지 주소가 바뀌어 캐시를 피한다.
-  var VERSION = 4;
+  // 버전: 주.부.수 (배포할 때마다 올린다. manifest·이미지 주소에 붙어 캐시도 피한다)
+  //  주: 저장 데이터(ipd.settings)가 예전 것과 맞지 않게 바뀌거나 화면 구성이 크게 바뀔 때
+  //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
+  //  수: 같은 작업 안의 보정·버그 수정
+  // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
+  var VERSION = '4.0.1';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
@@ -1457,20 +1461,24 @@
   // ===============================================================
   // ③ 백업·복원
   // ===============================================================
+  // 글 전체 고르기. iOS에서는 focus 없이 잠깐 읽기 전용으로 두고 select + setSelectionRange를
+  // 함께 써야 고르기·복사가 된다 (키보드도 뜨지 않음)
   function selectAll(ta) {
-    ta.focus();
-    try { ta.setSelectionRange(0, ta.value.length); } catch (e) { /* 무시 */ }
-    try { ta.select(); } catch (e2) { /* 무시 */ }
+    var ro = ta.hasAttribute('readonly');
+    if (!ro) { ta.setAttribute('readonly', ''); }
+    try { ta.select(); } catch (e) { /* 무시 */ }
+    try { ta.setSelectionRange(0, ta.value.length); } catch (e2) { /* 무시 */ }
+    if (!ro) { ta.removeAttribute('readonly'); }
   }
   // 복사 버튼: 글을 고른 뒤 execCommand('copy'). 안 되는 기기에서는 길게 눌러 복사하도록 안내
   function copyBackup() {
     var ta = $('backup-ta'), ok = false;
     selectAll(ta);
     try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
-    if (ok && ta.blur) { ta.blur(); }
+    // 실패하면 고른 상태를 그대로 둔다 (선택된 글을 한 번 누르면 나오는 메뉴에서 복사)
     $('backup-msg').textContent = ok
       ? '복사했어요. 이메일·메신저 등에 붙여 넣어 보관하세요.'
-      : '자동 복사가 안 돼요. 글을 길게 눌러 나오는 메뉴에서 "복사"를 눌러 주세요.';
+      : '이 기기에서는 자동 복사가 안 돼요. 글 전체가 선택되어 있으니, 선택된 글을 한 번 눌러 나오는 메뉴에서 "복사"를 눌러 주세요.';
     $('backup-msg').className = ok ? 'ok' : 'err';
   }
 
@@ -1481,10 +1489,14 @@
     $('rec-msg').textContent = '';
     show('rec-ov', true);
   }
-  function closeRecover() {
-    if (document.activeElement && document.activeElement.blur) { document.activeElement.blur(); }
-    show('rec-ov', false);
+  function blurInput() {
+    var a = document.activeElement;
+    if (a && a.blur && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) { a.blur(); }
     window.scrollTo(0, 0);
+  }
+  function closeRecover() {
+    blurInput();
+    show('rec-ov', false);
   }
   function checkRecover(txt) {
     var obj;
@@ -1643,6 +1655,21 @@
     bindButton('pin-forgot', openRecover);
     bindButton('rec-close', closeRecover);
     bindButton('rec-ok', doRecover);
+    // 붙여 넣으면 키보드를 닫는다 (iOS 키보드가 오르내리며 버튼이 밀리는 문제).
+    // PIN 복구 칸은 붙여 넣자마자 확인까지 한다. 복원 칸은 확인 창이 있으니 "복원"은 직접 누른다.
+    $('rec-ta').addEventListener('paste', function () {
+      setTimeout(function () { blurInput(); doRecover(); }, 60); // 붙여 넣은 글이 들어간 뒤 (한 번만)
+    }, false);
+    $('restore-ta').addEventListener('paste', function () {
+      setTimeout(blurInput, 60);
+    }, false);
+    // 입력칸에서 벗어나면 iOS가 밀어 둔 화면 위치를 되돌린다
+    document.addEventListener('focusout', function () {
+      setTimeout(function () {
+        var a = document.activeElement;
+        if (!a || (a.tagName !== 'INPUT' && a.tagName !== 'TEXTAREA')) { window.scrollTo(0, 0); }
+      }, 100);
+    }, false);
     bindButton('restore-btn', doRestore);
     bindButton('pin-change', function () {
       $('pin-change-msg').textContent = '';
