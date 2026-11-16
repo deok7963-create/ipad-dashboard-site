@@ -61,18 +61,40 @@
   #d-time { font-size: 52px; font-weight: bold; line-height: 56px; vertical-align: middle; }
   #d-date { font-size: 28px; line-height: 56px; vertical-align: middle; margin-left: 16px; color: #444; }
 
-  /* 일정 (가짜 예시) */
-  #sch-title { font-size: 22px; line-height: 26px; height: 26px; color: #666; font-weight: bold; }
+  /* 오늘 할 일 */
+  #sch-head { position: relative; height: 40px; line-height: 40px; white-space: nowrap; }
+  #sch-title { font-size: 22px; color: #555; font-weight: bold; }
+  #sch-right { position: absolute; right: 0; top: 0; }
+  #sch-left { font-size: 18px; color: #888; margin-right: 10px; vertical-align: middle; }
+  .sbtn {
+    display: inline-block; height: 36px; line-height: 36px; padding: 0 16px;
+    border-radius: 18px; background: #e4ded2; color: #444;
+    font-size: 18px; font-weight: bold; vertical-align: middle; cursor: pointer;
+  }
   .card {
-    height: 56px; margin-top: 6px; padding: 0 14px;
+    position: relative; height: 58px; margin-top: 6px;
     background: #fff; border-radius: 14px; border: 2px solid #e2ddd4;
     white-space: nowrap; overflow: hidden;
     -webkit-box-sizing: border-box; box-sizing: border-box;
   }
-  .card span { display: inline-block; vertical-align: middle; line-height: 52px; }
-  .c-time { font-size: 26px; font-weight: bold; color: #555; width: 84px; }
-  .c-icon { font-size: 30px; width: 46px; text-align: center; }
-  .c-text { font-size: 28px; }
+  .card.first { border-color: #f0a640; background: #fff4dc; }
+  .card.first .c-time { color: #c46d00; }
+  .card.done .c-time, .card.done .c-icon, .card.done .c-textbox { opacity: 0.4; }
+  .card.msg { text-align: center; line-height: 54px; font-size: 28px; font-weight: bold; color: #555; }
+  .chk-hit { position: absolute; left: 0; top: 0; width: 64px; height: 54px; cursor: pointer; }
+  .chk {
+    position: absolute; left: 8px; top: 3px; width: 48px; height: 48px;
+    border-radius: 24px; border: 4px solid #a39a8c; background: #fff;
+    text-align: center; line-height: 40px; font-size: 30px; font-weight: bold; color: #fff;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
+  }
+  .card.first .chk { border-color: #f0a640; }
+  .card.done .chk { background: #6bbf59; border-color: #6bbf59; }
+  .chk-hit.down .chk { background: #e8e2d6; }
+  .c-time { position: absolute; left: 64px; top: 0; width: 84px; line-height: 54px; font-size: 26px; font-weight: bold; color: #555; }
+  .c-icon { position: absolute; left: 148px; top: 0; width: 46px; line-height: 54px; font-size: 30px; text-align: center; }
+  .c-textbox { position: absolute; left: 196px; right: 10px; top: 0; height: 54px; overflow: hidden; }
+  .c-text { display: inline-block; white-space: nowrap; line-height: 54px; font-size: 28px; }
 
   /* 통화 버튼 (가짜, 동작 없음) */
   .call {
@@ -83,6 +105,139 @@
   .call.mom { background: #e2657f; }
   .call.dad { background: #3f7fd0; }
   .call:active { opacity: 0.7; }
+
+  /* 숨은 진입 영역 (보이지 않음) */
+  #corner { position: absolute; z-index: 20; background: rgba(0, 0, 0, 0); }
+
+  /* 덮개 공통 */
+  .ov {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    display: none; background: #f6f3ee; z-index: 50;
+  }
+  .ov-head { position: absolute; left: 0; right: 0; top: 0; height: 80px; background: #3a3f4b; color: #fff; }
+  .ov-title { position: absolute; left: 24px; top: 0; line-height: 80px; font-size: 30px; font-weight: bold; white-space: nowrap; }
+  .bigbtn {
+    position: absolute; right: 16px; top: 10px; height: 60px; line-height: 60px;
+    padding: 0 36px; border-radius: 30px; background: #fff; color: #222;
+    font-size: 28px; font-weight: bold; cursor: pointer;
+  }
+  .ov-body {
+    position: absolute; left: 0; right: 0; top: 80px; bottom: 0;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 12px 24px 160px;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
+  }
+  #all-ov { z-index: 50; }
+  #all-body .card { margin-top: 10px; }
+
+  /* 설정 화면 */
+  #set-ov { z-index: 60; }
+  .sec { margin: 16px 0; padding: 14px 20px 18px; background: #fff; border-radius: 16px; }
+  .sec h2 { margin: 0 0 8px; font-size: 26px; }
+  .sec h3 { margin: 18px 0 4px; font-size: 22px; color: #555; }
+  .sec p { margin: 6px 0; font-size: 20px; line-height: 28px; color: #444; }
+  .small { font-size: 18px; color: #777; }
+  .notice { font-size: 20px; line-height: 28px; color: #a33; }
+  .notice div { margin: 6px 0; padding: 10px 14px; background: #fde8e6; border-radius: 12px; }
+  .notice div.info { color: #285; background: #e3f4e6; }
+  .hint { font-size: 20px; line-height: 28px; color: #8a5a00; margin: 4px 0; }
+  .err { font-size: 20px; line-height: 28px; color: #c0392b; min-height: 0; }
+  .ok { font-size: 20px; line-height: 28px; color: #2a8a3a; }
+  .btn {
+    display: inline-block; height: 52px; line-height: 52px; padding: 0 22px;
+    margin: 6px 10px 6px 0; border-radius: 14px; background: #e4ded2; color: #333;
+    font-size: 22px; font-weight: bold; cursor: pointer; vertical-align: middle;
+  }
+  .btn.primary { background: #3f7fd0; color: #fff; }
+  .btn.danger { background: #d9534f; color: #fff; }
+  .btn.down, .key.down, .bigbtn.down, .sbtn.down { opacity: 0.6; }
+  .item { position: relative; padding: 10px 0; border-bottom: 1px solid #eee; min-height: 64px; }
+  .item-info { margin-right: 230px; white-space: nowrap; overflow: hidden; }
+  .item-info.past { opacity: 0.55; }
+  .item.haspick .item-info { margin-left: 56px; }
+  .i-time { font-size: 22px; font-weight: bold; margin-right: 8px; }
+  .i-icon { font-size: 26px; margin-right: 8px; }
+  .i-text { font-size: 22px; }
+  .i-when { font-size: 18px; color: #777; margin-top: 2px; }
+  .item-btns { position: absolute; right: 0; top: 6px; }
+  .item-btns .btn { margin: 0 0 0 8px; height: 48px; line-height: 48px; padding: 0 16px; font-size: 20px; }
+  .pick {
+    position: absolute; left: 0; top: 12px; width: 44px; height: 44px; border-radius: 10px;
+    border: 3px solid #a39a8c; text-align: center; line-height: 38px; font-size: 26px; font-weight: bold; color: #fff;
+    -webkit-box-sizing: border-box; box-sizing: border-box; cursor: pointer;
+  }
+  .pick.on { background: #d9534f; border-color: #d9534f; }
+  .empty { font-size: 20px; color: #999; padding: 8px 0; }
+  textarea, input {
+    -webkit-user-select: text; user-select: text;
+    font-family: Menlo, Consolas, monospace;
+  }
+  textarea {
+    display: block; width: 100%; height: 160px; margin: 6px 0; padding: 8px;
+    font-size: 16px; border: 2px solid #ccc; border-radius: 10px;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
+  }
+  /* 편집 */
+  #editor { display: none; margin: 8px 0 16px; padding: 14px 20px 18px; background: #fff7e0; border: 3px solid #f0a640; border-radius: 16px; }
+  #ed-title { font-size: 26px; font-weight: bold; margin-bottom: 6px; }
+  .ed-row { margin: 12px 0; }
+  .lab { display: inline-block; width: 80px; font-size: 22px; font-weight: bold; vertical-align: middle; }
+  #ed-text, #ed-time, #ed-date {
+    font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    font-size: 26px; height: 52px; padding: 0 10px; vertical-align: middle;
+    border: 2px solid #bbb; border-radius: 10px; background: #fff;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
+  }
+  #ed-text { width: 380px; }
+  #ed-time, #ed-date { width: 220px; }
+  #ed-count { margin-left: 8px; vertical-align: middle; }
+  #ed-count.over { color: #c0392b; font-weight: bold; }
+  .seg, .day, .ico {
+    display: inline-block; height: 52px; line-height: 52px; margin: 4px 8px 4px 0; padding: 0 16px;
+    border-radius: 12px; background: #fff; border: 2px solid #ccc; font-size: 22px;
+    vertical-align: middle; cursor: pointer;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
+  }
+  .day { width: 56px; padding: 0; text-align: center; }
+  .ico { width: 60px; padding: 0; text-align: center; font-size: 30px; }
+  .ico.none { width: auto; padding: 0 12px; font-size: 20px; }
+  .seg.on, .day.on, .ico.on { background: #3f7fd0; border-color: #3f7fd0; color: #fff; }
+  .ed-sub { display: block; margin-left: 80px; }
+  /* 아이콘 점검(임시) */
+  .icheck { display: inline-block; width: 120px; margin: 6px 6px 6px 0; padding: 8px 0; text-align: center; background: #f6f3ee; border-radius: 12px; vertical-align: top; }
+  .icheck b { display: block; font-size: 48px; line-height: 60px; font-weight: normal; }
+  .icheck span { display: block; font-size: 15px; color: #666; }
+
+  /* PIN */
+  #pin-ov { z-index: 70; background: #2f3542; color: #fff; text-align: center; }
+  #pin-box { position: absolute; left: 50%; top: 50%; width: 372px; height: 600px; margin-left: -186px; margin-top: -300px; }
+  #pin-title { height: 44px; line-height: 44px; font-size: 28px; font-weight: bold; }
+  #pin-dots { height: 56px; line-height: 56px; font-size: 0; }
+  .dot {
+    display: inline-block; width: 26px; height: 26px; margin: 0 12px; vertical-align: middle;
+    border-radius: 13px; border: 3px solid #fff;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
+  }
+  .dot.on { background: #fff; }
+  #pin-msg { height: 64px; padding-top: 4px; font-size: 20px; line-height: 28px; color: #ffd36b; }
+  #pin-keys { font-size: 0; }
+  .key {
+    display: inline-block; width: 110px; height: 90px; margin: 0 6px 12px; vertical-align: top;
+    line-height: 90px; border-radius: 20px; background: #4b5366; color: #fff;
+    font-size: 40px; font-weight: bold; cursor: pointer;
+  }
+  .key.word { font-size: 24px; background: #3b4252; }
+  #pin-keys.off .key.num { opacity: 0.3; }
+
+  /* 확인 창 */
+  #ask-ov { z-index: 80; background: rgba(0, 0, 0, 0.5); }
+  #ask-box {
+    position: absolute; left: 50%; top: 120px; width: 520px; margin-left: -260px;
+    padding: 24px; background: #fff; border-radius: 20px; text-align: center;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
+  }
+  #ask-msg { font-size: 24px; line-height: 34px; margin-bottom: 16px; white-space: pre-line; }
+  #ask-box .btn { margin: 6px 10px; min-width: 140px; }
 </style>
 </head>
 <body ontouchstart="">
@@ -93,25 +248,105 @@
 </div>
 <div id="clock" class="box"></div>
 <div id="digital" class="box"><span id="d-time"></span><span id="d-date"></span></div>
-<div id="schedule" class="box"><div id="sch-title">오늘 할 일</div></div>
+<div id="schedule" class="box">
+  <div id="sch-head"><span id="sch-title">오늘 할 일</span><span id="sch-right"><span id="sch-left"></span><span id="sch-all" class="sbtn">전체 보기</span></span></div>
+  <div id="sch-cards"></div>
+</div>
 <div id="call-0" class="call mom"></div>
 <div id="call-1" class="call dad"></div>
+<div id="corner"></div>
+
+<!-- 오늘 할 일 전체 보기 (아이용, PIN 없음) -->
+<div id="all-ov" class="ov">
+  <div class="ov-head"><span id="all-title" class="ov-title">오늘 할 일</span><span id="all-close" class="bigbtn">닫기</span></div>
+  <div id="all-body" class="ov-body"></div>
+</div>
+
+<!-- 부모 설정 -->
+<div id="set-ov" class="ov">
+  <div class="ov-head"><span class="ov-title">설정</span><span id="set-close" class="bigbtn">닫기</span></div>
+  <div id="set-body" class="ov-body">
+    <div id="set-notice" class="notice"></div>
+
+    <div id="editor">
+      <div id="ed-title"></div>
+      <div id="ed-err" class="err"></div>
+      <div class="ed-row"><span class="lab">글</span><input id="ed-text" type="text" autocomplete="off" autocorrect="off"><span id="ed-count" class="small"></span></div>
+      <div class="ed-row"><span class="lab">시각</span><input id="ed-time" type="time"></div>
+      <div class="ed-row"><span class="lab">종류</span><span class="seg" data-kind="daily">매일 (루틴)</span><span class="seg" data-kind="weekday">요일 (루틴)</span><span class="seg" data-kind="date">날짜 (일정)</span></div>
+      <div id="ed-days-row" class="ed-row"><span class="lab">요일</span><span class="day" data-d="1">월</span><span class="day" data-d="2">화</span><span class="day" data-d="3">수</span><span class="day" data-d="4">목</span><span class="day" data-d="5">금</span><span class="day" data-d="6">토</span><span class="day" data-d="0">일</span><span class="ed-sub"><span class="seg" data-quick="wk">평일</span><span class="seg" data-quick="we">주말</span></span></div>
+      <div id="ed-date-row" class="ed-row"><span class="lab">날짜</span><input id="ed-date" type="date"></div>
+      <div class="ed-row"><span class="lab">아이콘</span><span id="ed-icons"></span></div>
+      <div class="ed-row"><span id="ed-save" class="btn primary">저장</span><span id="ed-cancel" class="btn">취소</span><span id="ed-del" class="btn danger">지우기</span></div>
+    </div>
+
+    <div id="sec-sched" class="sec">
+      <h2>할 일 (루틴·일정)</h2>
+      <div id="empty-days" class="hint"></div>
+      <div><span id="add-routine" class="btn primary">+ 루틴 추가</span><span id="add-dated" class="btn primary">+ 일정 추가</span><span id="sch-count" class="small"></span></div>
+      <div id="add-msg" class="err"></div>
+      <h3>루틴 (매일·요일 반복)</h3><div id="list-routine"></div>
+      <h3>일정 (특정 날짜)</h3><div id="list-dated"></div>
+      <h3>지난 일정</h3>
+      <div id="past-tools"><span id="past-del-sel" class="btn">선택한 것 지우기</span><span id="past-del-all" class="btn">지난 일정 모두 지우기</span></div>
+      <div id="past-msg" class="err"></div>
+      <div id="list-past"></div>
+    </div>
+
+    <div class="sec">
+      <h2>백업·복원</h2>
+      <p>아래 글을 "전체 선택"한 뒤 복사해 메모 등에 보관하세요. PIN도 함께 들어 있어요. 이 글은 저장소나 문서에 붙여 넣지 마세요.</p>
+      <textarea id="backup-ta" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      <span id="backup-sel" class="btn">전체 선택</span>
+      <p style="margin-top:18px">복원: 보관한 글을 아래에 붙여 넣고 "복원"을 누르세요.</p>
+      <textarea id="restore-ta" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      <span id="restore-btn" class="btn primary">복원</span>
+      <div id="restore-msg"></div>
+    </div>
+
+    <div class="sec">
+      <h2>PIN 변경</h2>
+      <span id="pin-change" class="btn">PIN 바꾸기</span>
+      <div id="pin-change-msg" class="ok"></div>
+    </div>
+
+    <div class="sec"><h2>통화 대상</h2><p>다음 작업에서 만들어요.</p></div>
+    <div class="sec"><h2>화면 옵션</h2><p>다음 작업에서 만들어요.</p></div>
+
+    <div class="sec">
+      <h2>아이콘 점검 (임시)</h2>
+      <p>네모(□)나 빈칸으로 나오는 아이콘이 있는지 봐 주세요. 확인 후 다음 작업에서 정리합니다.</p>
+      <div id="icon-check"></div>
+    </div>
+    <div id="set-ver" class="small"></div>
+  </div>
+</div>
+
+<!-- PIN -->
+<div id="pin-ov" class="ov">
+  <div id="pin-box">
+    <div id="pin-title"></div>
+    <div id="pin-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <div id="pin-msg"></div>
+    <div id="pin-keys"><span class="key num" data-k="1">1</span><span class="key num" data-k="2">2</span><span class="key num" data-k="3">3</span><span class="key num" data-k="4">4</span><span class="key num" data-k="5">5</span><span class="key num" data-k="6">6</span><span class="key num" data-k="7">7</span><span class="key num" data-k="8">8</span><span class="key num" data-k="9">9</span><span class="key word" data-k="cancel">취소</span><span class="key num" data-k="0">0</span><span class="key word" data-k="del">지우기</span></div>
+  </div>
+</div>
+
+<!-- 확인 창 (브라우저 대화상자 대신) -->
+<div id="ask-ov" class="ov">
+  <div id="ask-box"><div id="ask-msg"></div><span id="ask-yes" class="btn danger"></span><span id="ask-no" class="btn">아니요</span></div>
+</div>
 
 <script>
 (function () {
   // 배포할 때마다 이 숫자만 올리면 manifest·이미지 주소가 바뀌어 캐시를 피한다.
-  var VERSION = 2;
+  var VERSION = 3;
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
-  // 가짜 예시 (IPD-TASK-005·006에서 설정 데이터로 교체할 자리)
+  // 가짜 예시 (통화 버튼은 IPD-TASK-006에서 설정 데이터로 교체할 자리)
   // 실제 이름·전화번호·Apple ID는 넣지 않는다.
   // ---------------------------------------------------------------
-  var FAKE_SCHEDULE = [
-    { time: '07:30', icon: '😁', text: '이를 닦아요' },      // 😁
-    { time: '15:00', icon: '📚', text: '책을 읽어요' },      // 📚
-    { time: '20:30', icon: '🛁', text: '씻고 잘 준비해요' }  // 🛁
-  ];
   var FAKE_CALLS = [
     { label: '엄마 FaceTime' },
     { label: '아빠 FaceTime' }
@@ -127,6 +362,7 @@
     evening:   { name: '저녁', bubble: '저녁이야',       color: '#e3d3f5', dark: false },
     night:     { name: '밤',   bubble: '잘 자',          color: '#2e3a63', dark: true }
   };
+  var PERIOD_ORDER = ['morning', 'forenoon', 'noon', 'afternoon', 'evening', 'night'];
   // manifest를 못 읽었을 때 쓰는 기본 구간 (이미지 없음 → 자리표시)
   var periods = [
     { id: 'morning',   from: '06:00', to: '09:00', images: [] },
@@ -138,7 +374,43 @@
   ];
 
   var DAY_NAMES = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+  var DAY_SHORT = ['일', '월', '화', '수', '목', '금', '토'];
   var TAP_MS = 5000;
+
+  // ---------------------------------------------------------------
+  // 할 일·설정 상수 (A5-5, 2026-11-16 채팅 결정 반영)
+  // ---------------------------------------------------------------
+  var KEY_SETTINGS = 'ipd.settings', KEY_LOCK = 'ipd.lock', KEY_DONE = 'ipd.done';
+  var MAX_ROUTINE = 20;   // 루틴(매일·요일) 최대
+  var MAX_DATED = 40;     // 일정(특정 날짜) 최대, 루틴과 따로 센다
+  var MAX_TEXT = 14;      // 글 최대 글자 수
+  var SHOW_CARDS = 3;     // 메인 카드 최대 개수
+  var LOCK_FAILS = 5, LOCK_MS = 30000;
+  var PRESS_MS = 5000, PRESS_MOVE = 10;  // 숨은 진입: 5초, 10px 넘게 움직이면 취소
+  var CORNER = 100;                      // 숨은 진입 영역 크기
+  var PIN_ROUNDS = 1000;                 // 해시 반복 횟수
+  var ALL_IDLE_MS = 60000;               // 전체 보기 창: 1분 동안 터치 없으면 닫기
+  var MARQUEE_WAIT = 2000, MARQUEE_SPEED = 40; // 긴 글 흐르기: 앞뒤 2초 멈춤, 초당 40px
+  var TIME_RE = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
+  var HEX64 = /^[0-9a-f]{64}$/, HEX32 = /^[0-9a-f]{32}$/;
+
+  // 아이콘 후보: iOS 10.3에 있는 오래된 이모지만 (iPad에서 □로 나오는지 점검 영역으로 확인)
+  var ICONS = [
+    { c: '⏰', n: '알람시계', u: '23F0' },
+    { c: '😁', n: '이 보이는 웃음', u: '1F601' },
+    { c: '🍚', n: '밥', u: '1F35A' },
+    { c: '🍎', n: '사과', u: '1F34E' },
+    { c: '🎒', n: '책가방', u: '1F392' },
+    { c: '🏫', n: '학교', u: '1F3EB' },
+    { c: '🚌', n: '버스', u: '1F68C' },
+    { c: '🚗', n: '자동차', u: '1F697' },
+    { c: '📚', n: '책', u: '1F4DA' },
+    { c: '✏️', n: '연필', u: '270F FE0F' },
+    { c: '⚽', n: '축구공', u: '26BD' },
+    { c: '🎹', n: '피아노', u: '1F3B9' },
+    { c: '🛁', n: '욕조', u: '1F6C1' },
+    { c: '💤', n: '잠', u: '1F4A4' }
+  ];
 
   function $(id) { return document.getElementById(id); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -147,12 +419,33 @@
     var p = String(hhmm).split(':');
     return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
   }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) { e.className = cls; }
+    if (text !== undefined && text !== null) { e.textContent = text; }
+    return e;
+  }
+  function clearEl(node) { while (node.firstChild) { node.removeChild(node.firstChild); } }
+  function isArray(x) { return Array.isArray(x); }
+  function isObj(x) { return x !== null && typeof x === 'object' && !isArray(x); }
+  // 글자 수: 이모지 같은 두 칸짜리 문자도 한 글자로 센다
+  function textLen(s) { return String(s).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '_').length; }
+  function realNow() { return new Date().getTime(); }
+  function show(id, on) { $(id).style.display = on ? 'block' : 'none'; }
 
   // ---------------------------------------------------------------
   // 시각 (개발용 시각 가정은 콘솔의 IPD_DEV.setTime으로만 한다. 화면·주소에는 없음)
   // ---------------------------------------------------------------
   var devOffset = 0;
   function now() { return new Date(new Date().getTime() + devOffset); }
+  function dateStr(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function validDate(s) {
+    if (typeof s !== 'string' || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(s)) { return false; }
+    var p = s.split('-');
+    var y = +p[0], m = +p[1], d = +p[2];
+    var t = new Date(y, m - 1, d);
+    return t.getFullYear() === y && t.getMonth() === m - 1 && t.getDate() === d;
+  }
 
   // 날짜 번호: 1970-01-01부터 센 일수 (지역 날짜 기준)
   function dayNumber(y, m, d) {
@@ -197,18 +490,1110 @@
     return '지금은 ' + h12 + '시 ' + m + '분이야';
   }
 
+  // ===============================================================
+  // ① 저장 계층 (ipd.settings / ipd.lock / ipd.done)
+  // 읽기 실패·모양 오류·저장 불가여도 멈추지 않고 기본값으로 계속 동작한다.
+  // ===============================================================
+  var notices = { load: '', save: false };
+
+  function lsGet(key) {
+    try { return window.localStorage.getItem(key); } catch (e) { return null; }
+  }
+  function lsSet(key, val) {
+    try {
+      window.localStorage.setItem(key, val);
+      return true;
+    } catch (e) {
+      notices.save = true;
+      return false;
+    }
+  }
+  // {exists, ok, value}: 없음 / 깨진 JSON / 정상을 구분한다
+  function readJSON(key) {
+    var raw = lsGet(key);
+    if (raw === null || raw === undefined) { return { exists: false, ok: false, value: null }; }
+    try { return { exists: true, ok: true, value: JSON.parse(raw) }; }
+    catch (e) { return { exists: true, ok: false, value: null }; }
+  }
+
+  function defaultSettings() {
+    var ps = [];
+    for (var i = 0; i < PERIOD_ORDER.length; i++) {
+      ps.push({ id: PERIOD_ORDER[i], bubble: PERIOD_TEXT[PERIOD_ORDER[i]].bubble });
+    }
+    return {
+      version: 1,
+      pinHash: '', pinSalt: '',
+      contacts: [
+        { label: '엄마', target: '', icon: 'mom' },
+        { label: '아빠', target: '', icon: 'dad' }
+      ],
+      periods: ps,
+      schedule: [],
+      ui: { secondHand: true, analogSize: 'large' }
+    };
+  }
+
+  // 항목 하나 검사: 틀리면 이유 문장, 맞으면 ''
+  function checkItem(it) {
+    if (!isObj(it)) { return '항목 모양이 틀려요'; }
+    if (typeof it.id !== 'string' || !it.id || it.id.length > 40) { return 'id가 없어요'; }
+    if (it.repeat !== 'daily' && it.repeat !== 'weekday' && it.repeat !== 'date') { return '반복 종류(repeat)가 틀려요'; }
+    if (typeof it.time !== 'string' || !TIME_RE.test(it.time)) { return '시각 형식이 틀려요 (예: 07:30)'; }
+    if (typeof it.text !== 'string' || !it.text.trim()) { return '글이 비어 있어요'; }
+    if (textLen(it.text.trim()) > MAX_TEXT) { return '글이 ' + MAX_TEXT + '자를 넘어요'; }
+    if (it.icon !== undefined && it.icon !== null && (typeof it.icon !== 'string' || it.icon.length > 8)) { return '아이콘이 틀려요'; }
+    if (it.repeat === 'weekday') {
+      if (!isArray(it.days) || it.days.length === 0) { return '요일(days)이 없어요'; }
+      for (var i = 0; i < it.days.length; i++) {
+        var v = it.days[i];
+        if (typeof v !== 'number' || v % 1 !== 0 || v < 0 || v > 6) { return '요일(days) 값이 틀려요'; }
+      }
+    }
+    if (it.repeat === 'date' && !validDate(it.date)) { return '날짜 형식이 틀려요 (예: 2026-11-21)'; }
+    return '';
+  }
+  function cleanItem(it) {
+    var days = [];
+    if (it.repeat === 'weekday') {
+      for (var d = 0; d <= 6; d++) { if (it.days.indexOf(d) >= 0) { days.push(d); } }
+    }
+    return {
+      id: it.id, repeat: it.repeat, days: days,
+      date: it.repeat === 'date' ? it.date : null,
+      time: it.time, icon: it.icon || '', text: it.text.trim()
+    };
+  }
+
+  // 설정 전체 검사 + 기본값 병합. errors: 틀린 부분, missing: 빠져서 기본값으로 채운 항목
+  function checkSettings(obj) {
+    var s = defaultSettings(), errors = [], missing = [];
+    if (!isObj(obj)) {
+      return { settings: s, errors: ['맨 바깥이 { } 모양이 아니에요'], missing: [] };
+    }
+    var keys = ['version', 'pinHash', 'pinSalt', 'contacts', 'periods', 'schedule', 'ui'];
+    for (var k = 0; k < keys.length; k++) {
+      if (obj[keys[k]] === undefined) { missing.push(keys[k]); }
+    }
+    if (obj.version !== undefined && obj.version !== 1) { errors.push('version이 1이 아니에요'); }
+
+    var ph = obj.pinHash, ps = obj.pinSalt;
+    if ((ph !== undefined && ph !== '') || (ps !== undefined && ps !== '')) {
+      if (typeof ph === 'string' && HEX64.test(ph) && typeof ps === 'string' && HEX32.test(ps)) {
+        s.pinHash = ph; s.pinSalt = ps;
+      } else {
+        errors.push('PIN 값(pinHash·pinSalt)이 틀려요');
+      }
+    }
+
+    if (obj.schedule !== undefined) {
+      if (!isArray(obj.schedule)) {
+        errors.push('schedule이 목록 [ ] 이 아니에요');
+      } else {
+        var ids = {}, nR = 0, nD = 0, overR = false, overD = false;
+        for (var i = 0; i < obj.schedule.length; i++) {
+          var it = obj.schedule[i];
+          var e = checkItem(it);
+          if (!e && ids[it.id]) { e = 'id가 겹쳐요'; }
+          if (e) { errors.push('할 일 ' + (i + 1) + '번째: ' + e); continue; }
+          var c = cleanItem(it);
+          if (c.repeat === 'date') {
+            if (nD >= MAX_DATED) { overD = true; continue; }
+            nD++;
+          } else {
+            if (nR >= MAX_ROUTINE) { overR = true; continue; }
+            nR++;
+          }
+          ids[c.id] = true;
+          s.schedule.push(c);
+        }
+        if (overR) { errors.push('루틴이 ' + MAX_ROUTINE + '개를 넘어요'); }
+        if (overD) { errors.push('일정이 ' + MAX_DATED + '개를 넘어요'); }
+      }
+    }
+    if (obj.contacts !== undefined) {
+      if (isArray(obj.contacts)) { s.contacts = obj.contacts; } else { errors.push('contacts가 목록이 아니에요'); }
+    }
+    if (obj.periods !== undefined) {
+      if (isArray(obj.periods)) { s.periods = obj.periods; } else { errors.push('periods가 목록이 아니에요'); }
+    }
+    if (obj.ui !== undefined) {
+      if (isObj(obj.ui)) {
+        if (typeof obj.ui.secondHand === 'boolean') { s.ui.secondHand = obj.ui.secondHand; }
+        if (typeof obj.ui.analogSize === 'string') { s.ui.analogSize = obj.ui.analogSize; }
+      } else { errors.push('ui가 { } 모양이 아니에요'); }
+    }
+    return { settings: s, errors: errors, missing: missing };
+  }
+
+  var settings = defaultSettings();
+
+  function loadSettings() {
+    notices.load = '';
+    var r = readJSON(KEY_SETTINGS);
+    if (!r.exists) { settings = defaultSettings(); return; }
+    if (!r.ok) {
+      settings = defaultSettings();
+      notices.load = '저장된 설정을 읽지 못해 기본값으로 시작했어요. 백업이 있으면 아래 "백업·복원"에서 복원해 주세요.';
+      return;
+    }
+    var c = checkSettings(r.value);
+    settings = c.settings;
+    var msgs = [];
+    if (c.errors.length) { msgs.push('저장된 설정 중 틀린 부분을 빼고 읽었어요: ' + c.errors.slice(0, 3).join(' / ')); }
+    if (c.missing.length) { msgs.push('빠진 항목을 기본값으로 채웠어요: ' + c.missing.join(', ')); }
+    notices.load = msgs.join(' ');
+  }
+  function saveSettings() {
+    var ok = lsSet(KEY_SETTINGS, JSON.stringify(settings));
+    if (ok) { notices.save = false; }
+    return ok;
+  }
+  // 저장이 되는지 미리 시험 (사생활 보호 모드 등)
+  function probeStorage() {
+    if (lsSet('ipd.test', '1')) {
+      try { window.localStorage.removeItem('ipd.test'); } catch (e) { /* 무시 */ }
+    }
+  }
+
+  // --- PIN 잠금 상태 ---
+  var lockState = { fails: 0, until: 0 };
+  function loadLock() {
+    var r = readJSON(KEY_LOCK);
+    lockState = { fails: 0, until: 0 };
+    if (r.ok && isObj(r.value)) {
+      var f = r.value.fails, u = r.value.until;
+      if (typeof f === 'number' && f >= 0 && f < 100) { lockState.fails = Math.floor(f); }
+      if (typeof u === 'number' && u > 0) { lockState.until = u; }
+    }
+    // 시계가 뒤로 갔을 때 잠금이 너무 길어지지 않게
+    if (lockState.until > realNow() + LOCK_MS) { lockState.until = realNow() + LOCK_MS; }
+  }
+  function saveLock() { lsSet(KEY_LOCK, JSON.stringify(lockState)); }
+  function lockLeft() { return Math.max(0, lockState.until - realNow()); }
+
+  // --- 오늘 체크 상태 ---
+  var done = { date: '', ids: [] };
+  function loadDone() {
+    var r = readJSON(KEY_DONE);
+    done = { date: '', ids: [] };
+    if (r.ok && isObj(r.value) && typeof r.value.date === 'string' && isArray(r.value.ids)) {
+      done.date = r.value.date;
+      for (var i = 0; i < r.value.ids.length; i++) {
+        if (typeof r.value.ids[i] === 'string') { done.ids.push(r.value.ids[i]); }
+      }
+    }
+  }
+  function saveDone() { lsSet(KEY_DONE, JSON.stringify(done)); }
+  // 날짜가 바뀌면 체크를 비운다
+  function ensureDoneDate(today) {
+    if (done.date !== today) {
+      done = { date: today, ids: [] };
+      saveDone();
+    }
+  }
+  function isDone(id) { return done.ids.indexOf(id) >= 0; }
+  function toggleDone(id) {
+    ensureDoneDate(dateStr(now()));
+    var i = done.ids.indexOf(id);
+    if (i >= 0) { done.ids.splice(i, 1); } else { done.ids.push(id); }
+    saveDone();
+  }
+
+  // ===============================================================
+  // ① PIN 해시: 순수 JS SHA-256 (브라우저 내장 암호 API는 쓰지 않는다)
+  // 4자리 PIN이라 보안 수단은 아니다(아이 실수 방지용). 평문은 저장하지 않는다.
+  // ===============================================================
+  var K256 = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+  function ror(x, n) { return (x >>> n) | (x << (32 - n)); }
+  function sha256(str) {
+    var s = unescape(encodeURIComponent(str)); // UTF-8 바이트
+    var bytes = [], i;
+    for (i = 0; i < s.length; i++) { bytes.push(s.charCodeAt(i)); }
+    var bitLen = bytes.length * 8;
+    bytes.push(0x80);
+    while (bytes.length % 64 !== 56) { bytes.push(0); }
+    var hi = Math.floor(bitLen / 0x100000000), lo = bitLen >>> 0;
+    bytes.push((hi >>> 24) & 255, (hi >>> 16) & 255, (hi >>> 8) & 255, hi & 255);
+    bytes.push((lo >>> 24) & 255, (lo >>> 16) & 255, (lo >>> 8) & 255, lo & 255);
+
+    var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+    var w = new Array(64);
+    for (var off = 0; off < bytes.length; off += 64) {
+      for (i = 0; i < 16; i++) {
+        var j = off + i * 4;
+        w[i] = (bytes[j] << 24) | (bytes[j + 1] << 16) | (bytes[j + 2] << 8) | bytes[j + 3];
+      }
+      for (i = 16; i < 64; i++) {
+        var x = w[i - 15], y = w[i - 2];
+        var s0 = ror(x, 7) ^ ror(x, 18) ^ (x >>> 3);
+        var s1 = ror(y, 17) ^ ror(y, 19) ^ (y >>> 10);
+        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+      }
+      var a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+      for (i = 0; i < 64; i++) {
+        var S1 = ror(e, 6) ^ ror(e, 11) ^ ror(e, 25);
+        var ch = (e & f) ^ (~e & g);
+        var t1 = (h + S1 + ch + K256[i] + w[i]) | 0;
+        var S0 = ror(a, 2) ^ ror(a, 13) ^ ror(a, 22);
+        var maj = (a & b) ^ (a & c) ^ (b & c);
+        var t2 = (S0 + maj) | 0;
+        h = g; g = f; f = e; e = (d + t1) | 0;
+        d = c; c = b; b = a; a = (t1 + t2) | 0;
+      }
+      H[0] = (H[0] + a) | 0; H[1] = (H[1] + b) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+      H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+    }
+    var out = '';
+    for (i = 0; i < 8; i++) { out += ('00000000' + (H[i] >>> 0).toString(16)).slice(-8); }
+    return out;
+  }
+  function makeSalt() {
+    var b = [], i;
+    try {
+      var arr = new Uint8Array(16);
+      window.crypto.getRandomValues(arr);
+      for (i = 0; i < 16; i++) { b.push(arr[i]); }
+    } catch (e) {
+      b = [];
+      for (i = 0; i < 16; i++) { b.push(Math.floor(Math.random() * 256)); }
+    }
+    var out = '';
+    for (i = 0; i < 16; i++) { out += ('0' + b[i].toString(16)).slice(-2); }
+    return out;
+  }
+  function hashPin(pinText, salt) {
+    var h = sha256(salt + ':' + pinText);
+    for (var i = 1; i < PIN_ROUNDS; i++) { h = sha256(h + salt); }
+    return h;
+  }
+  function setPin(pinText) {
+    settings.pinSalt = makeSalt();
+    settings.pinHash = hashPin(pinText, settings.pinSalt);
+    return saveSettings();
+  }
+  function checkPin(pinText) {
+    return !!settings.pinHash && hashPin(pinText, settings.pinSalt) === settings.pinHash;
+  }
+
+  // ---------------------------------------------------------------
+  // 빠른 터치: touchend에서 바로 처리하고(합성 click 막음), 손가락이 움직였으면 무시.
+  // PC 마우스는 click으로 처리. 리스너는 처음 한 번만 붙인다.
+  // handler(target)가 true를 돌려주면 처리한 것으로 본다.
+  // ---------------------------------------------------------------
+  function findUp(node, stop, attr) {
+    while (node && node !== stop && node.nodeType === 1) {
+      if (node.getAttribute(attr) !== null) { return node; }
+      node = node.parentNode;
+    }
+    if (node && node === stop && node.nodeType === 1 && node.getAttribute(attr) !== null) { return node; }
+    return null;
+  }
+  var downEl = null;
+  function markDown(target, stop) {
+    var n = target;
+    while (n && n !== stop && n.nodeType === 1) {
+      if (/(^| )(btn|key|bigbtn|sbtn|chk-hit|seg|day|ico|pick)( |$)/.test(n.className)) {
+        downEl = n; n.className += ' down'; return;
+      }
+      n = n.parentNode;
+    }
+  }
+  function clearDown() {
+    if (downEl) { downEl.className = downEl.className.replace(/ down/g, ''); downEl = null; }
+  }
+  function bindTap(node, handler) {
+    var sx = 0, sy = 0, moved = false;
+    node.addEventListener('touchstart', function (e) {
+      var t = e.touches[0];
+      sx = t.clientX; sy = t.clientY; moved = false;
+      markDown(e.target, node);
+    }, false);
+    node.addEventListener('touchmove', function (e) {
+      var t = e.touches[0];
+      if (Math.abs(t.clientX - sx) > PRESS_MOVE || Math.abs(t.clientY - sy) > PRESS_MOVE) { moved = true; clearDown(); }
+    }, false);
+    node.addEventListener('touchend', function (e) {
+      clearDown();
+      if (moved) { return; }
+      if (handler(e.target)) { e.preventDefault(); }
+    }, false);
+    node.addEventListener('touchcancel', function () { clearDown(); }, false);
+    node.addEventListener('click', function (e) { handler(e.target); }, false);
+  }
+  function bindButton(id, fn) {
+    bindTap($(id), function () { fn(); return true; });
+  }
+
+  // ===============================================================
+  // ① 숨은 진입: 오른쪽 위 모서리 100×100, 5초 연속 누르기
+  // ===============================================================
+  var press = { timer: null, x: 0, y: 0 };
+  function pressStart(x, y) {
+    pressCancel();
+    press.x = x; press.y = y;
+    press.timer = setTimeout(function () {   // 한 번만 도는 타이머 (반복 타이머 아님)
+      press.timer = null;
+      openPinEntry();
+    }, PRESS_MS);
+  }
+  function pressMove(x, y) {
+    if (press.timer !== null && (Math.abs(x - press.x) > PRESS_MOVE || Math.abs(y - press.y) > PRESS_MOVE)) { pressCancel(); }
+  }
+  function pressCancel() {
+    if (press.timer !== null) { clearTimeout(press.timer); press.timer = null; }
+  }
+  function bindCorner() {
+    var c = $('corner');
+    // 터치: preventDefault로 마우스 흉내 이벤트·확대·메뉴를 막는다
+    c.addEventListener('touchstart', function (e) {
+      e.preventDefault();
+      if (e.touches.length !== 1) { pressCancel(); return; }
+      pressStart(e.touches[0].clientX, e.touches[0].clientY);
+    }, false);
+    c.addEventListener('touchmove', function (e) {
+      e.preventDefault();
+      if (e.touches.length !== 1) { pressCancel(); return; }
+      pressMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, false);
+    c.addEventListener('touchend', pressCancel, false);
+    c.addEventListener('touchcancel', pressCancel, false);
+    // PC 마우스 (확인용)
+    c.addEventListener('mousedown', function (e) { pressStart(e.clientX, e.clientY); }, false);
+    c.addEventListener('mousemove', function (e) { pressMove(e.clientX, e.clientY); }, false);
+    c.addEventListener('mouseup', pressCancel, false);
+    c.addEventListener('mouseleave', pressCancel, false);
+  }
+
+  // ===============================================================
+  // ① PIN 화면 (화면 숫자 키패드)
+  // 모드: setup1·setup2(처음 설정) / enter(진입) / old·new1·new2(변경)
+  // ===============================================================
+  var pin = { open: false, mode: '', buf: '', first: '', busy: false, msg: '' };
+  var PIN_TITLES = {
+    setup1: '새 PIN 4자리를 정해 주세요',
+    setup2: '한 번 더 눌러 주세요',
+    enter: 'PIN을 눌러 주세요',
+    old: '지금 PIN을 눌러 주세요',
+    new1: '새 PIN 4자리를 눌러 주세요',
+    new2: '새 PIN을 한 번 더 눌러 주세요'
+  };
+  function openPinEntry() {
+    if (pin.open || setOpen) { return; }
+    openPin(settings.pinHash ? 'enter' : 'setup1');
+  }
+  function openPin(mode) {
+    pin.open = true; pin.mode = mode; pin.buf = ''; pin.first = ''; pin.busy = false; pin.msg = '';
+    show('pin-ov', true);
+    drawPin();
+  }
+  function closePin() {
+    pin.open = false; pin.buf = ''; pin.first = '';
+    show('pin-ov', false);
+  }
+  function pinLocked() { return (pin.mode === 'enter' || pin.mode === 'old') && lockLeft() > 0; }
+  function drawPin() {
+    $('pin-title').textContent = PIN_TITLES[pin.mode] || '';
+    var dots = $('pin-dots').childNodes, n = 0;
+    for (var i = 0; i < dots.length; i++) {
+      if (dots[i].nodeType === 1) { dots[i].className = 'dot' + (n < pin.buf.length ? ' on' : ''); n++; }
+    }
+    var locked = pinLocked();
+    $('pin-keys').className = locked ? 'off' : '';
+    $('pin-msg').textContent = locked
+      ? '여러 번 틀려서 잠겼어요. ' + Math.ceil(lockLeft() / 1000) + '초 뒤에 다시 눌러 주세요.'
+      : pin.msg;
+  }
+  // tick()에서 매초 부른다 (잠금 남은 초 표시)
+  function pinTick() {
+    if (!pin.open) { return; }
+    if (pin.msg.indexOf('잠겼') >= 0 && !pinLocked()) { pin.msg = '다시 눌러 주세요.'; }
+    drawPin();
+  }
+  function pinKey(k) {
+    if (k === 'cancel') {
+      var wasChange = (pin.mode === 'old' || pin.mode === 'new1' || pin.mode === 'new2');
+      closePin();
+      if (wasChange) { $('pin-change-msg').textContent = ''; }
+      return;
+    }
+    if (pin.busy || pinLocked()) { return; }
+    if (k === 'del') {
+      pin.buf = pin.buf.slice(0, -1);
+    } else if (pin.buf.length < 4) {
+      pin.buf += k;
+    }
+    drawPin();
+    if (pin.buf.length === 4) {
+      pin.busy = true;
+      setTimeout(submitPin, 150); // 네 번째 점이 보이도록 잠깐 뒤에 처리 (한 번만 도는 타이머)
+    }
+  }
+  function pinWrong() {
+    lockState.fails++;
+    if (lockState.fails >= LOCK_FAILS) {
+      lockState.until = realNow() + LOCK_MS;
+      lockState.fails = 0;
+      pin.msg = '여러 번 틀려서 잠겼어요.';
+    } else {
+      pin.msg = '틀렸어요. (' + (LOCK_FAILS - lockState.fails) + '번 더 틀리면 30초 잠겨요)';
+    }
+    saveLock();
+  }
+  function pinRight() {
+    lockState.fails = 0; lockState.until = 0;
+    saveLock();
+  }
+  function submitPin() {
+    var v = pin.buf;
+    pin.buf = ''; pin.busy = false;
+    if (!pin.open) { return; }
+    if (pin.mode === 'setup1' || pin.mode === 'new1') {
+      pin.first = v; pin.msg = '';
+      pin.mode = (pin.mode === 'setup1') ? 'setup2' : 'new2';
+    } else if (pin.mode === 'setup2' || pin.mode === 'new2') {
+      var isSetup = (pin.mode === 'setup2');
+      if (v !== pin.first) {
+        pin.first = '';
+        pin.mode = isSetup ? 'setup1' : 'new1';
+        pin.msg = '두 번 누른 숫자가 달라요. 처음부터 다시 눌러 주세요.';
+      } else {
+        setPin(v);
+        pinRight();
+        closePin();
+        if (isSetup) {
+          openSettings(true);
+        } else {
+          $('pin-change-msg').textContent = 'PIN을 바꿨어요.';
+          renderSettings();
+        }
+        return;
+      }
+    } else if (pin.mode === 'enter' || pin.mode === 'old') {
+      if (checkPin(v)) {
+        pinRight();
+        if (pin.mode === 'enter') {
+          closePin();
+          openSettings(false);
+          return;
+        }
+        pin.mode = 'new1'; pin.msg = '';
+      } else {
+        pinWrong();
+      }
+    }
+    drawPin();
+  }
+
+  // ===============================================================
+  // ② 오늘 할 일 계산 (A5-5)
+  // ===============================================================
+  // 오늘(d) 해당 항목: 매일 + 요일이 맞는 요일 루틴 + 날짜가 같은 일정. 시각순, 같으면 입력 순.
+  function itemsFor(d) {
+    var ds = dateStr(d), wd = d.getDay(), arr = [], i;
+    for (i = 0; i < settings.schedule.length; i++) {
+      var it = settings.schedule[i];
+      if (it.repeat === 'daily' ||
+          (it.repeat === 'weekday' && it.days.indexOf(wd) >= 0) ||
+          (it.repeat === 'date' && it.date === ds)) {
+        arr.push({ it: it, k: i });
+      }
+    }
+    arr.sort(function (a, b) {
+      if (a.it.time < b.it.time) { return -1; }
+      if (a.it.time > b.it.time) { return 1; }
+      return a.k - b.k;
+    });
+    var out = [];
+    for (i = 0; i < arr.length; i++) { out.push(arr[i].it); }
+    return out;
+  }
+  function todayInfo() {
+    var d = now();
+    ensureDoneDate(dateStr(d));
+    var items = itemsFor(d), rest = [], doneN = 0;
+    for (var i = 0; i < items.length; i++) {
+      if (isDone(items[i].id)) { doneN++; } else { rest.push(items[i]); }
+    }
+    return { items: items, rest: rest, doneN: doneN };
+  }
+
+  function makeCard(it, isDoneCard, isFirst) {
+    var card = el('div', 'card' + (isDoneCard ? ' done' : '') + (isFirst ? ' first' : ''));
+    var hit = el('div', 'chk-hit');
+    hit.setAttribute('data-chk', it.id);
+    hit.appendChild(el('span', 'chk', isDoneCard ? '✓' : ''));
+    card.appendChild(hit);
+    card.appendChild(el('span', 'c-time', it.time));
+    card.appendChild(el('span', 'c-icon', it.icon || ''));
+    var box = el('span', 'c-textbox');
+    box.appendChild(el('span', 'c-text', it.text));
+    card.appendChild(box);
+    return card;
+  }
+
+  function renderTodo() {
+    var t = todayInfo();
+    var total = t.items.length;
+    $('sch-title').textContent = total ? '오늘 할 일 (' + t.doneN + '/' + total + ')' : '오늘 할 일';
+    $('sch-left').textContent = t.rest.length > SHOW_CARDS ? '남은 일 ' + t.rest.length + '개' : '';
+    $('sch-all').style.display = total ? 'inline-block' : 'none';
+    var box = $('sch-cards');
+    clearEl(box);
+    if (!total) {
+      box.appendChild(el('div', 'card msg', '오늘은 자유 시간!'));
+    } else if (!t.rest.length) {
+      box.appendChild(el('div', 'card msg', '다 했어요! 🎉')); // 🎉
+    } else {
+      for (var i = 0; i < t.rest.length && i < SHOW_CARDS; i++) {
+        box.appendChild(makeCard(t.rest[i], false, i === 0));
+      }
+    }
+    if (allOpen) { renderAll(t); }
+    setupMarquees();
+  }
+
+  // --- 전체 보기 창 (아이용): 오늘 할 일 전부, 체크한 것은 흐리게 + ✓ ---
+  var allOpen = false, allLast = 0;
+  function renderAll(t) {
+    if (!t) { t = todayInfo(); }
+    var total = t.items.length;
+    $('all-title').textContent = '오늘 할 일 (' + t.doneN + '/' + total + ')';
+    var body = $('all-body');
+    clearEl(body);
+    if (!total) { body.appendChild(el('div', 'card msg', '오늘은 자유 시간!')); return; }
+    var firstId = t.rest.length ? t.rest[0].id : '';
+    for (var i = 0; i < t.items.length; i++) {
+      var it = t.items[i];
+      body.appendChild(makeCard(it, isDone(it.id), it.id === firstId));
+    }
+  }
+  function openAll() {
+    allOpen = true; allLast = realNow();
+    show('all-ov', true);
+    renderAll();
+    $('all-body').scrollTop = 0;
+    setupMarquees();
+  }
+  function closeAll() {
+    allOpen = false;
+    show('all-ov', false);
+    setupMarquees();
+  }
+  // tick()에서 매초 부른다
+  function allTick() {
+    if (allOpen && realNow() - allLast > ALL_IDLE_MS) { closeAll(); }
+  }
+
+  // --- 긴 글 흐르기: 칸을 넘는 글만, 앞뒤 2초 멈춤. tick()이 1초마다 단계를 넘긴다 ---
+  var marquees = [];
+  function setupMarquees() {
+    var i;
+    for (i = 0; i < marquees.length; i++) { resetMarquee(marquees[i].tx); }
+    marquees = [];
+    var boxes = document.querySelectorAll('.c-textbox');
+    for (i = 0; i < boxes.length; i++) {
+      var box = boxes[i], tx = box.firstChild;
+      if (!tx || !box.clientWidth) { continue; }
+      resetMarquee(tx);
+      var dist = tx.offsetWidth - box.clientWidth;
+      if (dist > 2) { marquees.push({ tx: tx, dist: dist + 6, phase: 0, t0: realNow() }); }
+    }
+  }
+  function resetMarquee(tx) {
+    tx.style.webkitTransition = 'none'; tx.style.transition = 'none';
+    tx.style.webkitTransform = 'translate3d(0,0,0)'; tx.style.transform = 'translate3d(0,0,0)';
+  }
+  function stepMarquees() {
+    var t = realNow();
+    for (var i = 0; i < marquees.length; i++) {
+      var m = marquees[i];
+      var dur = Math.max(1000, Math.round(m.dist / MARQUEE_SPEED * 1000));
+      if (m.phase === 0 && t - m.t0 >= MARQUEE_WAIT) {
+        var tr = (dur / 1000) + 's linear';
+        m.tx.style.webkitTransition = '-webkit-transform ' + tr;
+        m.tx.style.transition = 'transform ' + tr;
+        m.tx.style.webkitTransform = 'translate3d(-' + m.dist + 'px,0,0)';
+        m.tx.style.transform = 'translate3d(-' + m.dist + 'px,0,0)';
+        m.phase = 1; m.t0 = t;
+      } else if (m.phase === 1 && t - m.t0 >= dur + MARQUEE_WAIT) {
+        resetMarquee(m.tx);
+        m.phase = 0; m.t0 = t;
+      }
+    }
+  }
+
+  function onCheckTap(target, container) {
+    var hit = findUp(target, container, 'data-chk');
+    if (!hit) { return false; }  // 카드의 다른 곳은 아무 반응 없음
+    toggleDone(hit.getAttribute('data-chk'));
+    renderTodo();
+    return true;
+  }
+
+  // ===============================================================
+  // ② 설정 화면
+  // ===============================================================
+  var setOpen = false, firstRun = false;
+  var pastSel = {};
+
+  function openSettings(isFirst) {
+    setOpen = true; firstRun = !!isFirst;
+    pastSel = {};
+    closeEditor();
+    $('add-msg').textContent = ''; $('past-msg').textContent = '';
+    $('restore-msg').textContent = ''; $('restore-msg').className = '';
+    $('pin-change-msg').textContent = '';
+    $('restore-ta').value = '';
+    if (allOpen) { closeAll(); }
+    show('set-ov', true);
+    renderSettings();
+    $('set-body').scrollTop = 0;
+  }
+  function closeSettings() {
+    if (document.activeElement && document.activeElement.blur) { document.activeElement.blur(); }
+    setOpen = false; firstRun = false;
+    closeEditor();
+    show('set-ov', false);
+    window.scrollTo(0, 0);
+    renderTodo();
+    layout();
+  }
+
+  function countKinds(exceptId) {
+    var r = 0, d = 0;
+    for (var i = 0; i < settings.schedule.length; i++) {
+      var it = settings.schedule[i];
+      if (it.id === exceptId) { continue; }
+      if (it.repeat === 'date') { d++; } else { r++; }
+    }
+    return { routine: r, dated: d };
+  }
+  function describe(it) {
+    if (it.repeat === 'daily') { return '매일'; }
+    if (it.repeat === 'weekday') {
+      var ds = it.days.join(',');
+      if (ds === '1,2,3,4,5') { return '평일 (월~금)'; }
+      if (ds === '0,6') { return '주말 (토·일)'; }
+      if (ds === '0,1,2,3,4,5,6') { return '매주 모든 요일'; }
+      var names = [], order = [1, 2, 3, 4, 5, 6, 0];
+      for (var i = 0; i < order.length; i++) { if (it.days.indexOf(order[i]) >= 0) { names.push(DAY_SHORT[order[i]]); } }
+      return '매주 ' + names.join('·');
+    }
+    var p = it.date.split('-');
+    var t = new Date(+p[0], +p[1] - 1, +p[2]);
+    var yr = (t.getFullYear() !== now().getFullYear()) ? t.getFullYear() + '년 ' : '';
+    return yr + (+p[1]) + '월 ' + (+p[2]) + '일 (' + DAY_SHORT[t.getDay()] + ')';
+  }
+  function itemRow(it, past) {
+    var row = el('div', 'item' + (past ? ' haspick' : ''));
+    if (past) {
+      var pk = el('span', 'pick' + (pastSel[it.id] ? ' on' : ''), pastSel[it.id] ? '✓' : '');
+      pk.setAttribute('data-pick', it.id);
+      row.appendChild(pk);
+    }
+    var info = el('div', 'item-info' + (past ? ' past' : ''));
+    info.appendChild(el('span', 'i-time', it.time));
+    info.appendChild(el('span', 'i-icon', it.icon || ''));
+    info.appendChild(el('span', 'i-text', it.text));
+    info.appendChild(el('div', 'i-when', describe(it)));
+    row.appendChild(info);
+    var bx = el('div', 'item-btns');
+    var b1 = el('span', 'btn', '고치기'); b1.setAttribute('data-edit', it.id);
+    var b2 = el('span', 'btn danger', '지우기'); b2.setAttribute('data-del', it.id);
+    bx.appendChild(b1); bx.appendChild(b2);
+    row.appendChild(bx);
+    return row;
+  }
+  function emptyDays() {
+    var d = now(), out = [];
+    for (var k = 0; k < 7; k++) {
+      var t = new Date(d.getFullYear(), d.getMonth(), d.getDate() + k);
+      if (itemsFor(t).length === 0) {
+        out.push((t.getMonth() + 1) + '/' + t.getDate() + '(' + DAY_SHORT[t.getDay()] + ')');
+      }
+    }
+    return out;
+  }
+  function renderNotices() {
+    var box = $('set-notice');
+    clearEl(box);
+    if (notices.load) { box.appendChild(el('div', '', notices.load)); }
+    if (notices.save) { box.appendChild(el('div', '', '저장할 수 없어요. (사생활 보호 모드이거나 저장 공간이 막혀 있어요) 바꾼 내용은 새로고침하면 사라질 수 있어요.')); }
+    if (firstRun) { box.appendChild(el('div', 'info', 'PIN을 정했어요. 이제 반복되는 루틴(예: 평일 유치원 가기)과 날짜가 정해진 일정을 미리 넣어 주세요.')); }
+  }
+  function renderSettings() {
+    renderNotices();
+    var today = dateStr(now());
+    var routines = [], upcoming = [], past = [], i;
+    for (i = 0; i < settings.schedule.length; i++) {
+      var it = settings.schedule[i];
+      var w = { it: it, k: i };
+      if (it.repeat !== 'date') { routines.push(w); }
+      else if (it.date < today) { past.push(w); }
+      else { upcoming.push(w); }
+    }
+    var byTime = function (a, b) {
+      if (a.it.time < b.it.time) { return -1; }
+      if (a.it.time > b.it.time) { return 1; }
+      return a.k - b.k;
+    };
+    var byDate = function (a, b) {
+      if (a.it.date < b.it.date) { return -1; }
+      if (a.it.date > b.it.date) { return 1; }
+      return byTime(a, b);
+    };
+    routines.sort(byTime); upcoming.sort(byDate); past.sort(byDate);
+
+    // 지난 일정 선택 중 사라진 id 정리
+    var keep = {};
+    for (i = 0; i < past.length; i++) { if (pastSel[past[i].it.id]) { keep[past[i].it.id] = true; } }
+    pastSel = keep;
+
+    var lists = [['list-routine', routines, false], ['list-dated', upcoming, false], ['list-past', past, true]];
+    for (var l = 0; l < lists.length; l++) {
+      var box = $(lists[l][0]), arr = lists[l][1];
+      clearEl(box);
+      if (!arr.length) { box.appendChild(el('div', 'empty', '없어요')); }
+      for (i = 0; i < arr.length; i++) { box.appendChild(itemRow(arr[i].it, lists[l][2])); }
+    }
+    show('past-tools', past.length > 0);
+
+    var c = countKinds(null);
+    $('sch-count').textContent = '루틴 ' + c.routine + '/' + MAX_ROUTINE + ' · 일정 ' + c.dated + '/' + MAX_DATED;
+    var ed = emptyDays();
+    $('empty-days').textContent = ed.length
+      ? '앞으로 7일 중 할 일이 없는 날: ' + ed.join(', ')
+      : '앞으로 7일은 모두 할 일이 있어요.';
+
+    $('backup-ta').value = JSON.stringify(settings, null, 2);
+    $('set-ver').textContent = '버전 ' + VERSION;
+  }
+
+  // --- 확인 창 (alert·confirm 대신 화면 안 UI) ---
+  var askFn = null;
+  function askYesNo(msg, yesLabel, fn) {
+    askFn = fn;
+    $('ask-msg').textContent = msg;
+    $('ask-yes').textContent = yesLabel;
+    show('ask-ov', true);
+  }
+  function askClose(yes) {
+    var fn = askFn;
+    askFn = null;
+    show('ask-ov', false);
+    if (yes && fn) { fn(); }
+  }
+
+  function removeItems(idMap) {
+    var keep = [];
+    for (var i = 0; i < settings.schedule.length; i++) {
+      if (!idMap[settings.schedule[i].id]) { keep.push(settings.schedule[i]); }
+    }
+    var n = settings.schedule.length - keep.length;
+    settings.schedule = keep;
+    saveSettings();
+    return n;
+  }
+  function findItem(id) {
+    for (var i = 0; i < settings.schedule.length; i++) {
+      if (settings.schedule[i].id === id) { return settings.schedule[i]; }
+    }
+    return null;
+  }
+
+  // --- 편집 ---
+  var ed = { id: null, kind: 'daily', days: [], icon: '' };
+  function newId() {
+    var id;
+    do { id = 's' + realNow().toString(36) + Math.floor(Math.random() * 1296).toString(36); } while (findItem(id));
+    return id;
+  }
+  function openEditor(id, kind) {
+    var it = id ? findItem(id) : null;
+    $('ed-err').textContent = '';
+    $('add-msg').textContent = '';
+    if (it) {
+      ed.id = it.id; ed.kind = it.repeat; ed.days = it.days.slice(0); ed.icon = it.icon || '';
+      $('ed-text').value = it.text;
+      $('ed-time').value = it.time;
+      $('ed-date').value = it.date || dateStr(now());
+      $('ed-title').textContent = (it.repeat === 'date' ? '일정' : '루틴') + ' 고치기';
+    } else {
+      ed.id = null; ed.kind = kind; ed.days = (kind === 'weekday') ? [1, 2, 3, 4, 5] : []; ed.icon = '';
+      $('ed-text').value = '';
+      $('ed-time').value = '08:00';
+      $('ed-date').value = dateStr(now());
+      $('ed-title').textContent = (kind === 'date' ? '일정' : '루틴') + ' 추가';
+    }
+    show('ed-del', !!it);
+    $('ed-del').style.display = it ? 'inline-block' : 'none';
+    show('editor', true);
+    drawEditor();
+    $('set-body').scrollTop = 0; // 입력칸을 화면 위쪽에 둔다 (iOS 키보드에 가리지 않게)
+  }
+  function closeEditor() {
+    show('editor', false);
+    ed.id = null;
+  }
+  function drawEditor() {
+    var nodes = $('editor').querySelectorAll('[data-kind]'), i;
+    for (i = 0; i < nodes.length; i++) { nodes[i].className = 'seg' + (nodes[i].getAttribute('data-kind') === ed.kind ? ' on' : ''); }
+    nodes = $('editor').querySelectorAll('[data-d]');
+    for (i = 0; i < nodes.length; i++) {
+      nodes[i].className = 'day' + (ed.days.indexOf(+nodes[i].getAttribute('data-d')) >= 0 ? ' on' : '');
+    }
+    nodes = $('editor').querySelectorAll('[data-icon]');
+    for (i = 0; i < nodes.length; i++) {
+      var v = nodes[i].getAttribute('data-icon');
+      nodes[i].className = 'ico' + (v === '' ? ' none' : '') + (v === ed.icon ? ' on' : '');
+    }
+    show('ed-days-row', ed.kind === 'weekday');
+    show('ed-date-row', ed.kind === 'date');
+    drawCount();
+  }
+  function drawCount() {
+    var n = textLen($('ed-text').value.trim());
+    $('ed-count').textContent = n + '/' + MAX_TEXT;
+    $('ed-count').className = 'small' + (n > MAX_TEXT ? ' over' : '');
+  }
+  function saveEditor() {
+    var text = $('ed-text').value.trim();
+    var time = String($('ed-time').value || '');
+    if (/^[0-9]{2}:[0-9]{2}:[0-9]{2}/.test(time)) { time = time.slice(0, 5); } // 초가 붙어 오면 뗀다
+    var days = [];
+    for (var d = 0; d <= 6; d++) { if (ed.days.indexOf(d) >= 0) { days.push(d); } }
+    var item = {
+      id: ed.id || newId(), repeat: ed.kind,
+      days: ed.kind === 'weekday' ? days : [],
+      date: ed.kind === 'date' ? String($('ed-date').value || '') : null,
+      time: time, icon: ed.icon, text: text
+    };
+    var err = '';
+    if (!text) { err = '글을 써 주세요.'; }
+    else if (textLen(text) > MAX_TEXT) { err = '글은 ' + MAX_TEXT + '자까지예요. (지금 ' + textLen(text) + '자)'; }
+    else if (!TIME_RE.test(time)) { err = '시각을 바르게 넣어 주세요. (예: 07:30)'; }
+    else if (ed.kind === 'weekday' && !days.length) { err = '요일을 하나 이상 골라 주세요.'; }
+    else if (ed.kind === 'date' && !validDate(item.date)) { err = '날짜를 바르게 넣어 주세요. (예: 2026-11-21)'; }
+    else {
+      err = checkItem(item);
+      if (!err) {
+        var c = countKinds(ed.id);
+        if (ed.kind === 'date' && c.dated >= MAX_DATED) { err = '일정은 ' + MAX_DATED + '개까지예요. 지난 일정을 지워 주세요.'; }
+        if (ed.kind !== 'date' && c.routine >= MAX_ROUTINE) { err = '루틴은 ' + MAX_ROUTINE + '개까지예요. 안 쓰는 루틴을 지워 주세요.'; }
+      }
+    }
+    if (err) { $('ed-err').textContent = err; $('set-body').scrollTop = 0; return false; }
+    var clean = cleanItem(item), replaced = false;
+    for (var i = 0; i < settings.schedule.length; i++) {
+      if (settings.schedule[i].id === clean.id) { settings.schedule[i] = clean; replaced = true; break; }
+    }
+    if (!replaced) { settings.schedule.push(clean); }
+    saveSettings();
+    closeEditor();
+    renderSettings();
+    renderTodo();
+    return true;
+  }
+  function tryAdd(kind) {
+    var c = countKinds(null);
+    if (kind !== 'date' && c.routine >= MAX_ROUTINE) {
+      $('add-msg').textContent = '루틴은 ' + MAX_ROUTINE + '개까지예요. 안 쓰는 루틴을 지워 주세요.';
+      return;
+    }
+    if (kind === 'date' && c.dated >= MAX_DATED) {
+      $('add-msg').textContent = '일정은 ' + MAX_DATED + '개까지예요. 지난 일정을 지워 주세요.';
+      return;
+    }
+    openEditor(null, kind);
+  }
+  function askDelete(id) {
+    var it = findItem(id);
+    if (!it) { return; }
+    askYesNo('"' + it.text + '"을(를) 지울까요?', '지우기', function () {
+      var m = {}; m[id] = true;
+      removeItems(m);
+      if (ed.id === id) { closeEditor(); }
+      renderSettings();
+      renderTodo();
+    });
+  }
+
+  // ===============================================================
+  // ③ 백업·복원
+  // ===============================================================
+  function selectAll(ta) {
+    ta.focus();
+    try { ta.setSelectionRange(0, ta.value.length); } catch (e) { /* 무시 */ }
+    try { ta.select(); } catch (e2) { /* 무시 */ }
+  }
+  function restoreMsg(text, ok) {
+    $('restore-msg').textContent = text;
+    $('restore-msg').className = ok ? 'ok' : 'err';
+  }
+  // 복원 검사: 통과하면 {settings}, 아니면 {errors}
+  function checkRestore(txt) {
+    var obj;
+    if (!txt) { return { errors: ['붙여 넣은 글이 없어요.'] }; }
+    try { obj = JSON.parse(txt); }
+    catch (e) { return { errors: ['JSON 형식이 아니에요. 처음 { 부터 끝 } 까지 빠짐없이 붙여 넣었는지 확인해 주세요.'] }; }
+    if (!isObj(obj)) { return { errors: ['맨 바깥이 { } 모양이 아니에요.'] }; }
+    if (obj.schedule === undefined) { return { errors: ['schedule(할 일 목록)이 없어요.'] }; }
+    if (!isArray(obj.schedule)) { return { errors: ['schedule(할 일 목록)이 목록 [ ] 모양이 아니에요.'] }; }
+    var c = checkSettings(obj);
+    if (c.errors.length) { return { errors: c.errors }; }
+    return { settings: c.settings, errors: [] };
+  }
+  function doRestore() {
+    var r = checkRestore($('restore-ta').value.trim());
+    if (r.errors.length) {
+      var list = r.errors.slice(0, 5).join(' / ') + (r.errors.length > 5 ? ' 외 ' + (r.errors.length - 5) + '개' : '');
+      restoreMsg('복원하지 않았어요. 지금 설정은 그대로예요. 틀린 부분: ' + list, false);
+      return;
+    }
+    var s = r.settings, nR = 0, nD = 0;
+    for (var i = 0; i < s.schedule.length; i++) { if (s.schedule[i].repeat === 'date') { nD++; } else { nR++; } }
+    restoreMsg('', true);
+    askYesNo('지금 설정을 덮어쓸까요?\n루틴 ' + nR + '개 · 일정 ' + nD + '개 · ' +
+             (s.pinHash ? 'PIN 포함' : 'PIN 없음 (다음에 새로 정해요)'), '덮어쓰기', function () {
+      settings = s;
+      notices.load = '';
+      var ok = saveSettings();
+      $('restore-ta').value = '';
+      closeEditor();
+      renderSettings();
+      renderTodo();
+      restoreMsg(ok ? '복원했어요.' : '복원했지만 저장하지 못했어요. 새로고침하면 사라질 수 있어요.', ok);
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // 화면 요소에 리스너 붙이기 (시작할 때 한 번만)
+  // ---------------------------------------------------------------
+  function buildUI() {
+    var i;
+    // 아이콘 고르기 버튼·점검 영역
+    var icBox = $('ed-icons'), chk = $('icon-check');
+    var none = el('span', 'ico none', '없음'); none.setAttribute('data-icon', '');
+    icBox.appendChild(none);
+    for (i = 0; i < ICONS.length; i++) {
+      var b = el('span', 'ico', ICONS[i].c); b.setAttribute('data-icon', ICONS[i].c);
+      icBox.appendChild(b);
+      var cell = el('div', 'icheck');
+      cell.appendChild(el('b', '', ICONS[i].c));
+      cell.appendChild(el('span', '', ICONS[i].n));
+      cell.appendChild(el('span', '', 'U+' + ICONS[i].u));
+      chk.appendChild(cell);
+    }
+
+    // 메인: 체크 버튼 / 전체 보기
+    bindTap($('sch-cards'), function (t) { return onCheckTap(t, $('sch-cards')); });
+    bindButton('sch-all', openAll);
+    // 전체 보기 창
+    bindTap($('all-body'), function (t) { allLast = realNow(); return onCheckTap(t, $('all-body')); });
+    $('all-body').addEventListener('scroll', function () { allLast = realNow(); }, false);
+    bindButton('all-close', closeAll);
+
+    // PIN 키패드
+    bindTap($('pin-keys'), function (t) {
+      var k = findUp(t, $('pin-keys'), 'data-k');
+      if (!k) { return false; }
+      pinKey(k.getAttribute('data-k'));
+      return true;
+    });
+
+    // 설정
+    bindButton('set-close', closeSettings);
+    bindButton('add-routine', function () { tryAdd('daily'); });
+    bindButton('add-dated', function () { tryAdd('date'); });
+    bindButton('ed-save', saveEditor);
+    bindButton('ed-cancel', closeEditor);
+    bindButton('ed-del', function () { if (ed.id) { askDelete(ed.id); } });
+    $('ed-text').addEventListener('input', drawCount, false);
+    bindTap($('editor'), function (t) {
+      var box = $('editor'), n;
+      if ((n = findUp(t, box, 'data-kind'))) {
+        ed.kind = n.getAttribute('data-kind');
+        if (ed.kind === 'weekday' && !ed.days.length) { ed.days = [1, 2, 3, 4, 5]; }
+      } else if ((n = findUp(t, box, 'data-quick'))) {
+        ed.days = n.getAttribute('data-quick') === 'wk' ? [1, 2, 3, 4, 5] : [0, 6];
+      } else if ((n = findUp(t, box, 'data-d'))) {
+        var d = +n.getAttribute('data-d'), p = ed.days.indexOf(d);
+        if (p >= 0) { ed.days.splice(p, 1); } else { ed.days.push(d); }
+      } else if ((n = findUp(t, box, 'data-icon'))) {
+        ed.icon = n.getAttribute('data-icon');
+      } else {
+        return false;
+      }
+      drawEditor();
+      return true;
+    });
+    bindTap($('sec-sched'), function (t) {
+      var box = $('sec-sched'), n;
+      if ((n = findUp(t, box, 'data-edit'))) { openEditor(n.getAttribute('data-edit')); return true; }
+      if ((n = findUp(t, box, 'data-del'))) { askDelete(n.getAttribute('data-del')); return true; }
+      if ((n = findUp(t, box, 'data-pick'))) {
+        var id = n.getAttribute('data-pick');
+        if (pastSel[id]) { delete pastSel[id]; } else { pastSel[id] = true; }
+        $('past-msg').textContent = '';
+        renderSettings();
+        return true;
+      }
+      return false;
+    });
+    bindButton('past-del-sel', function () {
+      var n = Object.keys(pastSel).length;
+      if (!n) { $('past-msg').textContent = '지울 일정을 먼저 골라 주세요. (왼쪽 네모를 누르세요)'; return; }
+      askYesNo('고른 지난 일정 ' + n + '개를 지울까요?', '지우기', function () {
+        removeItems(pastSel); pastSel = {};
+        renderSettings(); renderTodo();
+      });
+    });
+    bindButton('past-del-all', function () {
+      var today = dateStr(now()), m = {}, n = 0;
+      for (var j = 0; j < settings.schedule.length; j++) {
+        var it = settings.schedule[j];
+        if (it.repeat === 'date' && it.date < today) { m[it.id] = true; n++; }
+      }
+      if (!n) { return; }
+      askYesNo('지난 일정 ' + n + '개를 모두 지울까요?', '모두 지우기', function () {
+        removeItems(m); pastSel = {};
+        renderSettings(); renderTodo();
+      });
+    });
+    bindButton('backup-sel', function () { selectAll($('backup-ta')); });
+    bindButton('restore-btn', doRestore);
+    bindButton('pin-change', function () {
+      $('pin-change-msg').textContent = '';
+      openPin(settings.pinHash ? 'old' : 'new1');
+    });
+    bindButton('ask-yes', function () { askClose(true); });
+    bindButton('ask-no', function () { askClose(false); });
+
+    bindCorner();
+  }
+
   // ---------------------------------------------------------------
   // 아날로그 시계 (SVG, viewBox 200×200)
   // ---------------------------------------------------------------
   var SVGNS = 'http://www.w3.org/2000/svg';
   var hands = {};
   function svgEl(name, attrs, parent) {
-    var el = document.createElementNS(SVGNS, name);
+    var e = document.createElementNS(SVGNS, name);
     for (var k in attrs) {
-      if (attrs.hasOwnProperty(k)) { el.setAttribute(k, attrs[k]); }
+      if (attrs.hasOwnProperty(k)) { e.setAttribute(k, attrs[k]); }
     }
-    if (parent) { parent.appendChild(el); }
-    return el;
+    if (parent) { parent.appendChild(e); }
+    return e;
   }
   function buildClock() {
     var svg = svgEl('svg', { viewBox: '0 0 200 200' });
@@ -260,12 +1645,12 @@
   var curImg = null;
   var loadToken = 0;
 
-  function showPlaceholder(show) {
-    $('ph-label').style.display = show ? 'block' : 'none';
+  function showPlaceholder(on) {
+    $('ph-label').style.display = on ? 'block' : 'none';
   }
-  function removeLater(el) {
+  function removeLater(node) {
     setTimeout(function () {
-      if (el.parentNode) { el.parentNode.removeChild(el); }
+      if (node.parentNode) { node.parentNode.removeChild(node); }
     }, 900);
   }
   function showPeriod(info) {
@@ -309,6 +1694,7 @@
   // 매초 그리기
   // ---------------------------------------------------------------
   var tapUntil = 0;
+  var minuteKey = '';
   function render() {
     var d = now();
     setHands(d);
@@ -334,6 +1720,16 @@
       bubble.textContent = t ? t.bubble : '';
       bubble.className = side;
     }
+
+    // 할 일: 1분마다·날짜가 바뀔 때 다시 그린다 (날짜가 바뀌면 renderTodo 안에서 체크를 비움)
+    var mk = dateStr(d) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    if (mk !== minuteKey) {
+      minuteKey = mk;
+      renderTodo();
+    }
+    stepMarquees();
+    pinTick();
+    allTick();
   }
 
   // 1초 타이머는 하나만: 다음 초 경계에 맞춰 setTimeout을 다시 건다.
@@ -351,12 +1747,12 @@
   // ---------------------------------------------------------------
   // 레이아웃: 방향은 innerWidth > innerHeight (A3-6)
   // ---------------------------------------------------------------
-  var PAD = 16, CALL_H = 124, DIGI_H = 56, SCH_H = 26 + 3 * 62;
-  function place(el, x, y, w, h) {
-    el.style.left = Math.round(x) + 'px';
-    el.style.top = Math.round(y) + 'px';
-    el.style.width = Math.round(w) + 'px';
-    if (h !== null) { el.style.height = Math.round(h) + 'px'; }
+  var PAD = 16, CALL_H = 124, DIGI_H = 56, SCH_H = 40 + SHOW_CARDS * 64;
+  function place(node, x, y, w, h) {
+    node.style.left = Math.round(x) + 'px';
+    node.style.top = Math.round(y) + 'px';
+    node.style.width = Math.round(w) + 'px';
+    if (h !== null) { node.style.height = Math.round(h) + 'px'; }
   }
   function placeDitto(x, y, w, h) {
     var box = $('ditto'), frame = $('frame'), bubble = $('bubble');
@@ -421,6 +1817,9 @@
       place($('digital'), PAD, digiY, cw, DIGI_H);
       place($('schedule'), PAD, schY, cw, SCH_H);
     }
+    // 숨은 진입: 가로·세로 모두 오른쪽 위 모서리 (시계 탭·통화 버튼·말풍선과 겹치지 않는 곳)
+    place($('corner'), W - CORNER, 0, CORNER, CORNER);
+    setupMarquees();
   }
   function onResize() {
     layout();
@@ -428,20 +1827,9 @@
   }
 
   // ---------------------------------------------------------------
-  // 가짜 일정·통화 버튼 그리기 (동작 없음)
+  // 가짜 통화 버튼 (동작 없음, IPD-TASK-006)
   // ---------------------------------------------------------------
-  function buildFakes() {
-    var sch = $('schedule');
-    for (var i = 0; i < FAKE_SCHEDULE.length && i < 3; i++) {
-      var s = FAKE_SCHEDULE[i];
-      var card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = '<span class="c-time"></span><span class="c-icon"></span><span class="c-text"></span>';
-      card.childNodes[0].textContent = s.time;
-      card.childNodes[1].textContent = s.icon;
-      card.childNodes[2].textContent = s.text;
-      sch.appendChild(card);
-    }
+  function buildCalls() {
     for (var j = 0; j < FAKE_CALLS.length && j < 2; j++) {
       $('call-' + j).textContent = PHONE_ICON + FAKE_CALLS[j].label;
     }
@@ -450,8 +1838,13 @@
   // ---------------------------------------------------------------
   // 시작
   // ---------------------------------------------------------------
+  probeStorage();
+  loadSettings();
+  loadLock();
+  loadDone();
   buildClock();
-  buildFakes();
+  buildCalls();
+  buildUI();
   render();
   layout();
 
@@ -505,7 +1898,22 @@
         image: state.image
       };
     },
-    sentence: timeSentence
+    sentence: timeSentence,
+    // 메인 할 일 카드 상태
+    todo: function () {
+      var cards = $('sch-cards').childNodes, out = [];
+      for (var i = 0; i < cards.length; i++) {
+        var c = cards[i];
+        if (c.className.indexOf('msg') >= 0) { out.push(c.textContent); continue; }
+        out.push((c.className.indexOf('first') >= 0 ? '*' : '') + c.childNodes[1].textContent + ' ' + c.childNodes[3].textContent);
+      }
+      return { title: $('sch-title').textContent, left: $('sch-left').textContent, cards: out, done: done };
+    },
+    settings: function () { return JSON.parse(JSON.stringify(settings)); },
+    checkItem: checkItem,
+    checkRestore: checkRestore,
+    sha256: sha256,
+    timers: function () { return { tick: timer !== null, press: press.timer !== null, marquees: marquees.length }; }
   };
 })();
 </script>
