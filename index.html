@@ -243,6 +243,15 @@
   }
   #ask-msg { font-size: 24px; line-height: 34px; margin-bottom: 16px; white-space: pre-line; }
   #ask-box .btn { margin: 6px 10px; min-width: 140px; }
+
+  /* 자동 닫힘 안내 (모든 덮개 위) */
+  #idle-warn {
+    position: absolute; left: 50%; top: 88px; width: 600px; margin-left: -300px; z-index: 90;
+    padding: 16px 20px; background: #fff3c4; color: #5a4200; border: 3px solid #e0a800; border-radius: 16px;
+    font-size: 24px; line-height: 34px; font-weight: bold; text-align: center; display: none;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
+  }
+  a.btn { text-decoration: none; }
 </style>
 </head>
 <body ontouchstart="">
@@ -300,9 +309,11 @@
 
     <div class="sec">
       <h2>백업·복원</h2>
-      <p>"복사"를 누른 뒤 이메일·메신저 등에 붙여 넣어 PC에 보관하세요. PIN 정보도 들어 있어서, PIN을 잊었을 때 이 글로 다시 정할 수 있어요. 이 글은 저장소나 문서에 붙여 넣지 마세요.</p>
+      <p>"메일로 보내기"나 "복사"로 이 글을 PC에 보관하세요. PIN 정보도 들어 있어서, PIN을 잊었을 때 이 글로 다시 정할 수 있어요. 이 글은 저장소나 문서에 붙여 넣지 마세요.</p>
+      <p>메일로 보낸 뒤에는 이 iPad의 메일 앱에서 보낸편지함(과 휴지통)에 남은 백업 메일을 꼭 지워 주세요. 백업 글에는 PIN을 다시 정하는 열쇠와 전화번호가 들어 있어요.</p>
       <textarea id="backup-ta" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-      <span id="backup-copy" class="btn primary">복사</span><span id="backup-sel" class="btn">전체 선택</span>
+      <a id="backup-mail" class="btn primary" href="#">메일로 보내기</a><span id="backup-copy" class="btn primary">복사</span><span id="backup-sel" class="btn">전체 선택</span>
+      <div class="small">메일 앱이 열리지 않으면 '복사'를 쓰세요.</div>
       <div id="backup-msg"></div>
       <p style="margin-top:18px">복원: 보관한 글을 아래에 붙여 넣고 "복원"을 누르세요.</p>
       <textarea id="restore-ta" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
@@ -357,6 +368,9 @@
   <div id="ask-box"><div id="ask-msg"></div><span id="ask-yes" class="btn danger"></span><span id="ask-no" class="btn">아니요</span></div>
 </div>
 
+<!-- 자동 닫힘 안내 (닫히기 15초 전) -->
+<div id="idle-warn"></div>
+
 <script>
 (function () {
   // 버전: 주.부.수 (배포할 때마다 올린다. manifest·이미지 주소에 붙어 캐시도 피한다)
@@ -364,7 +378,7 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.0.1';
+  var VERSION = '4.1.0';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
@@ -414,6 +428,10 @@
   var CORNER = 100;                      // 숨은 진입 영역 크기
   var PIN_ROUNDS = 1000;                 // 해시 반복 횟수
   var ALL_IDLE_MS = 60000;               // 전체 보기 창: 1분 동안 터치 없으면 닫기
+  // 자동 닫힘 (IPD-TASK-010). 시간은 여기 세 줄에서만 바꾼다.
+  var SET_IDLE_MS = 3 * 60000;           // 설정 화면: 3분 동안 조작 없으면 닫고 메인으로
+  var PIN_IDLE_MS = 1 * 60000;           // PIN 입력·정하기·다시 정하기·확인 창: 1분
+  var IDLE_WARN_MS = 15000;              // 닫히기 15초 전부터 안내
   var MARQUEE_WAIT = 2000, MARQUEE_SPEED = 40; // 긴 글 흐르기: 앞뒤 2초 멈춤, 초당 40px
   var TIME_RE = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
   var HEX64 = /^[0-9a-f]{64}$/, HEX32 = /^[0-9a-f]{32}$/;
@@ -919,6 +937,7 @@
   function openPin(mode, after) {
     pin.open = true; pin.mode = mode; pin.buf = ''; pin.first = ''; pin.busy = false; pin.msg = '';
     pin.after = after || '';
+    idleMark();
     show('pin-ov', true);
     drawPin();
   }
@@ -1185,6 +1204,7 @@
     $('backup-msg').textContent = '';
     $('restore-ta').value = '';
     if (allOpen) { closeAll(); }
+    idleMark();
     show('set-ov', true);
     renderSettings();
     $('set-body').scrollTop = 0;
@@ -1306,6 +1326,7 @@
       : '앞으로 7일은 모두 할 일이 있어요.';
 
     $('backup-ta').value = JSON.stringify(settings, null, 2);
+    $('backup-mail').setAttribute('href', mailtoFor($('backup-ta').value, now()));
     $('set-ver').textContent = '버전 ' + VERSION;
   }
 
@@ -1315,6 +1336,7 @@
     askFn = fn;
     $('ask-msg').textContent = msg;
     $('ask-yes').textContent = yesLabel;
+    idleMark();
     show('ask-ov', true);
   }
   function askClose(yes) {
@@ -1322,6 +1344,61 @@
     askFn = null;
     show('ask-ov', false);
     if (yes && fn) { fn(); }
+  }
+
+  // --- 자동 닫힘 (IPD-TASK-010) ---
+  // 전체 보기 창과 같은 방식: 마지막 조작 시각을 적어 두고 1초 tick()이 확인한다 (새 타이머 없음).
+  // PIN 관련 화면(PIN 키패드·PIN 다시 정하기·확인 창)이 열려 있으면 1분, 설정 화면만 열려 있으면 3분.
+  var idleLast = 0, idleBinds = 0, idleWarnOn = false;
+  function isShown(id) { return $(id).style.display === 'block'; }
+  function idleMark() {
+    idleLast = realNow();
+    if (idleWarnOn) { idleWarn(false, 0); }
+  }
+  function idleLimit() {
+    if (pin.open || isShown('rec-ov') || isShown('ask-ov')) { return PIN_IDLE_MS; }
+    if (setOpen) { return SET_IDLE_MS; }
+    return 0;
+  }
+  function idleWarn(on, left) {
+    if (on) {
+      $('idle-warn').textContent = '곧 닫혀요. 화면을 한 번 눌러 주세요. (' + Math.ceil(left / 1000) + '초)';
+    }
+    if (on !== idleWarnOn) { show('idle-warn', on); idleWarnOn = on; }
+  }
+  // 저장하지 않은 편집 칸·입력 글은 버리고 모든 부모용 화면을 닫아 메인으로 돌아간다
+  function idleCloseAll() {
+    var a = document.activeElement;
+    if (a && a.blur && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) { a.blur(); }
+    if (isShown('ask-ov')) { askFn = null; show('ask-ov', false); }
+    if (isShown('rec-ov')) { $('rec-ta').value = ''; closeRecover(); }
+    if (pin.open) { closePin(); }
+    if (setOpen) { closeSettings(); }
+    idleWarn(false, 0);
+    window.scrollTo(0, 0);
+  }
+  // tick()에서 매초 부른다
+  function idleTick() {
+    var lim = idleLimit();
+    if (!lim) { if (idleWarnOn) { idleWarn(false, 0); } return; }
+    var left = lim - (realNow() - idleLast);
+    if (left <= 0) { idleCloseAll(); return; }
+    idleWarn(left <= IDLE_WARN_MS, left);
+  }
+  // 조작 기록 리스너: 문서에 한 번만 붙인다 (buildUI에서). scroll·focus는 위로 전달되지 않아 capture로 받는다.
+  // mousedown·keydown은 PC 시험용 (iPad에서는 touchstart·input이 먼저 온다)
+  function bindIdle() {
+    if (idleBinds) { return; }
+    var evs = ['touchstart', 'mousedown', 'keydown', 'input', 'scroll', 'focus'];
+    for (var i = 0; i < evs.length; i++) { document.addEventListener(evs[i], idleMark, true); }
+    idleBinds++;
+  }
+
+  // --- 백업 메일 (mailto:, 받는 사람은 비워 둔다. 부모가 메일 앱에서 직접 입력) ---
+  function mailtoFor(text, d) {
+    var body = String(text).replace(/\r?\n/g, '\r\n'); // 메일 줄바꿈은 CRLF (RFC 6068)
+    return 'mailto:?subject=' + encodeURIComponent('대시보드 백업 ' + dateStr(d)) +
+      '&body=' + encodeURIComponent(body);
   }
 
   function removeItems(idMap) {
@@ -1487,6 +1564,7 @@
     closePin();
     $('rec-ta').value = '';
     $('rec-msg').textContent = '';
+    idleMark();
     show('rec-ov', true);
   }
   function blurInput() {
@@ -1677,6 +1755,7 @@
     });
     bindButton('ask-yes', function () { askClose(true); });
     bindButton('ask-no', function () { askClose(false); });
+    bindIdle();
 
     bindCorner();
   }
@@ -1829,6 +1908,7 @@
     stepMarquees();
     pinTick();
     allTick();
+    idleTick();
   }
 
   // 1초 타이머는 하나만: 다음 초 경계에 맞춰 setTimeout을 다시 건다.
@@ -2012,7 +2092,19 @@
     checkItem: checkItem,
     checkRestore: checkRestore,
     sha256: sha256,
-    timers: function () { return { tick: timer !== null, press: press.timer !== null, marquees: marquees.length }; }
+    timers: function () { return { tick: timer !== null, press: press.timer !== null, marquees: marquees.length, idleBinds: idleBinds }; },
+    // 자동 닫힘 상태 (남은 시간 ms, 0이면 해당 화면 없음)
+    idle: function () {
+      var lim = idleLimit();
+      return { limit: lim, left: lim ? lim - (realNow() - idleLast) : 0, warn: idleWarnOn,
+        consts: [SET_IDLE_MS, PIN_IDLE_MS, IDLE_WARN_MS] };
+    },
+    // 메일 링크: 문자열 길이·앞부분. text를 주면 그 글로, 없으면 지금 백업 글로 만든다
+    mail: function (text) {
+      var t = (text === undefined) ? JSON.stringify(settings, null, 2) : String(text);
+      var url = mailtoFor(t, now());
+      return { length: url.length, bodyLength: t.length, head: url.slice(0, 120), url: url };
+    }
   };
 })();
 </script>
