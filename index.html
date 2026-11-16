@@ -210,7 +210,12 @@
 
   /* PIN */
   #pin-ov { z-index: 70; background: #2f3542; color: #fff; text-align: center; }
-  #pin-box { position: absolute; left: 50%; top: 50%; width: 372px; height: 600px; margin-left: -186px; margin-top: -300px; }
+  #pin-box { position: absolute; left: 50%; top: 50%; width: 372px; height: 640px; margin-left: -186px; margin-top: -320px; }
+  #pin-forgot {
+    display: inline-block; height: 44px; line-height: 44px; padding: 0 18px; margin-top: 4px;
+    border-radius: 22px; color: #c9cfdc; font-size: 20px; cursor: pointer;
+  }
+  #rec-ov { z-index: 75; }
   #pin-title { height: 44px; line-height: 44px; font-size: 28px; font-weight: bold; }
   #pin-dots { height: 56px; line-height: 56px; font-size: 0; }
   .dot {
@@ -295,9 +300,10 @@
 
     <div class="sec">
       <h2>백업·복원</h2>
-      <p>아래 글을 "전체 선택"한 뒤 복사해 메모 등에 보관하세요. PIN도 함께 들어 있어요. 이 글은 저장소나 문서에 붙여 넣지 마세요.</p>
+      <p>"복사"를 누른 뒤 이메일·메신저 등에 붙여 넣어 PC에 보관하세요. PIN 정보도 들어 있어서, PIN을 잊었을 때 이 글로 다시 정할 수 있어요. 이 글은 저장소나 문서에 붙여 넣지 마세요.</p>
       <textarea id="backup-ta" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-      <span id="backup-sel" class="btn">전체 선택</span>
+      <span id="backup-copy" class="btn primary">복사</span><span id="backup-sel" class="btn">전체 선택</span>
+      <div id="backup-msg"></div>
       <p style="margin-top:18px">복원: 보관한 글을 아래에 붙여 넣고 "복원"을 누르세요.</p>
       <textarea id="restore-ta" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
       <span id="restore-btn" class="btn primary">복원</span>
@@ -329,6 +335,20 @@
     <div id="pin-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
     <div id="pin-msg"></div>
     <div id="pin-keys"><span class="key num" data-k="1">1</span><span class="key num" data-k="2">2</span><span class="key num" data-k="3">3</span><span class="key num" data-k="4">4</span><span class="key num" data-k="5">5</span><span class="key num" data-k="6">6</span><span class="key num" data-k="7">7</span><span class="key num" data-k="8">8</span><span class="key num" data-k="9">9</span><span class="key word" data-k="cancel">취소</span><span class="key num" data-k="0">0</span><span class="key word" data-k="del">지우기</span></div>
+    <span id="pin-forgot">PIN을 잊었어요</span>
+  </div>
+</div>
+
+<!-- PIN 복구: 백업 글로 확인한 뒤 새 PIN 정하기 -->
+<div id="rec-ov" class="ov">
+  <div class="ov-head"><span class="ov-title">PIN 다시 정하기</span><span id="rec-close" class="bigbtn">취소</span></div>
+  <div class="ov-body">
+    <div class="sec">
+      <p>보관해 둔 백업 글을 아래에 붙여 넣고 "확인"을 누르세요. 백업 속 PIN 정보가 지금 것과 맞으면 새 PIN을 정할 수 있어요. 일정은 바뀌지 않아요.</p>
+      <textarea id="rec-ta" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+      <span id="rec-ok" class="btn primary">확인</span>
+      <div id="rec-msg" class="err"></div>
+    </div>
   </div>
 </div>
 
@@ -340,7 +360,7 @@
 <script>
 (function () {
   // 배포할 때마다 이 숫자만 올리면 manifest·이미지 주소가 바뀌어 캐시를 피한다.
-  var VERSION = 3;
+  var VERSION = 4;
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
@@ -878,7 +898,8 @@
   // ① PIN 화면 (화면 숫자 키패드)
   // 모드: setup1·setup2(처음 설정) / enter(진입) / old·new1·new2(변경)
   // ===============================================================
-  var pin = { open: false, mode: '', buf: '', first: '', busy: false, msg: '' };
+  // after: 'settings'이면 새 PIN을 정한 뒤 설정 화면을 연다 (PIN 복구)
+  var pin = { open: false, mode: '', buf: '', first: '', busy: false, msg: '', after: '' };
   var PIN_TITLES = {
     setup1: '새 PIN 4자리를 정해 주세요',
     setup2: '한 번 더 눌러 주세요',
@@ -891,8 +912,9 @@
     if (pin.open || setOpen) { return; }
     openPin(settings.pinHash ? 'enter' : 'setup1');
   }
-  function openPin(mode) {
+  function openPin(mode, after) {
     pin.open = true; pin.mode = mode; pin.buf = ''; pin.first = ''; pin.busy = false; pin.msg = '';
+    pin.after = after || '';
     show('pin-ov', true);
     drawPin();
   }
@@ -909,6 +931,7 @@
     }
     var locked = pinLocked();
     $('pin-keys').className = locked ? 'off' : '';
+    $('pin-forgot').style.display = (pin.mode === 'enter') ? 'inline-block' : 'none';
     $('pin-msg').textContent = locked
       ? '여러 번 틀려서 잠겼어요. ' + Math.ceil(lockLeft() / 1000) + '초 뒤에 다시 눌러 주세요.'
       : pin.msg;
@@ -967,13 +990,15 @@
         pin.mode = isSetup ? 'setup1' : 'new1';
         pin.msg = '두 번 누른 숫자가 달라요. 처음부터 다시 눌러 주세요.';
       } else {
+        var after = pin.after;
         setPin(v);
         pinRight();
         closePin();
         if (isSetup) {
           openSettings(true);
         } else {
-          $('pin-change-msg').textContent = 'PIN을 바꿨어요.';
+          if (after === 'settings') { openSettings(false); }
+          $('pin-change-msg').textContent = 'PIN을 바꿨어요. 백업 글도 새로 복사해 보관해 주세요. (예전 백업으로는 PIN을 다시 정할 수 없어요)';
           renderSettings();
         }
         return;
@@ -1153,6 +1178,7 @@
     $('add-msg').textContent = ''; $('past-msg').textContent = '';
     $('restore-msg').textContent = ''; $('restore-msg').className = '';
     $('pin-change-msg').textContent = '';
+    $('backup-msg').textContent = '';
     $('restore-ta').value = '';
     if (allOpen) { closeAll(); }
     show('set-ov', true);
@@ -1436,6 +1462,48 @@
     try { ta.setSelectionRange(0, ta.value.length); } catch (e) { /* 무시 */ }
     try { ta.select(); } catch (e2) { /* 무시 */ }
   }
+  // 복사 버튼: 글을 고른 뒤 execCommand('copy'). 안 되는 기기에서는 길게 눌러 복사하도록 안내
+  function copyBackup() {
+    var ta = $('backup-ta'), ok = false;
+    selectAll(ta);
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    if (ok && ta.blur) { ta.blur(); }
+    $('backup-msg').textContent = ok
+      ? '복사했어요. 이메일·메신저 등에 붙여 넣어 보관하세요.'
+      : '자동 복사가 안 돼요. 글을 길게 눌러 나오는 메뉴에서 "복사"를 눌러 주세요.';
+    $('backup-msg').className = ok ? 'ok' : 'err';
+  }
+
+  // PIN 복구: 백업 속 pinHash·pinSalt가 지금 것과 같아야 새 PIN을 정할 수 있다 (2026-11-16 채팅 결정)
+  function openRecover() {
+    closePin();
+    $('rec-ta').value = '';
+    $('rec-msg').textContent = '';
+    show('rec-ov', true);
+  }
+  function closeRecover() {
+    if (document.activeElement && document.activeElement.blur) { document.activeElement.blur(); }
+    show('rec-ov', false);
+    window.scrollTo(0, 0);
+  }
+  function checkRecover(txt) {
+    var obj;
+    if (!txt) { return '붙여 넣은 글이 없어요.'; }
+    try { obj = JSON.parse(txt); } catch (e) { return 'JSON 형식이 아니에요. 처음 { 부터 끝 } 까지 빠짐없이 붙여 넣었는지 확인해 주세요.'; }
+    if (!isObj(obj) || typeof obj.pinHash !== 'string' || !obj.pinHash) { return '이 글에는 PIN 정보가 없어요.'; }
+    if (!settings.pinHash) { return '지금 정해진 PIN이 없어요.'; }
+    if (obj.pinHash !== settings.pinHash || obj.pinSalt !== settings.pinSalt) {
+      return '이 백업의 PIN 정보가 지금 것과 달라요. PIN을 바꾼 뒤에 만든 백업을 넣어 주세요.';
+    }
+    return '';
+  }
+  function doRecover() {
+    var err = checkRecover($('rec-ta').value.trim());
+    if (err) { $('rec-msg').textContent = err; return; }
+    closeRecover();
+    openPin('new1', 'settings');
+  }
+
   function restoreMsg(text, ok) {
     $('restore-msg').textContent = text;
     $('restore-msg').className = ok ? 'ok' : 'err';
@@ -1570,7 +1638,11 @@
         renderSettings(); renderTodo();
       });
     });
+    bindButton('backup-copy', copyBackup);
     bindButton('backup-sel', function () { selectAll($('backup-ta')); });
+    bindButton('pin-forgot', openRecover);
+    bindButton('rec-close', closeRecover);
+    bindButton('rec-ok', doRecover);
     bindButton('restore-btn', doRestore);
     bindButton('pin-change', function () {
       $('pin-change-msg').textContent = '';
