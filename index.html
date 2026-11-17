@@ -427,7 +427,7 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.2.0';
+  var VERSION = '4.2.1';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
@@ -2204,8 +2204,9 @@
     for (var j = 0; j < 2; j++) {
       var c = settings.contacts[j];
       var v = $('call-' + j + '-v'), a = $('call-' + j + '-a');
-      callLabel(v, '📹 ' + c.label + ' ', '영상통화'); // 📹
-      callLabel(a, '📞 ', '음성');                      // 📞
+      // 영상·음성 모두 "아이콘 + 이름". 넓은 진한 버튼 = 영상, 좁은 연한 버튼 = 음성 (폭이 모자라면 아이콘 / 이름 두 줄)
+      callLabel(v, '📹 ', c.label); // 📹
+      callLabel(a, '📞 ', c.label); // 📞
       var hv = facetimeUrl(c.target, false), ha = facetimeUrl(c.target, true);
       setHref(v, hv);
       setHref(a, ha);
@@ -2264,7 +2265,7 @@
         return;
       }
       // 연결 실패는 판정하지 않는다 (FaceTime 확인 창 때문에 화면이 계속 보일 수 있다)
-      showCallMsg(j, c.label + '에게 ' + (audio ? '음성' : '영상') + '통화를 걸어요…');
+      showCallMsg(j, c.label + '에게 ' + (audio ? '전화를' : '영상통화를') + ' 걸어요…');
     }, false);
     // 안내가 덮인 동안 누른 것은 아무 일도 없게 (덮개는 링크가 아님)
   }
