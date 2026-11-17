@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>포켓몬 성능 시험</title>
+<!--
+  IPD-TASK-011 시험 페이지. 메인 화면에서 링크하지 않는다.
+  목적: iPad 4(iOS 10.3.4)에서 포켓몬이 카드 뒤로 돌아다니는 화면이 부드러운지, 오래 켜 둬도 괜찮은지 잰다.
+  제약: 순수 HTML/CSS/JS(ES5). 외부 파일 없음(같은 폴더의 assets 그림만).
+-->
+<style>
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+body {
+  position: fixed; left: 0; top: 0; right: 0; bottom: 0;
+  font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: #7D68D1;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-touch-callout: none;
+}
+
+/* ── 배경: 두 층을 겹치고 위층 투명도만 바꾼다(색을 직접 애니메이션하지 않음) ── */
+.bg { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 0; }
+#bgEvening { background: #A48CEB; background: -webkit-linear-gradient(top, #A48CEB, #7D68D1); background: linear-gradient(to bottom, #A48CEB, #7D68D1); }
+#bgNight {
+  background: #2B3363; background: -webkit-linear-gradient(top, #2B3363, #1B2147); background: linear-gradient(to bottom, #2B3363, #1B2147);
+  opacity: 0;
+  -webkit-transition: opacity 1.2s linear; transition: opacity 1.2s linear;
+}
+#bgNight.on { opacity: 1; }
+#glow {
+  position: absolute; z-index: 0; border-radius: 50%;
+  background: -webkit-radial-gradient(center, circle, rgba(255,255,255,0.35), rgba(255,255,255,0) 70%);
+  background: radial-gradient(circle at center, rgba(255,255,255,0.35), rgba(255,255,255,0) 70%);
+}
+
+/* ── 포켓몬 층 ── */
+#stage { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none; }
+body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 위로 */
+.poke {
+  position: absolute; left: 0; top: 0; pointer-events: none;
+  -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0);
+  -webkit-transition-property: -webkit-transform; transition-property: transform;
+  -webkit-transition-timing-function: linear; transition-timing-function: linear;
+}
+.hop, .bob, .flip { position: relative; }
+.bob { -webkit-transform-origin: 50% 100%; transform-origin: 50% 100%;
+  -webkit-animation: breathe 3s ease-in-out infinite; animation: breathe 3s ease-in-out infinite; }
+.moving .bob { -webkit-animation: bob 0.5s ease-in-out infinite; animation: bob 0.5s ease-in-out infinite; }
+.flip.left { -webkit-transform: scaleX(-1); transform: scaleX(-1); }
+.hop.jump { -webkit-animation: jump 0.6s ease-out 1; animation: jump 0.6s ease-out 1; }
+.poke img { display: block; pointer-events: auto; cursor: pointer; }
+#stage.paused .bob, #stage.paused .hop { -webkit-animation-play-state: paused; animation-play-state: paused; }
+
+.bubble {
+  position: absolute; bottom: 100%; left: 50%; margin-bottom: 6px; margin-left: -10px;
+  white-space: nowrap; padding: 8px 14px; border-radius: 18px;
+  background: #fff; color: #2A1F57; font-size: 22px; font-weight: bold;
+  border: 3px solid #2A1F57; opacity: 0; pointer-events: none;
+}
+.bubble.fold { left: auto; right: 50%; margin-left: 0; margin-right: -10px; }
+.bubble.show { -webkit-animation: bubbleLife 4s linear 1; animation: bubbleLife 4s linear 1; }
+
+@-webkit-keyframes breathe { 0%,100% { -webkit-transform: scale(1,1); } 50% { -webkit-transform: scale(1.02,1.03); } }
+@keyframes breathe { 0%,100% { transform: scale(1,1); } 50% { transform: scale(1.02,1.03); } }
+@-webkit-keyframes bob {
+  0%,100% { -webkit-transform: translate3d(0,0,0) scale(1.04,0.96); }
+  50% { -webkit-transform: translate3d(0,-6px,0) scale(0.97,1.03); } }
+@keyframes bob {
+  0%,100% { transform: translate3d(0,0,0) scale(1.04,0.96); }
+  50% { transform: translate3d(0,-6px,0) scale(0.97,1.03); } }
+@-webkit-keyframes jump {
+  0% { -webkit-transform: translate3d(0,0,0); } 40% { -webkit-transform: translate3d(0,-44px,0); }
+  75% { -webkit-transform: translate3d(0,0,0); } 88% { -webkit-transform: translate3d(0,-8px,0); } 100% { -webkit-transform: translate3d(0,0,0); } }
+@keyframes jump {
+  0% { transform: translate3d(0,0,0); } 40% { transform: translate3d(0,-44px,0); }
+  75% { transform: translate3d(0,0,0); } 88% { transform: translate3d(0,-8px,0); } 100% { transform: translate3d(0,0,0); } }
+@-webkit-keyframes bubbleLife { 0% { opacity: 0; } 5% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes bubbleLife { 0% { opacity: 0; } 5% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ── 가짜 화면 요소 (A5-6 레이아웃 크기·위치) ── */
+#ui { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 2; pointer-events: none; }
+#ui > * { position: absolute; pointer-events: auto; box-sizing: border-box; }
+.face { border-radius: 50%; background: #fff; border: 4px solid #2A1F57; box-shadow: 0 6px 0 rgba(42,31,87,0.25); }
+.face svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.digi { text-align: center; color: #fff; font-weight: bold; }
+.date { text-align: center; color: #fff; font-weight: bold; }
+.title { color: #fff; font-weight: bold; font-size: 30px; }
+.card {
+  background: #fff; border: 4px solid #2A1F57; border-radius: 26px;
+  box-shadow: 0 6px 0 rgba(42,31,87,0.25); color: #2A1F57; font-size: 28px; font-weight: bold;
+  padding: 0 20px 0 140px; overflow: hidden;
+}
+.card.first { border-color: #5B3FC4; }
+.card .chk { position: absolute; left: 16px; top: 50%; width: 48px; height: 48px; margin-top: -28px; border-radius: 50%; border: 4px solid #2A1F57; }
+.card .ico { position: absolute; left: 76px; top: 50%; width: 52px; height: 52px; margin-top: -26px; border-radius: 14px; background: #EDE8FF; }
+.call { border-radius: 26px; color: #fff; font-size: 34px; font-weight: bold; text-align: center; border: 4px solid rgba(0,0,0,0.15); }
+.mom { background: #D6336C; } .dad { background: #1C6FD1; }
+
+/* ── 측정 표시와 조작 줄 ── */
+#stats {
+  position: absolute; right: 4px; top: 4px; z-index: 10; pointer-events: none;
+  background: rgba(0,0,0,0.55); color: #fff; font: 11px/1.35 Menlo, Consolas, monospace;
+  padding: 4px 6px; border-radius: 4px; white-space: pre;
+}
+#bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 40px; z-index: 10;
+  background: rgba(0,0,0,0.6); white-space: nowrap; overflow: hidden; text-align: center;
+}
+#bar button {
+  display: inline-block; height: 32px; margin: 4px 2px; padding: 0 9px; vertical-align: top;
+  font-size: 13px; color: #fff; background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.4); border-radius: 6px; -webkit-appearance: none;
+}
+#bar button.sel { background: #FFD166; color: #1B2147; }
+#bar .sep { display: inline-block; width: 8px; }
+</style>
+</head>
+<body>
+<div class="bg" id="bgEvening"></div>
+<div class="bg" id="bgNight"></div>
+<div id="glow"></div>
+
+<div id="stage"></div>
+
+<div id="ui">
+  <div class="face" id="face">
+    <svg viewBox="0 0 200 200" id="faceSvg">
+      <g id="ticks"></g>
+      <line id="hHour" x1="100" y1="100" x2="100" y2="55" stroke="#2A1F57" stroke-width="9" stroke-linecap="round"/>
+      <line id="hMin" x1="100" y1="100" x2="100" y2="28" stroke="#5B3FC4" stroke-width="5" stroke-linecap="round"/>
+      <line id="hSec" x1="100" y1="112" x2="100" y2="22" stroke="#E5484D" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="100" cy="100" r="5" fill="#2A1F57"/>
+    </svg>
+  </div>
+  <div class="digi" id="digi">00:00</div>
+  <div class="date" id="date">-</div>
+  <div class="title" id="title">오늘 할 일 (0/3)</div>
+  <div class="card first" id="c0"><span class="chk"></span><span class="ico"></span><span class="txt">가짜 할 일 하나</span></div>
+  <div class="card" id="c1"><span class="chk"></span><span class="ico"></span><span class="txt">가짜 할 일 둘</span></div>
+  <div class="card" id="c2"><span class="chk"></span><span class="ico"></span><span class="txt">가짜 할 일 셋</span></div>
+  <div class="call mom" id="mom">엄마 (가짜)</div>
+  <div class="call dad" id="dad">아빠 (가짜)</div>
+</div>
+
+<div id="stats">측정 준비 중</div>
+
+<div id="bar">
+  <button id="n1">1마리</button><button id="n3">3마리</button><button id="n5">5마리</button><span class="sep"></span>
+  <button id="bBg">배경 교체</button><button id="bStop">멈춤</button><button id="bSpeed">속도: 보통</button><button id="bCover">카드 가림: 켬</button><span class="sep"></span>
+  <button id="bReset">기록 초기화</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ───────── 설정 ─────────
+  var SPRITES = ['pikachu', 'dragonite', 'haunter', 'koffing', 'snorlax'];
+  var RATIO = { pikachu: 291 / 320, dragonite: 297 / 320, haunter: 343 / 320, koffing: 333 / 320, snorlax: 276 / 320 };
+  var POKE_H = 120;          // 화면에서의 높이(px)
+  var EDGE = 24;             // 화면 가장자리 여백
+  var BAR_H = 40;            // 조작 줄 높이(그 위까지만 다닌다)
+  var SPEED = {              // px/초, 쉬는 시간(초)
+    normal: { min: 40, max: 70, restMin: 3, restMax: 8 },
+    slow:   { min: 15, max: 25, restMin: 6, restMax: 14 }
+  };
+  var STORE_KEY = 'ipd.sprite-test';   // 시험용 저장 키(개인정보 없음)
+
+  var state = { count: 3, speed: 'normal', stopped: false, night: false, cover: true };
+  var pokes = [];
+  var W = 0, H = 0, land = true;
+  var clock = { cx: 0, cy: 0, r: 0 };
+
+  function $(id) { return document.getElementById(id); }
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function now() { return Date.now(); }
+
+  // ───────── 가짜 화면 배치 (A5-6) ─────────
+  function place(el, x, y, w, h) {
+    el.style.left = x + 'px'; el.style.top = y + 'px';
+    el.style.width = w + 'px'; el.style.height = h + 'px';
+  }
+  function layout() {
+    W = window.innerWidth; H = window.innerHeight;
+    land = W > H;
+    var i, cards = [$('c0'), $('c1'), $('c2')];
+    var glow = $('glow');
+    if (land) {
+      place($('face'), 24, 24, 360, 360);
+      clock = { cx: 204, cy: 204, r: 180 };
+      place($('digi'), 24, 392, 360, 84); $('digi').style.fontSize = '72px'; $('digi').style.lineHeight = '84px';
+      place($('date'), 24, 486, 360, 32); $('date').style.fontSize = '26px'; $('date').style.lineHeight = '32px';
+      place($('title'), 552, 24, 448, 52); $('title').style.lineHeight = '52px';
+      for (i = 0; i < 3; i++) { place(cards[i], 552, 100 + i * 118, 448, 104); cards[i].style.lineHeight = '96px'; }
+      place($('mom'), 24, 600, 476, 124); place($('dad'), 524, 600, 476, 124);
+      $('mom').style.lineHeight = $('dad').style.lineHeight = '116px';
+    } else {
+      place($('face'), 224, 24, 320, 320);
+      clock = { cx: 384, cy: 184, r: 160 };
+      place($('digi'), 0, 354, W, 76); $('digi').style.fontSize = '64px'; $('digi').style.lineHeight = '76px';
+      place($('date'), 0, 440, W, 30); $('date').style.fontSize = '24px'; $('date').style.lineHeight = '30px';
+      place($('title'), 24, 488, 720, 52); $('title').style.lineHeight = '52px';
+      for (i = 0; i < 3; i++) { place(cards[i], 24, 556 + i * 100, 720, 88); cards[i].style.lineHeight = '80px'; }
+      place($('mom'), 24, 856, 348, 124); place($('dad'), 396, 856, 348, 124);
+      $('mom').style.lineHeight = $('dad').style.lineHeight = '116px';
+    }
+    place(glow, clock.cx - clock.r * 1.6, clock.cy - clock.r * 1.6, clock.r * 3.2, clock.r * 3.2);
+  }
+
+  function buildTicks() {
+    // SVG 안은 innerHTML 대신 createElementNS로 만든다(iOS 10 안전)
+    var g = $('ticks'), ns = 'http://www.w3.org/2000/svg', i, a, r1, el;
+    for (i = 0; i < 60; i++) {
+      a = i * Math.PI / 30;
+      r1 = (i % 5 === 0) ? 80 : 86;
+      el = document.createElementNS(ns, 'line');
+      el.setAttribute('x1', (100 + Math.sin(a) * r1).toFixed(1));
+      el.setAttribute('y1', (100 - Math.cos(a) * r1).toFixed(1));
+      el.setAttribute('x2', (100 + Math.sin(a) * 92).toFixed(1));
+      el.setAttribute('y2', (100 - Math.cos(a) * 92).toFixed(1));
+      el.setAttribute('stroke', '#2A1F57');
+      el.setAttribute('stroke-width', i % 5 === 0 ? '3' : '1');
+      g.appendChild(el);
+    }
+  }
+
+  var DAYS = ['일', '월', '화', '수', '목', '금', '토'];
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function drawClock() {
+    var d = new Date(), h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
+    $('hHour').setAttribute('transform', 'rotate(' + ((h % 12) * 30 + m * 0.5) + ' 100 100)');
+    $('hMin').setAttribute('transform', 'rotate(' + (m * 6 + s * 0.1) + ' 100 100)');
+    $('hSec').setAttribute('transform', 'rotate(' + (s * 6) + ' 100 100)');
+    $('digi').textContent = pad2(h) + ':' + pad2(m);
+    $('date').textContent = (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + DAYS[d.getDay()] + '요일';
+  }
+
+  // ───────── 포켓몬 ─────────
+  // 포켓몬 하나에 타이머는 p.timer(한 번짜리 setTimeout) 하나만 둔다.
+  // 폴짝·말풍선은 CSS 애니메이션으로 하고 animationend에서 class만 뗀다(타이머 없음).
+  function bounds(p) {
+    return { x0: EDGE, y0: EDGE, x1: Math.max(EDGE, W - EDGE - p.w), y1: Math.max(EDGE, H - BAR_H - EDGE - p.h) };
+  }
+  function setPos(p, x, y, sec) {
+    var v = 'translate3d(' + Math.round(x) + 'px,' + Math.round(y) + 'px,0)';
+    var t = sec > 0 ? sec.toFixed(2) + 's' : '0s';
+    p.el.style.webkitTransitionDuration = t; p.el.style.transitionDuration = t;
+    p.el.style.webkitTransform = v; p.el.style.transform = v;
+    p.x = x; p.y = y;
+  }
+  function onClock(x, y, p) {   // 발밑 가운데가 시계 원 안이면 쉬지 않는다
+    var fx = x + p.w / 2, fy = y + p.h * 0.8;
+    var dx = fx - clock.cx, dy = fy - clock.cy;
+    return dx * dx + dy * dy < clock.r * clock.r;
+  }
+  function nearOthers(x, y, p) {
+    for (var i = 0; i < pokes.length; i++) {
+      var q = pokes[i];
+      if (q === p) { continue; }
+      var dx = (q.tx - x), dy = (q.ty - y);
+      if (dx * dx + dy * dy < 140 * 140) { return true; }
+    }
+    return false;
+  }
+  function pickTarget(p) {
+    var b = bounds(p), x, y, tries;
+    for (tries = 0; tries < 12; tries++) {
+      x = rand(b.x0, b.x1); y = rand(b.y0, b.y1);
+      if (!onClock(x, y, p) && !nearOthers(x, y, p)) { break; }
+    }
+    return { x: x, y: y };
+  }
+  function schedule(p, ms, fn) {
+    p.timer = setTimeout(function () { p.timer = 0; fn(p); }, ms);
+  }
+  function rest(p) {
+    if (state.stopped || !p.alive) { return; }
+    p.el.className = 'poke';
+    var sp = SPEED[state.speed];
+    if (now() >= p.nextJump) { jump(p); }
+    schedule(p, rand(sp.restMin, sp.restMax) * 1000, walk);
+  }
+  function walk(p) {
+    if (state.stopped || !p.alive) { return; }
+    var sp = SPEED[state.speed];
+    var t = pickTarget(p);
+    p.tx = t.x; p.ty = t.y;
+    var dx = t.x - p.x, dy = t.y - p.y;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    var sec = Math.max(0.3, dist / rand(sp.min, sp.max));
+    if (Math.abs(dx) > 4) { p.flip.className = dx < 0 ? 'flip left' : 'flip'; }
+    p.el.className = 'poke moving';
+    setPos(p, t.x, t.y, sec);
+    schedule(p, sec * 1000, rest);
+  }
+  function restartAnim(el, cls) {
+    el.classList.remove(cls);
+    void el.offsetWidth;          // 같은 애니메이션을 다시 시작하려고 다시 그리게 함
+    el.classList.add(cls);
+  }
+  function jump(p) {
+    p.nextJump = now() + rand(15, 40) * 1000;
+    restartAnim(p.hop, 'jump');
+  }
+  function bubbleText() { return state.night ? '잘 자' : '저녁이야'; }
+  function onTap(p) {
+    p.tapCount++;
+    tapTotal++;
+    jump(p);
+    p.bubble.textContent = bubbleText();
+    // 화면 오른쪽 가장자리 가까이면 말풍선을 왼쪽으로 접는다
+    p.bubble.className = (p.x + p.w / 2 > W - 200) ? 'bubble fold' : 'bubble';
+    restartAnim(p.bubble, 'show');
+  }
+  function endAnim(e) {
+    var t = e.target;
+    if (t.classList.contains('jump')) { t.classList.remove('jump'); }
+    if (t.classList.contains('show')) { t.classList.remove('show'); }
+  }
+
+  function makePoke(name) {
+    var p = { name: name, alive: true, timer: 0, tapCount: 0, x: 0, y: 0, tx: 0, ty: 0 };
+    p.h = POKE_H; p.w = Math.round(POKE_H * RATIO[name]);
+    p.el = document.createElement('div'); p.el.className = 'poke';
+    p.hop = document.createElement('div'); p.hop.className = 'hop';
+    p.bob = document.createElement('div'); p.bob.className = 'bob';
+    p.flip = document.createElement('div'); p.flip.className = 'flip';
+    p.img = document.createElement('img');
+    p.img.src = 'assets/' + name + '.png';
+    p.img.width = p.w; p.img.height = p.h; p.img.alt = '';
+    p.img.draggable = false;
+    p.bubble = document.createElement('div'); p.bubble.className = 'bubble';
+    p.flip.appendChild(p.img); p.bob.appendChild(p.flip); p.hop.appendChild(p.bob);
+    p.el.appendChild(p.hop); p.el.appendChild(p.bubble);
+    // 리스너는 이 요소들에만 단다 → 요소를 지우면 함께 사라진다
+    p.img.addEventListener('click', function () { onTap(p); }, false);
+    p.hop.addEventListener('webkitAnimationEnd', endAnim, false);
+    p.hop.addEventListener('animationend', endAnim, false);
+    p.bubble.addEventListener('webkitAnimationEnd', endAnim, false);
+    p.bubble.addEventListener('animationend', endAnim, false);
+    $('stage').appendChild(p.el);
+    var b = bounds(p);
+    var t = pickTarget(p);
+    p.tx = t.x; p.ty = t.y;
+    setPos(p, rand(b.x0, b.x1), rand(b.y0, b.y1), 0);
+    p.nextJump = now() + rand(15, 40) * 1000;
+    return p;
+  }
+  function destroyAll() {
+    for (var i = 0; i < pokes.length; i++) {
+      var p = pokes[i];
+      p.alive = false;
+      if (p.timer) { clearTimeout(p.timer); p.timer = 0; }
+      if (p.el.parentNode) { p.el.parentNode.removeChild(p.el); }
+    }
+    pokes = [];
+  }
+  function spawn(n) {
+    destroyAll();
+    for (var i = 0; i < n; i++) {
+      var p = makePoke(SPRITES[i % SPRITES.length]);
+      pokes.push(p);
+      if (!state.stopped) { schedule(p, rand(300, 2500), walk); }
+    }
+  }
+  function currentXY(p) {   // 이동 중에 멈추면 지금 보이는 위치를 읽는다
+    var cs = window.getComputedStyle(p.el);
+    var tr = cs.transform || cs.webkitTransform || '';
+    var m = /matrix3d\(([^)]+)\)/.exec(tr), v;
+    if (m) { v = m[1].split(','); return { x: parseFloat(v[12]), y: parseFloat(v[13]) }; }
+    m = /matrix\(([^)]+)\)/.exec(tr);
+    if (m) { v = m[1].split(','); return { x: parseFloat(v[4]), y: parseFloat(v[5]) }; }
+    return { x: p.x, y: p.y };
+  }
+  function setStopped(on) {
+    state.stopped = on;
+    var i, p, c;
+    $('stage').className = on ? 'paused' : '';
+    for (i = 0; i < pokes.length; i++) {
+      p = pokes[i];
+      if (on) {
+        if (p.timer) { clearTimeout(p.timer); p.timer = 0; }
+        c = currentXY(p);
+        setPos(p, c.x, c.y, 0);
+        p.el.className = 'poke';
+      } else {
+        schedule(p, rand(300, 1500), walk);
+      }
+    }
+  }
+
+  // ───────── 측정 ─────────
+  var meas = {
+    start: now(),            // 페이지 연 시각
+    segStart: 0, segFrames: 0, segLong: 0, segMin: 999, segPause: 0,
+    lastFrame: 0, secFrames: 0, lastSec: 0, recent: []
+  };
+  var tapTotal = 0;
+  function resetSeg() {
+    meas.segStart = now(); meas.segFrames = 0; meas.segLong = 0; meas.segMin = 999; meas.segPause = 0;
+    meas.recent = []; meas.secFrames = 0; meas.lastSec = meas.segStart; meas.lastFrame = 0;
+  }
+  function frame(t) {
+    var n = now();
+    if (meas.lastFrame) {
+      var dt = n - meas.lastFrame;
+      if (dt > 1000) { meas.segPause++; }      // 화면 꺼짐·다른 앱 등은 긴 프레임으로 세지 않는다
+      else if (dt > 50) { meas.segLong++; }
+    }
+    meas.lastFrame = n;
+    meas.segFrames++; meas.secFrames++;
+    window.requestAnimationFrame(frame);
+  }
+  function fmtTime(ms) {
+    var s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+    return h + ':' + pad2(m) + ':' + pad2(s % 60);
+  }
+
+  // 저절로 다시 읽힘(Safari 메모리 부족 등) 세기:
+  // 정상으로 떠날 때(pagehide)는 clean=true를 남긴다. 다음에 열 때 clean이 false이고
+  // 마지막 기록이 1분 안이면 저절로 다시 읽힌 것으로 센다. [추정: 강제 종료 시 pagehide가 오지 않음]
+  var store = { loads: 0, reloads: 0, clean: true, last: 0 };
+  function loadStore() {
+    try {
+      var s = JSON.parse(window.localStorage.getItem(STORE_KEY) || 'null');
+      if (s && typeof s.loads === 'number') { store = s; }
+    } catch (e) { /* 저장 못 해도 시험은 계속 */ }
+    if (store.clean === false && now() - (store.last || 0) < 60000) { store.reloads++; }
+    store.loads++;
+    store.clean = false;
+    saveStore();
+  }
+  function saveStore() {
+    store.last = now();
+    try { window.localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { /* 무시 */ }
+  }
+
+  function tick() {
+    var n = now();
+    var secs = (n - meas.lastSec) / 1000;
+    if (secs > 0) {
+      var f = meas.secFrames / secs;
+      meas.recent.push(f);
+      if (meas.recent.length > 10) { meas.recent.shift(); }
+      if (n - meas.segStart > 3000 && f < meas.segMin && secs < 2) { meas.segMin = f; }  // 처음 3초는 준비 시간
+    }
+    meas.secFrames = 0; meas.lastSec = n;
+    var segSec = (n - meas.segStart) / 1000;
+    var avg = segSec > 0 ? meas.segFrames / segSec : 0;
+    var min10 = 999, i;
+    for (i = 0; i < meas.recent.length; i++) { if (meas.recent[i] < min10) { min10 = meas.recent[i]; } }
+    $('stats').textContent =
+      '포켓몬 ' + pokes.length + '마리' + (state.stopped ? ' (멈춤)' : '') + ' · ' + (state.speed === 'slow' ? '느림' : '보통') +
+      ' · 가림 ' + (state.cover ? '켬' : '끔') + '\n' +
+      '평균 fps   ' + avg.toFixed(1) + '\n' +
+      '최저(10초) ' + (min10 === 999 ? '-' : min10.toFixed(1)) + '\n' +
+      '최저(설정후) ' + (meas.segMin === 999 ? '-' : meas.segMin.toFixed(1)) + '\n' +
+      '긴 프레임(>50ms) ' + meas.segLong + (meas.segPause ? ' · 멈춤 ' + meas.segPause : '') + '\n' +
+      '설정 후 ' + fmtTime(n - meas.segStart) + ' · 켜 둔 시간 ' + fmtTime(n - meas.start) + '\n' +
+      'DPR ' + window.devicePixelRatio + ' · ' + W + '×' + H + ' · 누름 ' + tapTotal + '\n' +
+      '열기 ' + store.loads + ' · 저절로 다시 읽힘 ' + store.reloads;
+    drawClock();
+    if (n - store.last > 5000) { saveStore(); }
+  }
+
+  // ───────── 조작 ─────────
+  function sel(id, on) { $(id).className = on ? 'sel' : ''; }
+  function refreshBar() {
+    sel('n1', state.count === 1); sel('n3', state.count === 3); sel('n5', state.count === 5);
+    sel('bStop', state.stopped); sel('bBg', state.night);
+    $('bStop').textContent = state.stopped ? '움직이기' : '멈춤';
+    $('bSpeed').textContent = '속도: ' + (state.speed === 'slow' ? '느림' : '보통');
+    $('bCover').textContent = '카드 가림: ' + (state.cover ? '켬' : '끔');
+  }
+  function setCount(n) {
+    state.count = n;
+    spawn(n);
+    resetSeg();
+    refreshBar();
+  }
+  function bind(id, fn) { $(id).addEventListener('click', fn, false); }
+
+  bind('n1', function () { setCount(1); });
+  bind('n3', function () { setCount(3); });
+  bind('n5', function () { setCount(5); });
+  bind('bBg', function () {
+    state.night = !state.night;
+    $('bgNight').className = state.night ? 'bg on' : 'bg';
+    refreshBar();
+  });
+  bind('bStop', function () { setStopped(!state.stopped); resetSeg(); refreshBar(); });
+  bind('bSpeed', function () { state.speed = state.speed === 'slow' ? 'normal' : 'slow'; resetSeg(); refreshBar(); });
+  bind('bCover', function () {
+    state.cover = !state.cover;
+    document.body.className = state.cover ? '' : 'uiUnder';
+    resetSeg(); refreshBar();
+  });
+  bind('bReset', function () {
+    store = { loads: 1, reloads: 0, clean: false, last: 0 };
+    saveStore();
+    meas.start = now(); tapTotal = 0; resetSeg();
+  });
+
+  // 화면이 튕기거나 끌려 움직이지 않게
+  document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
+  window.addEventListener('pagehide', function () { store.clean = true; saveStore(); }, false);
+
+  var relayoutTimer = 0;
+  function onResize() {
+    layout();
+    // 회전 직후 값이 늦게 바뀌는 일이 있어 0.3초 뒤 한 번 더(A3-6). 이전 예약은 지운다.
+    if (relayoutTimer) { clearTimeout(relayoutTimer); }
+    relayoutTimer = setTimeout(function () { relayoutTimer = 0; layout(); }, 300);
+  }
+  window.addEventListener('resize', onResize, false);
+  window.addEventListener('orientationchange', onResize, false);
+
+  // ───────── 시작 ─────────
+  loadStore();
+  buildTicks();
+  layout();
+  drawClock();
+  setCount(3);
+  window.requestAnimationFrame(frame);
+  // 측정 표시 갱신용 1초 타이머. 이 시험 페이지에서만 허용(요청서 IPD-TASK-011 나):
+  // 1초마다 fps를 계산해 표시하고, 가짜 시계 바늘도 같은 타이머에서 움직인다(메인의 1초 tick과 같은 부하).
+  setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>
