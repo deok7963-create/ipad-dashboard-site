@@ -96,15 +96,31 @@
   .c-textbox { position: absolute; left: 196px; right: 10px; top: 0; height: 54px; overflow: hidden; }
   .c-text { display: inline-block; white-space: nowrap; line-height: 54px; font-size: 28px; }
 
-  /* 통화 버튼 (가짜, 동작 없음) */
+  /* 통화 버튼: 그룹(엄마·아빠) = 영상(왼쪽, 넓게) + 음성(오른쪽, 좁게). 진짜 링크 <a> (IPD-TASK-006) */
+  .callgrp { position: absolute; }
   .call {
-    position: absolute; border-radius: 24px;
-    text-align: center; font-size: 36px; font-weight: bold; color: #fff;
-    cursor: pointer;
+    position: absolute; top: 0; height: 124px; line-height: 124px; border-radius: 24px;
+    text-align: center; font-weight: bold; text-decoration: none; overflow: hidden;
+    cursor: pointer; /* href가 없을 때도 iOS가 click을 보내게 */
+    -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
   }
-  .call.mom { background: #e2657f; }
-  .call.dad { background: #3f7fd0; }
+  .call .in { display: inline-block; vertical-align: middle; line-height: 1.15; white-space: nowrap; }
+  .call.video { color: #fff; }
+  .call.audio { border: 5px solid; line-height: 114px; }
+  .mom .call.video { background: #e2657f; }
+  .dad .call.video { background: #3f7fd0; }
+  .mom .call.audio { background: #fbe4e9; border-color: #e2657f; color: #c2465f; }
+  .dad .call.audio { background: #e2ecf8; border-color: #3f7fd0; color: #2d63a8; }
+  .call.off { opacity: 0.35; }
   .call:active { opacity: 0.7; }
+  .call.off:active { opacity: 0.35; }
+  .callmsg {
+    display: none; position: absolute; left: 0; top: 0; width: 100%; height: 124px;
+    line-height: 124px; border-radius: 24px; text-align: center; z-index: 5;
+    background: #4a4f5c; color: #fff; font-size: 26px; font-weight: bold;
+  }
+  .callmsg .in { display: inline-block; vertical-align: middle; line-height: 1.25; padding: 0 12px; word-break: keep-all; }
 
   /* 숨은 진입 영역 (보이지 않음) */
   #corner { position: absolute; z-index: 20; background: rgba(0, 0, 0, 0); }
@@ -190,6 +206,21 @@
   }
   #ed-text { width: 380px; }
   #ed-time, #ed-date { width: 220px; }
+  /* 통화 대상 편집 칸 (할 일 편집 칸과 같은 자리·방식) */
+  #ceditor { display: none; margin: 8px 0 16px; padding: 14px 20px 18px; background: #fff7e0; border: 3px solid #f0a640; border-radius: 16px; }
+  #ceditor h3 { margin: 14px 0 0; font-size: 22px; color: #555; }
+  .lab2 { display: inline-block; width: 110px; font-size: 22px; font-weight: bold; vertical-align: middle; }
+  .ce-in {
+    font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    font-size: 26px; height: 52px; padding: 0 10px; vertical-align: middle;
+    border: 2px solid #bbb; border-radius: 10px; background: #fff;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
+  }
+  .ce-label { width: 160px; }
+  .ce-target { width: 460px; }
+  .c-row { font-size: 22px; padding: 6px 0; }
+  .c-row b { display: inline-block; width: 80px; }
+  .c-row .off { color: #a33; }
   #ed-count { margin-left: 8px; vertical-align: middle; }
   #ed-count.over { color: #c0392b; font-weight: bold; }
   .seg, .day, .ico {
@@ -266,8 +297,8 @@
   <div id="sch-head"><span id="sch-title">오늘 할 일</span><span id="sch-right"><span id="sch-left"></span><span id="sch-all" class="sbtn">전체 보기</span></span></div>
   <div id="sch-cards"></div>
 </div>
-<div id="call-0" class="call mom"></div>
-<div id="call-1" class="call dad"></div>
+<div id="call-0" class="callgrp mom"><a id="call-0-v" class="call video"></a><a id="call-0-a" class="call audio"></a><div id="call-0-msg" class="callmsg"></div></div>
+<div id="call-1" class="callgrp dad"><a id="call-1-v" class="call video"></a><a id="call-1-a" class="call audio"></a><div id="call-1-msg" class="callmsg"></div></div>
 <div id="corner"></div>
 
 <!-- 오늘 할 일 전체 보기 (아이용, PIN 없음) -->
@@ -292,6 +323,19 @@
       <div id="ed-date-row" class="ed-row"><span class="lab">날짜</span><input id="ed-date" type="date"></div>
       <div class="ed-row"><span class="lab">아이콘</span><span id="ed-icons"></span></div>
       <div class="ed-row"><span id="ed-save" class="btn primary">저장</span><span id="ed-cancel" class="btn">취소</span><span id="ed-del" class="btn danger">지우기</span></div>
+    </div>
+
+    <div id="ceditor">
+      <div id="ce-title" style="font-size:26px;font-weight:bold">통화 대상 바꾸기</div>
+      <p class="small">전화번호나 Apple ID(이메일)를 넣어요. 아이 Apple ID가 아니라 <b>부모 쪽</b> 번호나 ID예요. 비워 두면 그 버튼은 눌러도 걸리지 않아요.</p>
+      <div id="ce-err" class="err"></div>
+      <h3>엄마 버튼</h3>
+      <div class="ed-row"><span class="lab2">이름</span><input id="ce-label-0" class="ce-in ce-label" type="text" autocomplete="off" autocorrect="off"><span class="small"> 4자까지</span></div>
+      <div class="ed-row"><span class="lab2">번호·ID</span><input id="ce-target-0" class="ce-in ce-target" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
+      <h3>아빠 버튼</h3>
+      <div class="ed-row"><span class="lab2">이름</span><input id="ce-label-1" class="ce-in ce-label" type="text" autocomplete="off" autocorrect="off"><span class="small"> 4자까지</span></div>
+      <div class="ed-row"><span class="lab2">번호·ID</span><input id="ce-target-1" class="ce-in ce-target" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="ed-row"><span id="ce-save" class="btn primary">저장</span><span id="ce-cancel" class="btn">취소</span></div>
     </div>
 
     <div id="sec-sched" class="sec">
@@ -327,7 +371,12 @@
       <div id="pin-change-msg" class="ok"></div>
     </div>
 
-    <div class="sec"><h2>통화 대상</h2><p>다음 작업에서 만들어요.</p></div>
+    <div id="sec-call" class="sec">
+      <h2>통화 대상</h2>
+      <div id="call-rows"></div>
+      <span id="call-edit" class="btn primary">바꾸기</span>
+      <div id="call-msg" class="ok"></div>
+    </div>
     <div class="sec"><h2>화면 옵션</h2><p>다음 작업에서 만들어요.</p></div>
 
     <div class="sec">
@@ -378,18 +427,15 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.1.0';
+  var VERSION = '4.2.0';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
-  // 가짜 예시 (통화 버튼은 IPD-TASK-006에서 설정 데이터로 교체할 자리)
-  // 실제 이름·전화번호·Apple ID는 넣지 않는다.
+  // 통화 대상 (IPD-TASK-006). 실제 번호·이메일 값은 코드에 쓰지 않는다 (iPad 설정에만 저장).
   // ---------------------------------------------------------------
-  var FAKE_CALLS = [
-    { label: '엄마 FaceTime' },
-    { label: '아빠 FaceTime' }
-  ];
-  var PHONE_ICON = '📞 '; // 📞
+  var CONTACT_DEFAULT = [{ label: '엄마', icon: 'mom' }, { label: '아빠', icon: 'dad' }];
+  var MAX_LABEL = 4, MAX_TARGET = 40;
+  var CALL_MSG_MS = 3000;
 
   // 구간별 이름·말풍선·자리표시 색. manifest에는 이 값이 없어서 여기 둔다 (A5-2).
   var PERIOD_TEXT = {
@@ -576,6 +622,56 @@
     };
   }
 
+  // --- 통화 대상 정리·검증 (설정 저장·읽기·복원 모두 이 함수만 쓴다) ---
+  // 결과: { target: 정리된 값 } 또는 { err: 이유 }. 빈 값은 허용한다(그 버튼은 꺼짐).
+  var TARGET_OK = /[A-Za-z0-9+@._\-]/g;
+  function badCharMsg(bad) {
+    var c = bad.replace(/\s/g, '').charAt(0);
+    return '쓸 수 없는 글자가 있어요' + (c ? ' (' + c + ')' : ' (빈칸)') +
+      '. 번호는 숫자와 맨 앞 +, 이메일은 영문·숫자·@·.·_·-만 써요.';
+  }
+  function cleanTarget(raw) {
+    if (raw === undefined || raw === null) { raw = ''; }
+    if (typeof raw !== 'string') { return { err: '글자가 아니에요.' }; }
+    var s = raw.replace(/^\s+|\s+$/g, '');
+    if (s === '') { return { target: '' }; }
+    if (s.length > MAX_TARGET) { return { err: MAX_TARGET + '자까지예요. (지금 ' + s.length + '자)' }; }
+    if (/^[0-9+\-\s()]+$/.test(s)) { // 전화번호 모양
+      var p = s.replace(/[\-\s()]/g, '');
+      if (!/^\+?[0-9]+$/.test(p)) { return { err: '+는 번호 맨 앞에만 쓸 수 있어요.' }; }
+      var n = p.replace('+', '').length;
+      if (n < 9 || n > 15) { return { err: '전화번호는 숫자 9~15자리예요. (지금 ' + n + '자리)' }; }
+      return { target: p };
+    }
+    if (s.indexOf('@') >= 0) { // 이메일 모양 (대소문자는 그대로)
+      var e = s.replace(/\s+/g, '');
+      var bad = e.replace(TARGET_OK, '');
+      if (bad) { return { err: badCharMsg(bad) }; }
+      var parts = e.split('@');
+      if (parts.length !== 2) { return { err: '이메일에는 @가 하나만 있어야 해요.' }; }
+      if (!parts[0] || !parts[1]) { return { err: '이메일의 @ 앞뒤가 비어 있어요.' }; }
+      if (parts[1].indexOf('.') < 0) { return { err: '이메일의 @ 뒤에 점(.)이 있어야 해요.' }; }
+      return { target: e };
+    }
+    var b = s.replace(TARGET_OK, '');
+    if (b) { return { err: badCharMsg(b) }; }
+    return { err: '전화번호나 이메일 모양이 아니에요.' };
+  }
+  // 이름: 앞뒤 공백 제거, 비면 기본 이름, 4자까지. 결과 { label } 또는 { err }
+  function cleanLabel(raw, j) {
+    if (raw === undefined || raw === null) { raw = ''; }
+    if (typeof raw !== 'string') { return { err: '글자가 아니에요.' }; }
+    var t = raw.replace(/^\s+|\s+$/g, '');
+    if (t === '') { return { label: CONTACT_DEFAULT[j].label }; }
+    if (textLen(t) > MAX_LABEL) { return { err: '이름은 ' + MAX_LABEL + '자까지예요. (지금 ' + textLen(t) + '자)' }; }
+    return { label: t };
+  }
+  // FaceTime 링크는 이 함수에서만 만든다. 허용 글자가 아니면 링크를 만들지 않는다('').
+  function facetimeUrl(target, audio) {
+    if (typeof target !== 'string' || !/^[A-Za-z0-9+@._\-]+$/.test(target)) { return ''; }
+    return (audio ? 'facetime-audio://' : 'facetime://') + target;
+  }
+
   // 항목 하나 검사: 틀리면 이유 문장, 맞으면 ''
   function checkItem(it) {
     if (!isObj(it)) { return '항목 모양이 틀려요'; }
@@ -654,7 +750,20 @@
       }
     }
     if (obj.contacts !== undefined) {
-      if (isArray(obj.contacts)) { s.contacts = obj.contacts; } else { errors.push('contacts가 목록이 아니에요'); }
+      if (!isArray(obj.contacts)) {
+        errors.push('contacts가 목록이 아니에요');
+      } else {
+        // 2개 고정. 틀린 항목은 기본값으로 두고 이유만 적는다 (값 자체는 안내에 쓰지 않는다)
+        for (var q = 0; q < 2; q++) {
+          var oc = obj.contacts[q], nm = '통화 대상(' + CONTACT_DEFAULT[q].label + ' 버튼)';
+          if (oc === undefined) { continue; }
+          if (!isObj(oc)) { errors.push(nm + '이 { } 모양이 아니에요'); continue; }
+          var lb = cleanLabel(oc.label, q);
+          if (lb.err) { errors.push(nm + ' 이름: ' + lb.err); } else { s.contacts[q].label = lb.label; }
+          var tg = cleanTarget(oc.target);
+          if (tg.err) { errors.push(nm + ' 번호·ID: ' + tg.err); } else { s.contacts[q].target = tg.target; }
+        }
+      }
     }
     if (obj.periods !== undefined) {
       if (isArray(obj.periods)) { s.periods = obj.periods; } else { errors.push('periods가 목록이 아니에요'); }
@@ -1198,6 +1307,8 @@
     setOpen = true; firstRun = !!isFirst;
     pastSel = {};
     closeEditor();
+    closeCallEditor();
+    $('call-msg').textContent = '';
     $('add-msg').textContent = ''; $('past-msg').textContent = '';
     $('restore-msg').textContent = ''; $('restore-msg').className = '';
     $('pin-change-msg').textContent = '';
@@ -1213,6 +1324,7 @@
     if (document.activeElement && document.activeElement.blur) { document.activeElement.blur(); }
     setOpen = false; firstRun = false;
     closeEditor();
+    closeCallEditor(); // 저장하지 않은 통화 대상 입력은 버린다
     show('set-ov', false);
     window.scrollTo(0, 0);
     renderTodo();
@@ -1328,6 +1440,65 @@
     $('backup-ta').value = JSON.stringify(settings, null, 2);
     $('backup-mail').setAttribute('href', mailtoFor($('backup-ta').value, now()));
     $('set-ver').textContent = '버전 ' + VERSION;
+    renderCallRows();
+  }
+
+  // --- 통화 대상 (설정) ---
+  function renderCallRows() {
+    var box = $('call-rows');
+    clearEl(box);
+    for (var j = 0; j < 2; j++) {
+      var c = settings.contacts[j], row = el('div', 'c-row');
+      row.appendChild(el('b', '', c.label));
+      if (c.target) { row.appendChild(el('span', '', c.target)); }
+      else { row.appendChild(el('span', 'off', '비어 있음 (버튼 꺼짐)')); }
+      box.appendChild(row);
+    }
+  }
+  function openCallEditor() {
+    closeEditor();
+    $('ce-err').textContent = '';
+    $('call-msg').textContent = '';
+    for (var j = 0; j < 2; j++) {
+      $('ce-label-' + j).value = settings.contacts[j].label;
+      $('ce-target-' + j).value = settings.contacts[j].target;
+    }
+    show('ceditor', true);
+    $('set-body').scrollTop = 0; // 입력칸을 화면 위쪽에 둔다 (iOS 키보드에 가리지 않게)
+  }
+  function closeCallEditor() {
+    show('ceditor', false);
+    for (var j = 0; j < 2; j++) { $('ce-label-' + j).value = ''; $('ce-target-' + j).value = ''; }
+  }
+  // 두 줄 모두 통과해야 저장한다 (한 줄이라도 틀리면 아무것도 저장하지 않음)
+  function saveCallEditor() {
+    var errs = [], out = [];
+    for (var j = 0; j < 2; j++) {
+      var who = CONTACT_DEFAULT[j].label + ' 버튼';
+      var lb = cleanLabel($('ce-label-' + j).value, j);
+      var tg = cleanTarget($('ce-target-' + j).value);
+      if (lb.err) { errs.push(who + ' 이름: ' + lb.err); }
+      if (tg.err) { errs.push(who + ' 번호·ID: ' + tg.err); }
+      out.push({ label: lb.label, target: tg.target });
+    }
+    if (errs.length) {
+      $('ce-err').textContent = '저장하지 않았어요. ' + errs.join(' / ');
+      $('set-body').scrollTop = 0;
+      return false;
+    }
+    for (j = 0; j < 2; j++) {
+      settings.contacts[j] = { label: out[j].label, target: out[j].target, icon: settings.contacts[j].icon || CONTACT_DEFAULT[j].icon };
+    }
+    var ok = saveSettings();
+    var a = document.activeElement;
+    if (a && a.blur && a.tagName === 'INPUT') { a.blur(); }
+    closeCallEditor();
+    renderSettings();
+    buildCalls();
+    layout();
+    $('call-msg').className = ok ? 'ok' : 'err';
+    $('call-msg').textContent = ok ? '저장했어요.' : '바꿨지만 저장하지 못했어요. 새로고침하면 사라질 수 있어요.';
+    return true;
   }
 
   // --- 확인 창 (alert·confirm 대신 화면 안 UI) ---
@@ -1427,6 +1598,7 @@
   }
   function openEditor(id, kind) {
     var it = id ? findItem(id) : null;
+    closeCallEditor();
     $('ed-err').textContent = '';
     $('add-msg').textContent = '';
     if (it) {
@@ -1628,8 +1800,11 @@
       var ok = saveSettings();
       $('restore-ta').value = '';
       closeEditor();
+      closeCallEditor();
       renderSettings();
       renderTodo();
+      buildCalls();
+      layout();
       restoreMsg(ok ? '복원했어요.' : '복원했지만 저장하지 못했어요. 새로고침하면 사라질 수 있어요.', ok);
     });
   }
@@ -1676,6 +1851,14 @@
     bindButton('ed-save', saveEditor);
     bindButton('ed-cancel', closeEditor);
     bindButton('ed-del', function () { if (ed.id) { askDelete(ed.id); } });
+    bindButton('call-edit', openCallEditor);
+    bindButton('ce-save', saveCallEditor);
+    bindButton('ce-cancel', closeCallEditor);
+    // 메인 통화 버튼: 진짜 링크라 기본 동작(iOS가 FaceTime을 연다)은 막지 않는다. 대상이 없을 때만 막는다.
+    for (i = 0; i < 2; i++) {
+      bindCall(i, false);
+      bindCall(i, true);
+    }
     $('ed-text').addEventListener('input', drawCount, false);
     bindTap($('editor'), function (t) {
       var box = $('editor'), n;
@@ -1967,10 +2150,8 @@
 
     var callY = H - PAD - CALL_H;
     var callW = (W - PAD * 3) / 2;
-    place($('call-0'), PAD, callY, callW, CALL_H);
-    place($('call-1'), PAD * 2 + callW, callY, callW, CALL_H);
-    $('call-0').style.lineHeight = CALL_H + 'px';
-    $('call-1').style.lineHeight = CALL_H + 'px';
+    placeCallGroup(0, PAD, callY, callW);
+    placeCallGroup(1, PAD * 2 + callW, callY, callW);
 
     var topH = callY - PAD * 2; // 위쪽 영역 높이
     var c;
@@ -2006,12 +2187,86 @@
   }
 
   // ---------------------------------------------------------------
-  // 가짜 통화 버튼 (동작 없음, IPD-TASK-006)
+  // 통화 버튼 (IPD-TASK-006): 그룹마다 영상(facetime://) + 음성(facetime-audio://) 진짜 링크
   // ---------------------------------------------------------------
+  var CALL_GAP = 8, CALL_VIDEO = 0.65;
+  var callMsgTimer = [null, null]; // 그룹마다 한 번짜리 setTimeout 하나 (반복 타이머 아님)
+
+  // 버튼 글자: <span class="in"><span>첫 줄</span><span>둘째 줄</span></span>
+  function callLabel(a, first, second) {
+    clearEl(a);
+    var inn = el('span', 'in');
+    inn.appendChild(el('span', '', first));
+    inn.appendChild(el('span', '', second));
+    a.appendChild(inn);
+  }
   function buildCalls() {
-    for (var j = 0; j < FAKE_CALLS.length && j < 2; j++) {
-      $('call-' + j).textContent = PHONE_ICON + FAKE_CALLS[j].label;
+    for (var j = 0; j < 2; j++) {
+      var c = settings.contacts[j];
+      var v = $('call-' + j + '-v'), a = $('call-' + j + '-a');
+      callLabel(v, '📹 ' + c.label + ' ', '영상통화'); // 📹
+      callLabel(a, '📞 ', '음성');                      // 📞
+      var hv = facetimeUrl(c.target, false), ha = facetimeUrl(c.target, true);
+      setHref(v, hv);
+      setHref(a, ha);
     }
+  }
+  function setHref(a, url) {
+    if (url) { a.setAttribute('href', url); a.className = a.className.replace(/ off/g, ''); }
+    else {
+      a.removeAttribute('href');
+      if (a.className.indexOf(' off') < 0) { a.className += ' off'; }
+    }
+  }
+  // 한 줄에 들어가는 가장 큰 글자(32→26px)를 고르고, 안 되면 두 줄로 나눈다(26px까지, 그래도 넘치면 22px)
+  function fitCall(a, w) {
+    var inn = a.firstChild, second = inn.childNodes[1], room = w - 20, sizes = [32, 30, 28, 26], k;
+    second.style.display = 'inline';
+    for (k = 0; k < sizes.length; k++) {
+      a.style.fontSize = sizes[k] + 'px';
+      if (inn.offsetWidth <= room) { return; }
+    }
+    second.style.display = 'block';
+    sizes = [32, 30, 28, 26, 24, 22];
+    for (k = 0; k < sizes.length; k++) {
+      a.style.fontSize = sizes[k] + 'px';
+      if (inn.offsetWidth <= room) { return; }
+    }
+  }
+  function placeCallGroup(j, x, y, w) {
+    var v = $('call-' + j + '-v'), a = $('call-' + j + '-a');
+    var vw = Math.round((w - CALL_GAP) * CALL_VIDEO), aw = w - CALL_GAP - vw;
+    place($('call-' + j), x, y, w, CALL_H);
+    v.style.left = '0px'; v.style.width = vw + 'px';
+    a.style.left = (vw + CALL_GAP) + 'px'; a.style.width = aw + 'px';
+    fitCall(v, vw);
+    fitCall(a, aw);
+  }
+  // 누른 직후 3초 안내. 그룹 전체를 덮어 3초 동안 같은 그룹을 다시 누르지 못하게 한다(여러 번 걸기 방지).
+  function showCallMsg(j, text) {
+    var m = $('call-' + j + '-msg');
+    clearEl(m);
+    m.appendChild(el('span', 'in', text));
+    m.style.display = 'block';
+    if (callMsgTimer[j] !== null) { clearTimeout(callMsgTimer[j]); }
+    callMsgTimer[j] = setTimeout(function () {
+      callMsgTimer[j] = null;
+      m.style.display = 'none';
+    }, CALL_MSG_MS);
+  }
+  function bindCall(j, audio) {
+    var a = $('call-' + j + (audio ? '-a' : '-v'));
+    a.addEventListener('click', function (e) {
+      var c = settings.contacts[j];
+      if (!facetimeUrl(c.target, audio)) {
+        e.preventDefault();
+        showCallMsg(j, '어른이 번호를 넣어야 해요');
+        return;
+      }
+      // 연결 실패는 판정하지 않는다 (FaceTime 확인 창 때문에 화면이 계속 보일 수 있다)
+      showCallMsg(j, c.label + '에게 ' + (audio ? '음성' : '영상') + '통화를 걸어요…');
+    }, false);
+    // 안내가 덮인 동안 누른 것은 아무 일도 없게 (덮개는 링크가 아님)
   }
 
   // ---------------------------------------------------------------
@@ -2092,7 +2347,34 @@
     checkItem: checkItem,
     checkRestore: checkRestore,
     sha256: sha256,
-    timers: function () { return { tick: timer !== null, press: press.timer !== null, marquees: marquees.length, idleBinds: idleBinds }; },
+    timers: function () {
+      return { tick: timer !== null, press: press.timer !== null, marquees: marquees.length, idleBinds: idleBinds,
+        callMsg: (callMsgTimer[0] !== null ? 1 : 0) + (callMsgTimer[1] !== null ? 1 : 0) };
+    },
+    // 통화 버튼 상태: 링크 문자열·글자·눌림 영역 (화면에 실제로 붙은 값)
+    calls: function () {
+      var out = [];
+      for (var j = 0; j < 2; j++) {
+        var g = $('call-' + j), v = $('call-' + j + '-v'), a = $('call-' + j + '-a'), m = $('call-' + j + '-msg');
+        var gr = g.getBoundingClientRect(), vr = v.getBoundingClientRect(), ar = a.getBoundingClientRect();
+        out.push({
+          label: settings.contacts[j].label,
+          videoHref: v.getAttribute('href'), audioHref: a.getAttribute('href'),
+          videoText: v.textContent, audioText: a.textContent,
+          off: [v.className.indexOf(' off') >= 0, a.className.indexOf(' off') >= 0],
+          fonts: [v.style.fontSize, a.style.fontSize],
+          twoLines: [v.firstChild.childNodes[1].style.display === 'block', a.firstChild.childNodes[1].style.display === 'block'],
+          group: [gr.left, gr.top, gr.width, gr.height],
+          video: [vr.left, vr.top, vr.width, vr.height],
+          audio: [ar.left, ar.top, ar.width, ar.height],
+          msg: m.style.display === 'block' ? m.textContent : ''
+        });
+      }
+      return out;
+    },
+    cleanTarget: cleanTarget,
+    cleanLabel: cleanLabel,
+    facetimeUrl: facetimeUrl,
     // 자동 닫힘 상태 (남은 시간 ms, 0이면 해당 화면 없음)
     idle: function () {
       var lim = idleLimit();
