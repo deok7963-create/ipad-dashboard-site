@@ -166,8 +166,10 @@
   #sch-right { position: absolute; right: 0; top: 0; }
   #sch-left { position: absolute; font-size: 20px; font-weight: bold; }
   body.portrait #sch-left { right: 128px; top: 0; line-height: 52px; }
-  body.landscape #sch-left { left: 0; top: 80px; line-height: 60px; }
-  body.landscape #sch-right { right: 76px; }   /* 오른쪽 위 설정 진입 영역(100×100)을 피한다 */
+  body.landscape #sch-left { left: 0; top: 56px; line-height: 30px; }
+  /* 가로: 제목 줄을 카드보다 왼쪽으로 120px 넓혀 [오늘 할 일] [전체 보기] [－ ＋] 를 한 줄에 두고, 오른쪽 위 설정 진입 영역(100×100·톱니바퀴)과 떨어뜨린다 */
+  body.landscape #sch-head { margin-left: -120px; width: 492px; }
+  body.landscape #sch-right { right: 164px; }
   .sbtn {
     display: inline-block; height: 44px; line-height: 44px; padding: 0 16px;
     border-radius: 22px; background: #e4ded2; color: #444;
@@ -175,7 +177,7 @@
   }
   #sch-cards { margin-top: 24px; }
   body.portrait #sch-cards { margin-top: 16px; }
-  body.landscape #sch-cards { margin-top: 100px; }   /* 제목 줄 아래 − ＋ 한 줄 자리 */
+  body.landscape #sch-cards { margin-top: 36px; }
   .card {
     position: relative; margin-top: 14px; background: none; border: 0;
     overflow: hidden; -webkit-box-sizing: border-box; box-sizing: border-box;
@@ -554,7 +556,7 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.3.4';
+  var VERSION = '4.3.5';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
@@ -2520,7 +2522,7 @@
       place($('digital'), PAD, 392, c, 84);
       place($('dateline'), PAD, 486, c, 32);
       place($('schedule'), W - 472, PAD, 448, null);
-      ctl.style.left = (W - PAD - 136) + 'px'; ctl.style.top = '104px';
+      ctl.style.left = (W - 112 - 136) + 'px'; ctl.style.top = '20px';
     } else {
       // 세로: 시계(가운데) → 디지털 → 날짜 → 제목 줄 → 카드 3개 → 통화 / 조작은 시계 왼쪽 빈 자리
       c = 320;
