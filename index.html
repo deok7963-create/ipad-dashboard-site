@@ -23,78 +23,190 @@
   }
   .box { position: absolute; }
 
-  /* 메타몽 */
-  #frame {
-    position: absolute; overflow: hidden;
-    border-radius: 24px; background: #ddd;
+  /* 배경: 두 층을 겹쳐 위층 투명도만 바꾼다(색을 직접 애니메이션하지 않음). 시계 뒤 은은한 빛 */
+  .bg { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 0; opacity: 0;
+    -webkit-transition: opacity 1.2s linear; transition: opacity 1.2s linear; }
+  #glow {
+    position: absolute; z-index: 0; border-radius: 50%; pointer-events: none;
+    background: -webkit-radial-gradient(center, circle, rgba(255,255,255,0.35), rgba(255,255,255,0) 70%);
+    background: radial-gradient(circle at center, rgba(255,255,255,0.35), rgba(255,255,255,0) 70%);
   }
-  #frame img {
-    position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-    opacity: 0;
-    -webkit-transition: opacity 0.8s ease; transition: opacity 0.8s ease;
+  body.p-night #glow { opacity: 0.35; }
+
+  /* 포켓몬 층 (UI 아래). 이동은 transform만 바꾼다 */
+  #stage { position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; }
+  .poke {
+    position: absolute; left: 0; top: 0; pointer-events: none;
+    -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0);
+    -webkit-transition-property: -webkit-transform; transition-property: transform;
+    -webkit-transition-timing-function: linear; transition-timing-function: linear;
   }
-  #frame img.on { opacity: 1; }
-  #ph-label {
-    position: absolute; left: 0; right: 0; top: 50%;
-    margin-top: -36px; height: 72px; line-height: 72px;
-    text-align: center; font-size: 56px; font-weight: bold; color: #333;
-    display: none;
-  }
-  #frame.dark #ph-label { color: #fff; }
-  #bubble {
-    position: absolute;
-    background: #fff; border: 3px solid #333; border-radius: 24px;
-    padding: 10px 20px; font-size: 30px; line-height: 40px; font-weight: bold;
+  .fade { -webkit-transition: opacity 0.8s linear; transition: opacity 0.8s linear; }
+  .hop, .bob, .flip { position: relative; }
+  .bob { -webkit-transform-origin: 50% 100%; transform-origin: 50% 100%;
+    -webkit-animation: breathe 3s ease-in-out infinite; animation: breathe 3s ease-in-out infinite; }
+  .moving .bob { -webkit-animation: bob 0.5s ease-in-out infinite; animation: bob 0.5s ease-in-out infinite; }
+  .flip.left { -webkit-transform: scaleX(-1); transform: scaleX(-1); }
+  .hop.jump { -webkit-animation: jump 0.6s ease-out 1; animation: jump 0.6s ease-out 1; }
+  .poke img { display: block; pointer-events: auto; cursor: pointer; }
+  #stage.paused .bob, #stage.paused .hop { -webkit-animation-play-state: paused; animation-play-state: paused; }
+  .bubble {
+    position: absolute; bottom: 100%; left: 50%; margin-bottom: 6px; margin-left: -110px; width: 220px;
+    text-align: center; padding: 8px 12px; border-radius: 18px;
+    background: #fff; color: #2A1F57; font-size: 22px; line-height: 28px; font-weight: bold;
+    border: 3px solid #2A1F57; opacity: 0; pointer-events: none;
     -webkit-box-sizing: border-box; box-sizing: border-box;
   }
-  #bubble.time { background: #fff6c8; }
-  #bubble.side:before {
-    content: ""; position: absolute; left: -18px; top: 50%; margin-top: -12px;
-    border-style: solid; border-width: 12px 18px 12px 0;
-    border-color: transparent #333 transparent transparent;
-  }
+  .bubble.fold-l { left: 0; margin-left: 0; }
+  .bubble.fold-r { left: auto; right: 0; margin-left: 0; }
+  .bubble.below { bottom: auto; top: 100%; margin-bottom: 0; margin-top: 6px; }
+  .bubble.show { -webkit-animation: bubbleLife 4s linear 1; animation: bubbleLife 4s linear 1; }
+  @-webkit-keyframes breathe { 0%,100% { -webkit-transform: scale(1,1); } 50% { -webkit-transform: scale(1.02,1.03); } }
+  @keyframes breathe { 0%,100% { transform: scale(1,1); } 50% { transform: scale(1.02,1.03); } }
+  @-webkit-keyframes bob {
+    0%,100% { -webkit-transform: translate3d(0,0,0) scale(1.04,0.96); }
+    50% { -webkit-transform: translate3d(0,-6px,0) scale(0.97,1.03); } }
+  @keyframes bob {
+    0%,100% { transform: translate3d(0,0,0) scale(1.04,0.96); }
+    50% { transform: translate3d(0,-6px,0) scale(0.97,1.03); } }
+  @-webkit-keyframes jump {
+    0% { -webkit-transform: translate3d(0,0,0); } 40% { -webkit-transform: translate3d(0,-44px,0); }
+    75% { -webkit-transform: translate3d(0,0,0); } 88% { -webkit-transform: translate3d(0,-8px,0); } 100% { -webkit-transform: translate3d(0,0,0); } }
+  @keyframes jump {
+    0% { transform: translate3d(0,0,0); } 40% { transform: translate3d(0,-44px,0); }
+    75% { transform: translate3d(0,0,0); } 88% { transform: translate3d(0,-8px,0); } 100% { transform: translate3d(0,0,0); } }
+  @-webkit-keyframes bubbleLife { 0% { opacity: 0; } 5% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes bubbleLife { 0% { opacity: 0; } 5% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
 
-  /* 시계 */
+  /* 위에 올라오는 화면 요소 (UI 층). 상자는 터치를 막지 않고, 눌러야 하는 것만 받는다 */
+  .box, .callgrp { z-index: 2; }
+  #clock, #digital, #dateline, #schedule, #ctl { pointer-events: none; }
+  #clock, .chk-hit, .sbtn, #ctl .cbtn, .callgrp { pointer-events: auto; }
   #clock { cursor: pointer; }
   #clock svg { display: block; width: 100%; height: 100%; }
-  #digital { text-align: center; white-space: nowrap; }
-  #d-time { font-size: 52px; font-weight: bold; line-height: 56px; vertical-align: middle; }
-  #d-date { font-size: 28px; line-height: 56px; vertical-align: middle; margin-left: 16px; color: #444; }
+  .clk-tick { stroke-linecap: round; }
+  .clk-minor { opacity: 0.45; }
+  #cbubble {
+    display: none; position: absolute; z-index: 4; text-align: center; padding: 10px 18px; border-radius: 22px;
+    background: #fff6c8; color: #2A1F57; border: 3px solid #2A1F57; font-size: 28px; line-height: 36px; font-weight: bold;
+    -webkit-box-sizing: border-box; box-sizing: border-box; pointer-events: none;
+  }
+
+  /* 구간별 톤: 배경·글자·강조 (A5-6) */
+  .bg.p-morning { background: #FFE9A8; background: -webkit-linear-gradient(top, #FFE9A8, #FFC98B); background: linear-gradient(to bottom, #FFE9A8, #FFC98B); }
+  body.p-morning { color: #3A2A1A; }
+  body.p-morning .chk { border-color: #3A2A1A; }
+  body.p-morning .clk-tick, body.p-morning .clk-hour { stroke: #3A2A1A; }
+  body.p-morning .clk-num, body.p-morning .clk-hub { fill: #3A2A1A; }
+  body.p-morning .clk-min { stroke: #C2410C; }
+  body.p-morning .clk-sec { stroke: #E5484D; }
+  body.p-morning .c-next { background: #C2410C; color: #FFFFFF; }
+  body.p-morning .sbtn, body.p-morning .cbtn { background: rgba(255,255,255,0.80); color: #2A1F57; }
+  .bg.p-forenoon { background: #BDE6FF; background: -webkit-linear-gradient(top, #BDE6FF, #B9F0CF); background: linear-gradient(to bottom, #BDE6FF, #B9F0CF); }
+  body.p-forenoon { color: #173047; }
+  body.p-forenoon .chk { border-color: #173047; }
+  body.p-forenoon .clk-tick, body.p-forenoon .clk-hour { stroke: #173047; }
+  body.p-forenoon .clk-num, body.p-forenoon .clk-hub { fill: #173047; }
+  body.p-forenoon .clk-min { stroke: #0B7AC4; }
+  body.p-forenoon .clk-sec { stroke: #E5484D; }
+  body.p-forenoon .c-next { background: #0B7AC4; color: #FFFFFF; }
+  body.p-forenoon .sbtn, body.p-forenoon .cbtn { background: rgba(255,255,255,0.80); color: #2A1F57; }
+  .bg.p-noon { background: #FFC6DC; background: -webkit-linear-gradient(top, #FFC6DC, #FFE3EE); background: linear-gradient(to bottom, #FFC6DC, #FFE3EE); }
+  body.p-noon { color: #4A1830; }
+  body.p-noon .chk { border-color: #4A1830; }
+  body.p-noon .clk-tick, body.p-noon .clk-hour { stroke: #4A1830; }
+  body.p-noon .clk-num, body.p-noon .clk-hub { fill: #4A1830; }
+  body.p-noon .clk-min { stroke: #C2255C; }
+  body.p-noon .clk-sec { stroke: #E5484D; }
+  body.p-noon .c-next { background: #C2255C; color: #FFFFFF; }
+  body.p-noon .sbtn, body.p-noon .cbtn { background: rgba(255,255,255,0.80); color: #2A1F57; }
+  .bg.p-afternoon { background: #C9D6FF; background: -webkit-linear-gradient(top, #C9D6FF, #E3D2FF); background: linear-gradient(to bottom, #C9D6FF, #E3D2FF); }
+  body.p-afternoon { color: #25254F; }
+  body.p-afternoon .chk { border-color: #25254F; }
+  body.p-afternoon .clk-tick, body.p-afternoon .clk-hour { stroke: #25254F; }
+  body.p-afternoon .clk-num, body.p-afternoon .clk-hub { fill: #25254F; }
+  body.p-afternoon .clk-min { stroke: #4C4FD6; }
+  body.p-afternoon .clk-sec { stroke: #E5484D; }
+  body.p-afternoon .c-next { background: #4C4FD6; color: #FFFFFF; }
+  body.p-afternoon .sbtn, body.p-afternoon .cbtn { background: rgba(255,255,255,0.80); color: #2A1F57; }
+  .bg.p-evening { background: #A48CEB; background: -webkit-linear-gradient(top, #A48CEB, #7D68D1); background: linear-gradient(to bottom, #A48CEB, #7D68D1); }
+  body.p-evening { color: #2A1F57; }
+  body.p-evening .chk { border-color: #2A1F57; }
+  body.p-evening .clk-tick, body.p-evening .clk-hour { stroke: #2A1F57; }
+  body.p-evening .clk-num, body.p-evening .clk-hub { fill: #2A1F57; }
+  body.p-evening .clk-min { stroke: #5B3FC4; }
+  body.p-evening .clk-sec { stroke: #E5484D; }
+  body.p-evening .c-next { background: #5B3FC4; color: #FFFFFF; }
+  body.p-evening .sbtn, body.p-evening .cbtn { background: rgba(255,255,255,0.80); color: #2A1F57; }
+  .bg.p-night { background: #2B3363; background: -webkit-linear-gradient(top, #2B3363, #1B2147); background: linear-gradient(to bottom, #2B3363, #1B2147); }
+  body.p-night { color: #F3F0FF; }
+  body.p-night .chk { border-color: #F3F0FF; }
+  body.p-night .clk-tick, body.p-night .clk-hour { stroke: #F3F0FF; }
+  body.p-night .clk-num, body.p-night .clk-hub { fill: #F3F0FF; }
+  body.p-night .clk-min { stroke: #FFD166; }
+  body.p-night .clk-sec { stroke: #FF8FA3; }
+  body.p-night .c-next { background: #FFD166; color: #1B2147; }
+  body.p-night .sbtn, body.p-night .cbtn { background: rgba(46,55,104,0.92); color: #F3F0FF; }
+
+  /* 디지털 시각·날짜 (배경·윤곽선 없음) */
+  #digital, #dateline { text-align: center; white-space: nowrap; }
+  #d-time { font-weight: bold; -webkit-font-feature-settings: "tnum"; font-feature-settings: "tnum"; }
+  #d-date { font-weight: bold; }
+  body.landscape #d-time { font-size: 72px; line-height: 84px; }
+  body.landscape #d-date { font-size: 26px; line-height: 32px; }
+  body.portrait #d-time { font-size: 64px; line-height: 76px; }
+  body.portrait #d-date { font-size: 24px; line-height: 30px; }
 
   /* 오늘 할 일 */
-  #sch-head { position: relative; height: 40px; line-height: 40px; white-space: nowrap; }
-  #sch-title { font-size: 22px; color: #555; font-weight: bold; }
+  #sch-head { position: relative; height: 52px; line-height: 52px; white-space: nowrap; }
+  #sch-title { font-size: 27px; font-weight: bold; }
   #sch-right { position: absolute; right: 0; top: 0; }
-  #sch-left { font-size: 18px; color: #888; margin-right: 10px; vertical-align: middle; }
+  #sch-left { font-size: 18px; font-weight: bold; margin-right: 8px; vertical-align: middle; }
   .sbtn {
-    display: inline-block; height: 36px; line-height: 36px; padding: 0 16px;
-    border-radius: 18px; background: #e4ded2; color: #444;
-    font-size: 18px; font-weight: bold; vertical-align: middle; cursor: pointer;
+    display: inline-block; height: 44px; line-height: 44px; padding: 0 16px;
+    border-radius: 22px; background: #e4ded2; color: #444;
+    font-size: 20px; font-weight: bold; vertical-align: middle; cursor: pointer;
   }
+  #sch-cards { margin-top: 24px; }
+  body.portrait #sch-cards { margin-top: 16px; }
   .card {
-    position: relative; height: 58px; margin-top: 6px;
-    background: #fff; border-radius: 14px; border: 2px solid #e2ddd4;
-    white-space: nowrap; overflow: hidden;
-    -webkit-box-sizing: border-box; box-sizing: border-box;
+    position: relative; margin-top: 14px; background: none; border: 0;
+    overflow: hidden; -webkit-box-sizing: border-box; box-sizing: border-box;
   }
-  .card.first { border-color: #f0a640; background: #fff4dc; }
-  .card.first .c-time { color: #c46d00; }
-  .card.done .c-time, .card.done .c-icon, .card.done .c-textbox { opacity: 0.4; }
-  .card.msg { text-align: center; line-height: 54px; font-size: 28px; font-weight: bold; color: #555; }
-  .chk-hit { position: absolute; left: 0; top: 0; width: 64px; height: 54px; cursor: pointer; }
+  body.landscape .card { height: 104px; }
+  body.portrait .card { height: 88px; margin-top: 12px; }
+  #sch-cards .card:first-child { margin-top: 0; }
+  .card.done .c-time, .card.done .c-textbox { opacity: 0.4; }
+  .card.msg { text-align: center; font-size: 28px; font-weight: bold; }
+  body.landscape .card.msg { line-height: 104px; }
+  body.portrait .card.msg { line-height: 88px; }
+  .chk-hit { position: absolute; left: 0; top: 0; width: 88px; height: 100%; cursor: pointer; }
   .chk {
-    position: absolute; left: 8px; top: 3px; width: 48px; height: 48px;
-    border-radius: 24px; border: 4px solid #a39a8c; background: #fff;
-    text-align: center; line-height: 40px; font-size: 30px; font-weight: bold; color: #fff;
+    position: absolute; left: 16px; top: 50%; margin-top: -28px; width: 56px; height: 56px;
+    border-radius: 28px; border: 4px solid #333; background: transparent;
+    text-align: center; line-height: 48px; font-size: 34px; font-weight: bold; color: #fff;
     -webkit-box-sizing: border-box; box-sizing: border-box;
   }
-  .card.first .chk { border-color: #f0a640; }
-  .card.done .chk { background: #6bbf59; border-color: #6bbf59; }
-  .chk-hit.down .chk { background: #e8e2d6; }
-  .c-time { position: absolute; left: 64px; top: 0; width: 84px; line-height: 54px; font-size: 26px; font-weight: bold; color: #555; }
-  .c-icon { position: absolute; left: 148px; top: 0; width: 46px; line-height: 54px; font-size: 30px; text-align: center; }
-  .c-textbox { position: absolute; left: 196px; right: 10px; top: 0; height: 54px; overflow: hidden; }
-  .c-text { display: inline-block; white-space: nowrap; line-height: 54px; font-size: 28px; }
+  .card.done .chk { background: #6bbf59; border-color: #6bbf59 !important; }
+  .chk-hit.down .chk { background: rgba(0,0,0,0.12); }
+  .c-time { position: absolute; right: 14px; top: 50%; margin-top: -4px; width: 76px; line-height: 28px; font-size: 22px; font-weight: bold; text-align: right; }
+  .c-next { position: absolute; right: 14px; top: 50%; margin-top: -34px; height: 26px; line-height: 26px; padding: 0 10px; border-radius: 13px; font-size: 17px; font-weight: bold; }
+  .c-textbox { position: absolute; left: 88px; top: 0; bottom: 0; width: -webkit-calc(100% - 184px); width: calc(100% - 184px); height: 100%; display: table; }
+  .c-text { display: table-cell; vertical-align: middle; font-size: 28px; line-height: 34px; font-weight: bold; }
+
+  /* 포켓몬 수·숨기기 조작 (아이용, 큰 버튼) */
+  #ctl { position: absolute; z-index: 3; white-space: nowrap; }
+  .crow { display: inline-block; vertical-align: top; }
+  body.landscape .crow + .crow { margin-left: 16px; }
+  body.portrait .crow { display: block; margin-bottom: 10px; }
+  .cbtn {
+    display: inline-block; height: 60px; line-height: 60px; min-width: 60px; text-align: center;
+    border-radius: 30px; font-size: 28px; font-weight: bold; vertical-align: top; cursor: pointer;
+    -webkit-box-sizing: border-box; box-sizing: border-box;
+  }
+  .cbtn.wide { padding: 0 22px; font-size: 24px; }
+  .cbtn.down { opacity: 0.6; }
+  #cnt-label { display: inline-block; width: 64px; height: 60px; line-height: 60px; text-align: center; font-size: 22px; font-weight: bold; vertical-align: top; }
 
   /* 통화 버튼: 그룹(엄마·아빠) = 영상(왼쪽, 넓게) + 음성(오른쪽, 좁게). 진짜 링크 <a> (IPD-TASK-006) */
   .callgrp { position: absolute; }
@@ -108,10 +220,14 @@
   .call .in { display: inline-block; vertical-align: middle; line-height: 1.15; white-space: nowrap; }
   .call.video { color: #fff; }
   .call.audio { border: 5px solid; line-height: 114px; }
-  .mom .call.video { background: #e2657f; }
-  .dad .call.video { background: #3f7fd0; }
-  .mom .call.audio { background: #fbe4e9; border-color: #e2657f; color: #c2465f; }
-  .dad .call.audio { background: #e2ecf8; border-color: #3f7fd0; color: #2d63a8; }
+  .mom .call.video { background: #D6336C; }
+  .dad .call.video { background: #1C6FD1; }
+  .mom .call.audio { background: #FDE8F0; border-color: #D6336C; color: #A81F52; }
+  .dad .call.audio { background: #E6F0FC; border-color: #1C6FD1; color: #1456A8; }
+  body.p-night .mom .call.video { background: #B0245A; }
+  body.p-night .dad .call.video { background: #155AAE; }
+  body.p-night .mom .call.audio { background: #2E3768; border-color: #B0245A; color: #F3F0FF; }
+  body.p-night .dad .call.audio { background: #2E3768; border-color: #155AAE; color: #F3F0FF; }
   .call.off { opacity: 0.35; }
   .call:active { opacity: 0.7; }
   .call.off:active { opacity: 0.35; }
@@ -126,12 +242,12 @@
   #corner { position: absolute; z-index: 20; background: rgba(0, 0, 0, 0); box-sizing: border-box;
     border-left: 3px dashed rgba(42, 31, 87, 0.30); border-bottom: 3px dashed rgba(42, 31, 87, 0.30);
     border-bottom-left-radius: 28px; }
-  #frame.dark #corner { border-left-color: rgba(255, 255, 255, 0.35); border-bottom-color: rgba(255, 255, 255, 0.35); }
+  body.p-night #corner { border-left-color: rgba(255, 255, 255, 0.35); border-bottom-color: rgba(255, 255, 255, 0.35); }
 
   /* 덮개 공통 */
   .ov {
     position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-    display: none; background: #f6f3ee; z-index: 50;
+    display: none; background: #f6f3ee; color: #222; z-index: 50;
   }
   .ov-head { position: absolute; left: 0; right: 0; top: 0; height: 80px; background: #3a3f4b; color: #fff; }
   .ov-title { position: absolute; left: 24px; top: 0; line-height: 80px; font-size: 30px; font-weight: bold; white-space: nowrap; }
@@ -147,7 +263,12 @@
     -webkit-box-sizing: border-box; box-sizing: border-box;
   }
   #all-ov { z-index: 50; }
-  #all-body .card { margin-top: 10px; }
+  #all-body .card { margin-top: 10px; height: 84px; background: #fff; border: 2px solid #e2ddd4; border-radius: 14px; color: #222; }
+  #all-body .card.msg { line-height: 80px; }
+  #all-body .chk { border-color: #a39a8c; }
+  #all-body .card.first { border-color: #f0a640; background: #fff4dc; }
+  #all-body .card.first .c-next { background: #f0a640; color: #fff; }
+  #all-body .c-time { color: #555; }
 
   /* 설정 화면 */
   #set-ov { z-index: 60; }
@@ -175,7 +296,6 @@
   .item-info.past { opacity: 0.55; }
   .item.haspick .item-info { margin-left: 56px; }
   .i-time { font-size: 22px; font-weight: bold; margin-right: 8px; }
-  .i-icon { font-size: 26px; margin-right: 8px; }
   .i-text { font-size: 22px; }
   .i-when { font-size: 18px; color: #777; margin-top: 2px; }
   .item-btns { position: absolute; right: 0; top: 6px; }
@@ -290,12 +410,18 @@
 </head>
 <body ontouchstart="">
 
-<div id="ditto" class="box">
-  <div id="frame"><div id="ph-label"></div></div>
-  <div id="bubble"></div>
-</div>
+<div id="bgA" class="bg"></div>
+<div id="bgB" class="bg"></div>
+<div id="glow"></div>
+<div id="stage"></div>
 <div id="clock" class="box"></div>
-<div id="digital" class="box"><span id="d-time"></span><span id="d-date"></span></div>
+<div id="cbubble"></div>
+<div id="digital" class="box"><span id="d-time"></span></div>
+<div id="dateline" class="box"><span id="d-date"></span></div>
+<div id="ctl" class="box">
+  <div class="crow"><span id="cnt-minus" class="cbtn">－</span><span id="cnt-label"></span><span id="cnt-plus" class="cbtn">＋</span></div>
+  <div class="crow"><span id="hide-btn" class="cbtn wide">포켓몬 숨기기</span></div>
+</div>
 <div id="schedule" class="box">
   <div id="sch-head"><span id="sch-title">오늘 할 일</span><span id="sch-right"><span id="sch-left"></span><span id="sch-all" class="sbtn">전체 보기</span></span></div>
   <div id="sch-cards"></div>
@@ -324,7 +450,6 @@
       <div class="ed-row"><span class="lab">종류</span><span class="seg" data-kind="daily">매일 (루틴)</span><span class="seg" data-kind="weekday">요일 (루틴)</span><span class="seg" data-kind="date">날짜 (일정)</span></div>
       <div id="ed-days-row" class="ed-row"><span class="lab">요일</span><span class="day" data-d="1">월</span><span class="day" data-d="2">화</span><span class="day" data-d="3">수</span><span class="day" data-d="4">목</span><span class="day" data-d="5">금</span><span class="day" data-d="6">토</span><span class="day" data-d="0">일</span><span class="ed-sub"><span class="seg" data-quick="wk">평일</span><span class="seg" data-quick="we">주말</span></span></div>
       <div id="ed-date-row" class="ed-row"><span class="lab">날짜</span><input id="ed-date" type="date"></div>
-      <div class="ed-row"><span class="lab">아이콘</span><span id="ed-icons"></span></div>
       <div class="ed-row"><span id="ed-save" class="btn primary">저장</span><span id="ed-cancel" class="btn">취소</span><span id="ed-del" class="btn danger">지우기</span></div>
     </div>
 
@@ -382,11 +507,6 @@
     </div>
     <div class="sec"><h2>화면 옵션</h2><p>다음 작업에서 만들어요.</p></div>
 
-    <div class="sec">
-      <h2>아이콘 점검 (임시)</h2>
-      <p>네모(□)나 빈칸으로 나오는 아이콘이 있는지 봐 주세요. 확인 후 다음 작업에서 정리합니다.</p>
-      <div id="icon-check"></div>
-    </div>
     <div id="set-ver" class="small"></div>
   </div>
 </div>
@@ -430,7 +550,7 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.2.2';
+  var VERSION = '4.3.0';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
@@ -442,12 +562,12 @@
 
   // 구간별 이름·말풍선·자리표시 색. manifest에는 이 값이 없어서 여기 둔다 (A5-2).
   var PERIOD_TEXT = {
-    morning:   { name: '아침', bubble: '좋은 아침!',     color: '#ffe7a8', dark: false },
-    forenoon:  { name: '오전', bubble: '오늘도 힘내자',  color: '#cdebff', dark: false },
-    noon:      { name: '점심', bubble: '점심 시간이야',  color: '#ffd6c2', dark: false },
-    afternoon: { name: '오후', bubble: '간식 먹을까?',   color: '#d9f2c9', dark: false },
-    evening:   { name: '저녁', bubble: '저녁이야',       color: '#e3d3f5', dark: false },
-    night:     { name: '밤',   bubble: '잘 자',          color: '#2e3a63', dark: true }
+    morning:   { name: '아침', bubble: '좋은 아침!',     lines: ['좋은 아침!', '잘 잤어?', '세수하러 가자', '오늘도 신나게 시작!'], color: '#ffe7a8', dark: false },
+    forenoon:  { name: '오전', bubble: '오늘도 힘내자',  lines: ['오늘도 힘내자', '잘하고 있어', '물 한 모금 마실까?', '천천히 해도 괜찮아'], color: '#cdebff', dark: false },
+    noon:      { name: '점심', bubble: '점심 시간이야',  lines: ['점심 시간이야', '맛있게 먹자', '손 씻었어?', '냠냠 배고프다'], color: '#ffd6c2', dark: false },
+    afternoon: { name: '오후', bubble: '간식 먹을까?',   lines: ['간식 먹을까?', '같이 놀자', '오늘 뭐 했어?', '쉬어도 좋아'], color: '#d9f2c9', dark: false },
+    evening:   { name: '저녁', bubble: '저녁이야',       lines: ['저녁이야', '오늘 수고했어', '이제 씻을 시간!', '배고파졌어?'], color: '#e3d3f5', dark: false },
+    night:     { name: '밤',   bubble: '잘 자',          lines: ['잘 자', '내일 또 보자', '이제 눈 감자', '쿨쿨…'], color: '#2e3a63', dark: true }
   };
   var PERIOD_ORDER = ['morning', 'forenoon', 'noon', 'afternoon', 'evening', 'night'];
   // manifest를 못 읽었을 때 쓰는 기본 구간 (이미지 없음 → 자리표시)
@@ -481,27 +601,8 @@
   var SET_IDLE_MS = 3 * 60000;           // 설정 화면: 3분 동안 조작 없으면 닫고 메인으로
   var PIN_IDLE_MS = 1 * 60000;           // PIN 입력·정하기·다시 정하기·확인 창: 1분
   var IDLE_WARN_MS = 15000;              // 닫히기 15초 전부터 안내
-  var MARQUEE_WAIT = 2000, MARQUEE_SPEED = 40; // 긴 글 흐르기: 앞뒤 2초 멈춤, 초당 40px
   var TIME_RE = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
   var HEX64 = /^[0-9a-f]{64}$/, HEX32 = /^[0-9a-f]{32}$/;
-
-  // 아이콘 후보: iOS 10.3에 있는 오래된 이모지만 (iPad에서 □로 나오는지 점검 영역으로 확인)
-  var ICONS = [
-    { c: '⏰', n: '알람시계', u: '23F0' },
-    { c: '😁', n: '이 보이는 웃음', u: '1F601' },
-    { c: '🍚', n: '밥', u: '1F35A' },
-    { c: '🍎', n: '사과', u: '1F34E' },
-    { c: '🎒', n: '책가방', u: '1F392' },
-    { c: '🏫', n: '학교', u: '1F3EB' },
-    { c: '🚌', n: '버스', u: '1F68C' },
-    { c: '🚗', n: '자동차', u: '1F697' },
-    { c: '📚', n: '책', u: '1F4DA' },
-    { c: '✏️', n: '연필', u: '270F FE0F' },
-    { c: '⚽', n: '축구공', u: '26BD' },
-    { c: '🎹', n: '피아노', u: '1F3B9' },
-    { c: '🛁', n: '욕조', u: '1F6C1' },
-    { c: '💤', n: '잠', u: '1F4A4' }
-  ];
 
   function $(id) { return document.getElementById(id); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -956,7 +1057,7 @@
   function markDown(target, stop) {
     var n = target;
     while (n && n !== stop && n.nodeType === 1) {
-      if (/(^| )(btn|key|bigbtn|sbtn|chk-hit|seg|day|ico|pick)( |$)/.test(n.className)) {
+      if (/(^| )(btn|key|bigbtn|sbtn|cbtn|chk-hit|seg|day|pick)( |$)/.test(n.className)) {
         downEl = n; n.className += ' down'; return;
       }
       n = n.parentNode;
@@ -1187,14 +1288,15 @@
     return { items: items, rest: rest, doneN: doneN };
   }
 
+  // 카드 = [체크 원] [글 최대 2줄] [시각]. 맨 위(아직 안 한 첫 일)는 "다음" 표시. 아이콘 칸 없음(v1.28)
   function makeCard(it, isDoneCard, isFirst) {
     var card = el('div', 'card' + (isDoneCard ? ' done' : '') + (isFirst ? ' first' : ''));
     var hit = el('div', 'chk-hit');
     hit.setAttribute('data-chk', it.id);
     hit.appendChild(el('span', 'chk', isDoneCard ? '✓' : ''));
     card.appendChild(hit);
+    if (isFirst) { card.appendChild(el('span', 'c-next', '다음')); }
     card.appendChild(el('span', 'c-time', it.time));
-    card.appendChild(el('span', 'c-icon', it.icon || ''));
     var box = el('span', 'c-textbox');
     box.appendChild(el('span', 'c-text', it.text));
     card.appendChild(box);
@@ -1219,7 +1321,7 @@
       }
     }
     if (allOpen) { renderAll(t); }
-    setupMarquees();
+    if (typeof buildWalls === 'function') { buildWalls(); }
   }
 
   // --- 전체 보기 창 (아이용): 오늘 할 일 전부, 체크한 것은 흐리게 + ✓ ---
@@ -1242,54 +1344,14 @@
     show('all-ov', true);
     renderAll();
     $('all-body').scrollTop = 0;
-    setupMarquees();
   }
   function closeAll() {
     allOpen = false;
     show('all-ov', false);
-    setupMarquees();
   }
   // tick()에서 매초 부른다
   function allTick() {
     if (allOpen && realNow() - allLast > ALL_IDLE_MS) { closeAll(); }
-  }
-
-  // --- 긴 글 흐르기: 칸을 넘는 글만, 앞뒤 2초 멈춤. tick()이 1초마다 단계를 넘긴다 ---
-  var marquees = [];
-  function setupMarquees() {
-    var i;
-    for (i = 0; i < marquees.length; i++) { resetMarquee(marquees[i].tx); }
-    marquees = [];
-    var boxes = document.querySelectorAll('.c-textbox');
-    for (i = 0; i < boxes.length; i++) {
-      var box = boxes[i], tx = box.firstChild;
-      if (!tx || !box.clientWidth) { continue; }
-      resetMarquee(tx);
-      var dist = tx.offsetWidth - box.clientWidth;
-      if (dist > 2) { marquees.push({ tx: tx, dist: dist + 6, phase: 0, t0: realNow() }); }
-    }
-  }
-  function resetMarquee(tx) {
-    tx.style.webkitTransition = 'none'; tx.style.transition = 'none';
-    tx.style.webkitTransform = 'translate3d(0,0,0)'; tx.style.transform = 'translate3d(0,0,0)';
-  }
-  function stepMarquees() {
-    var t = realNow();
-    for (var i = 0; i < marquees.length; i++) {
-      var m = marquees[i];
-      var dur = Math.max(1000, Math.round(m.dist / MARQUEE_SPEED * 1000));
-      if (m.phase === 0 && t - m.t0 >= MARQUEE_WAIT) {
-        var tr = (dur / 1000) + 's linear';
-        m.tx.style.webkitTransition = '-webkit-transform ' + tr;
-        m.tx.style.transition = 'transform ' + tr;
-        m.tx.style.webkitTransform = 'translate3d(-' + m.dist + 'px,0,0)';
-        m.tx.style.transform = 'translate3d(-' + m.dist + 'px,0,0)';
-        m.phase = 1; m.t0 = t;
-      } else if (m.phase === 1 && t - m.t0 >= dur + MARQUEE_WAIT) {
-        resetMarquee(m.tx);
-        m.phase = 0; m.t0 = t;
-      }
-    }
   }
 
   function onCheckTap(target, container) {
@@ -1368,7 +1430,6 @@
     }
     var info = el('div', 'item-info' + (past ? ' past' : ''));
     info.appendChild(el('span', 'i-time', it.time));
-    info.appendChild(el('span', 'i-icon', it.icon || ''));
     info.appendChild(el('span', 'i-text', it.text));
     info.appendChild(el('div', 'i-when', describe(it)));
     row.appendChild(info);
@@ -1817,20 +1878,6 @@
   // ---------------------------------------------------------------
   function buildUI() {
     var i;
-    // 아이콘 고르기 버튼·점검 영역
-    var icBox = $('ed-icons'), chk = $('icon-check');
-    var none = el('span', 'ico none', '없음'); none.setAttribute('data-icon', '');
-    icBox.appendChild(none);
-    for (i = 0; i < ICONS.length; i++) {
-      var b = el('span', 'ico', ICONS[i].c); b.setAttribute('data-icon', ICONS[i].c);
-      icBox.appendChild(b);
-      var cell = el('div', 'icheck');
-      cell.appendChild(el('b', '', ICONS[i].c));
-      cell.appendChild(el('span', '', ICONS[i].n));
-      cell.appendChild(el('span', '', 'U+' + ICONS[i].u));
-      chk.appendChild(cell);
-    }
-
     // 메인: 체크 버튼 / 전체 보기
     bindTap($('sch-cards'), function (t) { return onCheckTap(t, $('sch-cards')); });
     bindButton('sch-all', openAll);
@@ -1873,8 +1920,6 @@
       } else if ((n = findUp(t, box, 'data-d'))) {
         var d = +n.getAttribute('data-d'), p = ed.days.indexOf(d);
         if (p >= 0) { ed.days.splice(p, 1); } else { ed.days.push(d); }
-      } else if ((n = findUp(t, box, 'data-icon'))) {
-        ed.icon = n.getAttribute('data-icon');
       } else {
         return false;
       }
@@ -1961,34 +2006,35 @@
   }
   function buildClock() {
     var svg = svgEl('svg', { viewBox: '0 0 200 200' });
-    svgEl('circle', { cx: 100, cy: 100, r: 96, fill: '#ffffff', stroke: '#333333', 'stroke-width': 4 }, svg);
     var i, a, x1, y1, x2, y2;
     for (i = 0; i < 60; i++) {
       a = i * 6 * Math.PI / 180;
       var major = (i % 5 === 0);
-      var r1 = major ? 82 : 87;
+      var r1 = major ? 84 : 89;
       x1 = 100 + Math.sin(a) * r1; y1 = 100 - Math.cos(a) * r1;
-      x2 = 100 + Math.sin(a) * 92; y2 = 100 - Math.cos(a) * 92;
+      x2 = 100 + Math.sin(a) * 96; y2 = 100 - Math.cos(a) * 96;
       svgEl('line', {
+        'class': major ? 'clk-tick' : 'clk-tick clk-minor',
         x1: x1.toFixed(2), y1: y1.toFixed(2), x2: x2.toFixed(2), y2: y2.toFixed(2),
-        stroke: major ? '#333333' : '#bbbbbb', 'stroke-width': major ? 3 : 1, 'stroke-linecap': 'round'
+        'stroke-width': major ? 3.5 : 1.6, 'stroke-linecap': 'round'
       }, svg);
     }
     for (i = 1; i <= 12; i++) {
       a = i * 30 * Math.PI / 180;
       var t = svgEl('text', {
+        'class': 'clk-num',
         x: (100 + Math.sin(a) * 68).toFixed(2),
-        y: (100 - Math.cos(a) * 68 + 6).toFixed(2),
-        'text-anchor': 'middle', 'font-size': 17, 'font-weight': 'bold', fill: '#222222',
+        y: (100 - Math.cos(a) * 68 + 7).toFixed(2),
+        'text-anchor': 'middle', 'font-size': 21, 'font-weight': 'bold',
         'font-family': '-apple-system, Helvetica, Arial, sans-serif'
       }, svg);
       t.textContent = String(i);
     }
-    // 시침: 짧고 굵게(남색) / 분침: 길고 가늘게(주황) / 초침: 가늘고 흐리게
-    hands.hour = svgEl('line', { x1: 100, y1: 108, x2: 100, y2: 52, stroke: '#1f4e9c', 'stroke-width': 8, 'stroke-linecap': 'round' }, svg);
-    hands.minute = svgEl('line', { x1: 100, y1: 110, x2: 100, y2: 26, stroke: '#e0662c', 'stroke-width': 4, 'stroke-linecap': 'round' }, svg);
-    hands.second = svgEl('line', { x1: 100, y1: 114, x2: 100, y2: 22, stroke: '#c4c4c4', 'stroke-width': 1.2, 'stroke-linecap': 'round' }, svg);
-    svgEl('circle', { cx: 100, cy: 100, r: 5, fill: '#333333' }, svg);
+    // 시침: 짧고 굵게 / 분침: 길고 가늘게(강조색) / 초침: 가늘게
+    hands.hour = svgEl('line', { 'class': 'clk-hour', x1: 100, y1: 108, x2: 100, y2: 52, 'stroke-width': 9, 'stroke-linecap': 'round' }, svg);
+    hands.minute = svgEl('line', { 'class': 'clk-min', x1: 100, y1: 110, x2: 100, y2: 26, 'stroke-width': 5, 'stroke-linecap': 'round' }, svg);
+    hands.second = svgEl('line', { 'class': 'clk-sec', x1: 100, y1: 114, x2: 100, y2: 22, 'stroke-width': 1.8, 'stroke-linecap': 'round' }, svg);
+    svgEl('circle', { 'class': 'clk-hub', cx: 100, cy: 100, r: 6 }, svg);
     $('clock').appendChild(svg);
   }
   var angles = { hour: 0, minute: 0, second: 0 };
@@ -2003,55 +2049,391 @@
   }
 
   // ---------------------------------------------------------------
-  // 메타몽 이미지 (구간이 바뀔 때만 교체, 짧은 페이드)
+  // 구간 톤·배경 (A5-6): 배경 두 층을 겹쳐 위층 투명도만 1.2초 바꾼다
   // ---------------------------------------------------------------
   var state = { key: null, current: null, image: null, manifestDone: false };
-  var curImg = null;
-  var loadToken = 0;
-
-  function showPlaceholder(on) {
-    $('ph-label').style.display = on ? 'block' : 'none';
+  var W = 0, H = 0, landscape = true, toneId = 'morning', bgCur = '', bgTimer = null;
+  function applyBodyClass() {
+    document.body.className = (landscape ? 'landscape' : 'portrait') + ' p-' + toneId;
   }
-  function removeLater(node) {
-    setTimeout(function () {
-      if (node.parentNode) { node.parentNode.removeChild(node); }
-    }, 900);
+  function finishBg() {
+    if (bgTimer === null) { return; }
+    clearTimeout(bgTimer); bgTimer = null;
+    var a = $('bgA'), b = $('bgB');
+    a.className = 'bg p-' + bgCur;
+    b.style.webkitTransition = 'none'; b.style.transition = 'none';
+    b.style.opacity = 0;
+    b.offsetWidth;
+    b.style.webkitTransition = ''; b.style.transition = '';
   }
-  function showPeriod(info) {
-    var p = info.period;
-    var txt = PERIOD_TEXT[p.id] || { name: p.id, bubble: '', color: '#dddddd', dark: false };
-    var frame = $('frame');
-    frame.style.backgroundColor = txt.color;
-    frame.className = txt.dark ? 'dark' : '';
-    $('ph-label').textContent = txt.name;
-    var name = pickImage(p, info.dayNo);
-    state.image = name;
-    var token = ++loadToken;
-
-    if (!name) {
-      if (curImg) { curImg.className = ''; removeLater(curImg); curImg = null; }
-      showPlaceholder(state.manifestDone);
+  function setBg(id) {
+    var a = $('bgA'), b = $('bgB');
+    if (bgCur === id) { return; }
+    finishBg();
+    if (bgCur === '') {
+      a.className = 'bg p-' + id;
+      a.style.webkitTransition = 'none'; a.style.transition = 'none';
+      a.style.opacity = 1;
+      a.offsetWidth;
+      a.style.webkitTransition = ''; a.style.transition = '';
+      bgCur = id;
       return;
     }
-    var img = document.createElement('img');
-    img.alt = '';
-    img.onload = function () {
-      if (token !== loadToken) { if (img.parentNode) { img.parentNode.removeChild(img); } return; }
-      showPlaceholder(false);
-      var old = curImg;
-      curImg = img;
-      img.offsetWidth; // 페이드가 일어나도록 먼저 그리게 한다
-      img.className = 'on';
-      if (old) { old.className = ''; removeLater(old); }
-    };
-    img.onerror = function () {
-      if (img.parentNode) { img.parentNode.removeChild(img); }
-      if (token !== loadToken) { return; }
-      if (curImg) { curImg.className = ''; removeLater(curImg); curImg = null; }
-      showPlaceholder(true);
-    };
-    frame.appendChild(img);
-    img.src = withVersion(BASE + name);
+    bgCur = id;
+    b.className = 'bg p-' + id;
+    b.offsetWidth;
+    b.style.opacity = 1;
+    bgTimer = setTimeout(function () { bgTimer = null; finishBgNow(); }, 1300);
+  }
+  function finishBgNow() {
+    var a = $('bgA'), b = $('bgB');
+    a.className = 'bg p-' + bgCur;
+    b.style.webkitTransition = 'none'; b.style.transition = 'none';
+    b.style.opacity = 0;
+    b.offsetWidth;
+    b.style.webkitTransition = ''; b.style.transition = '';
+  }
+  function setTone(id) {
+    toneId = id;
+    applyBodyClass();
+    setBg(id);
+  }
+
+  // ---------------------------------------------------------------
+  // 포켓몬 (A5-6): 구간 풀에서 n마리가 화면 전체를 돌아다니고 UI 뒤로 지나간다(통과 방식).
+  // 포켓몬 하나에 타이머는 p.timer(한 번짜리 setTimeout) 하나. 이동은 transform만, 폴짝·말풍선은 CSS 애니메이션.
+  // ---------------------------------------------------------------
+  var KEY_VIEW = 'ipd.view';
+  var SPRITE_DIR = 'assets/sprites/';
+  var POKE_H = 120, EDGE = 24, PICK_TRIES = 60, WALL_PAD = 8, HIDE_MS = 60000;
+  var MIN_N = 1, MAX_N = 5, DEF_N = 3;
+  var ALL = ['pikachu', 'psyduck', 'charmander', 'squirtle', 'bulbasaur', 'eevee', 'jigglypuff', 'clefairy',
+             'meowth', 'dragonite', 'slowpoke', 'muk', 'haunter', 'koffing', 'snorlax', 'original'];
+  var RATIO = { bulbasaur: 364 / 320, charmander: 279 / 320, clefairy: 323 / 320, dragonite: 297 / 320, eevee: 283 / 320,
+    haunter: 343 / 320, jigglypuff: 337 / 320, koffing: 333 / 320, meowth: 343 / 320, muk: 435 / 320, original: 425 / 320,
+    pikachu: 291 / 320, psyduck: 279 / 320, slowpoke: 381 / 320, snorlax: 276 / 320, squirtle: 323 / 320 };
+  // 포켓몬 이름(image 폴더 파일명). 말버릇은 확인된 것만: 피카츄의 "피카피카", 나머지는 자기 이름 부르기.
+  var SPECIES = {
+    bulbasaur: { ko: '이상해씨' }, charmander: { ko: '파이리' }, clefairy: { ko: '픽시' }, dragonite: { ko: '망나뇽' },
+    eevee: { ko: '이브이' }, haunter: { ko: '고스트' }, jigglypuff: { ko: '푸린' }, koffing: { ko: '또가스' },
+    meowth: { ko: '냐옹' }, muk: { ko: '질퍼기' }, original: { ko: '메타몽' }, psyduck: { ko: '고라파덕' },
+    pikachu: { ko: '피카츄', lines: ['피카피카!', '피카츄!'] }, slowpoke: { ko: '야돈' },
+    snorlax: { ko: '잠만보' }, squirtle: { ko: '꼬부기' }
+  };
+  var SPEEDS = {
+    day:     { min: 40, max: 70, restMin: 3, restMax: 8 },
+    evening: { min: 30, max: 50, restMin: 4, restMax: 10 },
+    night:   { min: 15, max: 25, restMin: 6, restMax: 14 }
+  };
+  var view = { n: DEF_N, hideUntil: 0 };
+  var pokes = [], walls = [], trash = [], batchTimer = null, greetTimer = null;
+  var needRespawn = false, wasHidden = false, lastLine = '';
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function hidden() { return view.hideUntil > realNow(); }
+  function loadView() {
+    var r = readJSON(KEY_VIEW);
+    if (r.ok && r.value && typeof r.value.n === 'number' && r.value.n >= MIN_N && r.value.n <= MAX_N) {
+      view.n = Math.floor(r.value.n);
+    }
+  }
+  function saveView() { lsSet(KEY_VIEW, JSON.stringify({ n: view.n })); }
+
+  // 구간 풀(manifest) 먼저, 모자라면 나머지에서 날짜로 돌려 채운다
+  function spriteKey(file) { return String(file).replace(/^ditto-/, '').replace(/\.jpg$/, ''); }
+  function pickSet(info, n) {
+    var pool = [], out = [], rest = [], i, k, imgs = (info && info.period.images) || [], day = info ? info.dayNo : 0, rot, start;
+    for (i = 0; i < imgs.length; i++) {
+      k = spriteKey(imgs[i]);
+      if (RATIO[k] && pool.indexOf(k) < 0) { pool.push(k); }
+    }
+    rot = pool.length ? ((day % pool.length) + pool.length) % pool.length : 0;
+    for (i = 0; i < pool.length && out.length < n; i++) { out.push(pool[(i + rot) % pool.length]); }
+    for (i = 0; i < ALL.length; i++) { if (pool.indexOf(ALL[i]) < 0) { rest.push(ALL[i]); } }
+    start = rest.length ? ((day % rest.length) + rest.length) % rest.length : 0;
+    for (i = 0; i < rest.length && out.length < n; i++) { out.push(rest[(i + start) % rest.length]); }
+    return out;
+  }
+
+  // 벽은 "쉬는 곳"을 고를 때만 쓴다. 걸어가는 길은 UI 뒤로 지나간다.
+  function rectOf(node) {
+    var r = node.getBoundingClientRect();
+    return { x: r.left, y: r.top, w: r.width, h: r.height };
+  }
+  function addWall(list, r) {
+    if (!r || r.w <= 0 || r.h <= 0) { return; }
+    list.push({ x0: r.x - WALL_PAD, y0: r.y - WALL_PAD, x1: r.x + r.w + WALL_PAD, y1: r.y + r.h + WALL_PAD });
+  }
+  function buildWalls() {
+    var list = [], i, cards;
+    if (!W) { return; }
+    addWall(list, rectOf($('clock')));
+    addWall(list, rectOf($('d-time')));
+    addWall(list, rectOf($('d-date')));
+    addWall(list, rectOf($('sch-head')));
+    cards = $('sch-cards').childNodes;
+    for (i = 0; i < cards.length; i++) { addWall(list, rectOf(cards[i])); }
+    addWall(list, rectOf($('call-0')));
+    addWall(list, rectOf($('call-1')));
+    addWall(list, rectOf($('ctl')));
+    walls = list;
+  }
+  function hitWall(x, y, p) {
+    var cx = p.w * 0.15, cy = p.h * 0.15;
+    var a0 = x + cx, b0 = y + cy, a1 = x + p.w - cx, b1 = y + p.h - cy, i, w;
+    for (i = 0; i < walls.length; i++) {
+      w = walls[i];
+      if (a0 < w.x1 && a1 > w.x0 && b0 < w.y1 && b1 > w.y0) { return true; }
+    }
+    return false;
+  }
+  function bounds(p) {
+    return { x0: EDGE, y0: EDGE, x1: Math.max(EDGE, W - EDGE - p.w), y1: Math.max(EDGE, H - EDGE - p.h) };
+  }
+  function setPos(p, x, y, sec) {
+    var v = 'translate3d(' + Math.round(x) + 'px,' + Math.round(y) + 'px,0)';
+    var t = sec > 0 ? sec.toFixed(2) + 's' : '0s';
+    p.el.style.webkitTransitionDuration = t; p.el.style.transitionDuration = t;
+    p.el.style.webkitTransform = v; p.el.style.transform = v;
+    p.x = x; p.y = y;
+  }
+  function currentXY(p) {   // 이동 중에 멈추면 지금 보이는 위치를 읽는다
+    var cs = window.getComputedStyle(p.el);
+    var tr = cs.transform || cs.webkitTransform || '';
+    var m = /matrix3d\(([^)]+)\)/.exec(tr), v;
+    if (m) { v = m[1].split(','); return { x: parseFloat(v[12]), y: parseFloat(v[13]) }; }
+    m = /matrix\(([^)]+)\)/.exec(tr);
+    if (m) { v = m[1].split(','); return { x: parseFloat(v[4]), y: parseFloat(v[5]) }; }
+    return { x: p.x, y: p.y };
+  }
+  function nearOthers(x, y, p) {
+    for (var i = 0; i < pokes.length; i++) {
+      var q = pokes[i];
+      if (q === p) { continue; }
+      var dx = q.tx - x, dy = q.ty - y;
+      if (dx * dx + dy * dy < 140 * 140) { return true; }
+    }
+    return false;
+  }
+  // 쉬는 곳: 벽과 안 겹치는 곳을 60번까지 고른다(다른 포켓몬과 140px는 되도록). 못 찾으면 마지막 후보.
+  function pickTarget(p) {
+    var b = bounds(p), x = b.x0, y = b.y0, i, wallOk = null;
+    for (i = 0; i < PICK_TRIES; i++) {
+      x = rand(b.x0, b.x1); y = rand(b.y0, b.y1);
+      if (hitWall(x, y, p)) { continue; }
+      if (!nearOthers(x, y, p)) { return { x: x, y: y }; }
+      if (!wallOk) { wallOk = { x: x, y: y }; }
+    }
+    return wallOk || { x: x, y: y };
+  }
+  function speedFor() { return SPEEDS[toneId === 'night' ? 'night' : (toneId === 'evening' ? 'evening' : 'day')]; }
+  function schedule(p, ms, fn) {
+    p.timer = setTimeout(function () { p.timer = 0; fn(p); }, ms);
+  }
+  function restartAnim(node, cls) {
+    node.classList.remove(cls);
+    void node.offsetWidth;
+    node.classList.add(cls);
+  }
+  function jump(p) {
+    p.nextJump = realNow() + rand(15, 40) * 1000;
+    restartAnim(p.hop, 'jump');
+  }
+  function rest(p) {
+    if (!p.alive || hidden()) { return; }
+    var sp = speedFor();
+    p.el.className = 'poke';
+    if (realNow() >= p.nextJump) { jump(p); }
+    schedule(p, rand(sp.restMin, sp.restMax) * 1000, walk);
+  }
+  function walk(p) {
+    if (!p.alive || hidden()) { return; }
+    var sp = speedFor(), t = pickTarget(p);
+    var dx = t.x - p.x, dy = t.y - p.y, dist = Math.sqrt(dx * dx + dy * dy);
+    var sec = Math.max(0.3, dist / rand(sp.min, sp.max));
+    p.tx = t.x; p.ty = t.y;
+    if (Math.abs(dx) > 4) { p.flip.className = dx < 0 ? 'flip left' : 'flip'; }
+    p.el.className = 'poke moving';
+    setPos(p, t.x, t.y, sec);
+    schedule(p, sec * 1000, rest);
+  }
+
+  // 말: 구간 대사 / 포켓몬 말버릇 / 다음 할 일 (직전과 같은 말은 피한다)
+  function nextTaskLine() {
+    var t = todayInfo();
+    return t.rest.length ? '다음 할 일은 ' + t.rest[0].text : '';
+  }
+  function periodLines() {
+    var t = state.current ? PERIOD_TEXT[state.current.period.id] : null;
+    return t ? t.lines : ['안녕!'];
+  }
+  function pickLine(p) {
+    var r = Math.random(), cand, nt = nextTaskLine(), sp = SPECIES[p.name], own, out = [], i;
+    own = sp ? (sp.lines || [sp.ko + '!']) : [];
+    if (nt && r < 0.34) { cand = [nt]; }
+    else if (own.length && r < 0.67) { cand = own; }
+    else { cand = periodLines(); }
+    for (i = 0; i < cand.length; i++) { if (cand[i] !== lastLine) { out.push(cand[i]); } }
+    if (!out.length) { out = cand; }
+    lastLine = out[Math.floor(Math.random() * out.length)];
+    return lastLine;
+  }
+  function showBubble(p, text) {
+    var c = currentXY(p), cx = c.x + p.w / 2, cls = 'bubble';
+    if (cx < 130) { cls += ' fold-l'; } else if (cx > W - 130) { cls += ' fold-r'; }
+    if (c.y < 90) { cls += ' below'; }
+    p.bubble.textContent = text;
+    p.bubble.className = cls;
+    p.el.style.zIndex = 3;   // 말하는 동안은 UI 위로 올려 말풍선이 글자에 가려지지 않게
+    restartAnim(p.bubble, 'show');
+  }
+  function onTap(p) {
+    jump(p);
+    showBubble(p, pickLine(p));
+  }
+  function endAnim(e) {
+    var t = e.target;
+    if (t.classList.contains('jump')) { t.classList.remove('jump'); }
+    if (t.classList.contains('show')) { t.classList.remove('show'); }
+  }
+
+  function makePoke(name) {
+    var p = { name: name, alive: true, timer: 0, x: 0, y: 0, tx: 0, ty: 0 };
+    p.h = POKE_H; p.w = Math.round(POKE_H * RATIO[name]);
+    p.el = el('div', 'poke');
+    p.fade = el('div', 'fade');
+    p.hop = el('div', 'hop');
+    p.bob = el('div', 'bob');
+    p.flip = el('div', 'flip');
+    p.img = document.createElement('img');
+    p.img.src = withVersion(SPRITE_DIR + name + '.png');
+    p.img.width = p.w; p.img.height = p.h; p.img.alt = '';
+    p.img.draggable = false;
+    p.bubble = el('div', 'bubble');
+    p.flip.appendChild(p.img); p.bob.appendChild(p.flip); p.hop.appendChild(p.bob);
+    p.fade.appendChild(p.hop);
+    p.el.appendChild(p.fade); p.el.appendChild(p.bubble);
+    // 리스너는 이 요소들에만 단다 → 요소를 지우면 함께 사라진다
+    p.img.addEventListener('click', function () { onTap(p); }, false);
+    p.hop.addEventListener('webkitAnimationEnd', endAnim, false);
+    p.hop.addEventListener('animationend', endAnim, false);
+    p.bubble.addEventListener('webkitAnimationEnd', function (e) { endAnim(e); p.el.style.zIndex = ''; }, false);
+    p.bubble.addEventListener('animationend', function (e) { endAnim(e); p.el.style.zIndex = ''; }, false);
+    p.fade.style.opacity = 0;
+    $('stage').appendChild(p.el);
+    var s0 = pickTarget(p);
+    setPos(p, s0.x, s0.y, 0);
+    p.tx = s0.x; p.ty = s0.y;
+    p.nextJump = realNow() + rand(15, 40) * 1000;
+    p.fade.offsetWidth;
+    p.fade.style.opacity = 1;
+    return p;
+  }
+  function destroyAll(immediate) {
+    var old = pokes, i, p;
+    pokes = [];
+    if (greetTimer !== null) { clearTimeout(greetTimer); greetTimer = null; }
+    for (i = 0; i < old.length; i++) {
+      p = old[i];
+      p.alive = false;
+      if (p.timer) { clearTimeout(p.timer); p.timer = 0; }
+      if (immediate) {
+        if (p.el.parentNode) { p.el.parentNode.removeChild(p.el); }
+      } else {
+        p.fade.style.opacity = 0;
+        trash.push(p.el);
+      }
+    }
+    if (trash.length && batchTimer === null) {
+      batchTimer = setTimeout(function () {
+        batchTimer = null;
+        for (var k = 0; k < trash.length; k++) {
+          if (trash[k].parentNode) { trash[k].parentNode.removeChild(trash[k]); }
+        }
+        trash = [];
+      }, 900);
+    }
+  }
+  function spawnSet() {
+    var names = pickSet(state.current, view.n), i, p;
+    state.image = names.join(',');
+    for (i = 0; i < names.length; i++) {
+      p = makePoke(names[i]);
+      pokes.push(p);
+      schedule(p, rand(300, 2500), walk);
+    }
+    // 새 구간이 시작되면 한 마리가 인사한다 (한 번짜리 타이머 하나)
+    greetTimer = setTimeout(function () {
+      greetTimer = null;
+      if (pokes.length && !hidden()) { showBubble(pokes[0], periodLines()[0]); }
+    }, 1500);
+  }
+  function respawn() {
+    if (!W || !state.manifestDone) { return; }
+    destroyAll(hidden());
+    if (hidden()) { needRespawn = true; return; }
+    needRespawn = false;
+    spawnSet();
+  }
+  // 회전·크기 변경 뒤: 화면 밖에 있는 포켓몬만 즉시 안으로 옮긴다
+  function relocateEdge() {
+    var i, p, c, b;
+    for (i = 0; i < pokes.length; i++) {
+      p = pokes[i];
+      c = currentXY(p); b = bounds(p);
+      if (c.x >= b.x0 && c.x <= b.x1 && c.y >= b.y0 && c.y <= b.y1) { continue; }
+      if (p.timer) { clearTimeout(p.timer); p.timer = 0; }
+      setPos(p, clamp(c.x, b.x0, b.x1), clamp(c.y, b.y0, b.y1), 0);
+      p.tx = p.x; p.ty = p.y;
+      p.el.className = 'poke';
+      if (!hidden()) { schedule(p, rand(300, 1500), walk); }
+    }
+  }
+  function ensureSprites() {
+    if (state.manifestDone && state.current && !pokes.length && !hidden()) { spawnSet(); }
+    else { relocateEdge(); }
+  }
+
+  // 아이용 조작: 포켓몬 수(1~5)와 1분 숨기기
+  function drawCtl() {
+    var left = Math.ceil((view.hideUntil - realNow()) / 1000);
+    $('cnt-label').textContent = view.n + '마리';
+    $('cnt-minus').style.opacity = view.n <= MIN_N ? 0.35 : 1;
+    $('cnt-plus').style.opacity = view.n >= MAX_N ? 0.35 : 1;
+    $('hide-btn').textContent = hidden() ? '다시 보기 (' + left + ')' : '포켓몬 숨기기';
+  }
+  function setCount(n) {
+    n = clamp(n, MIN_N, MAX_N);
+    if (n === view.n) { return; }
+    view.n = n;
+    saveView();
+    drawCtl();
+    respawn();
+  }
+  function applyHide() {
+    var h = hidden(), i, p;
+    wasHidden = h;
+    $('stage').style.display = h ? 'none' : 'block';
+    if (h) {
+      for (i = 0; i < pokes.length; i++) {
+        p = pokes[i];
+        if (p.timer) { clearTimeout(p.timer); p.timer = 0; }
+      }
+    } else if (needRespawn || !pokes.length) {
+      respawn();
+    } else {
+      for (i = 0; i < pokes.length; i++) { schedule(pokes[i], rand(300, 1500), walk); }
+    }
+    drawCtl();
+  }
+  function toggleHide() {
+    view.hideUntil = hidden() ? 0 : realNow() + HIDE_MS;
+    applyHide();
+  }
+  function onPeriod(info) {
+    setTone(info.period.id);
+    respawn();
   }
 
   // ---------------------------------------------------------------
@@ -2071,18 +2453,24 @@
       if (key !== state.key) {
         state.key = key;
         state.current = info;
-        showPeriod(info);
+        onPeriod(info);
       }
     }
-    var bubble = $('bubble');
-    var side = bubble.className.indexOf('side') >= 0 ? 'side' : 'top';
+    // 포켓몬 숨기기: 1분이 지나면 저절로 돌아온다. 숨는 동안 남은 초를 버튼에 보여 준다
+    if (view.hideUntil && !hidden()) { view.hideUntil = 0; applyHide(); }
+    else if (hidden()) { drawCtl(); }
+
+    // 시계를 누르면 5초 동안 지금 시각을 말풍선으로
+    var cb = $('cbubble');
     if (new Date().getTime() < tapUntil) {
-      bubble.textContent = timeSentence(d.getHours(), d.getMinutes());
-      bubble.className = side + ' time';
-    } else {
-      var t = state.current ? PERIOD_TEXT[state.current.period.id] : null;
-      bubble.textContent = t ? t.bubble : '';
-      bubble.className = side;
+      cb.textContent = timeSentence(d.getHours(), d.getMinutes());
+      cb.style.display = 'block';
+      var cr = rectOf($('clock'));
+      cb.style.maxWidth = Math.round(cr.w - 24) + 'px';
+      cb.style.left = Math.round(cr.x + cr.w / 2 - cb.offsetWidth / 2) + 'px';
+      cb.style.top = Math.round(cr.y + cr.h * 0.58 - cb.offsetHeight / 2) + 'px';
+    } else if (cb.style.display === 'block') {
+      cb.style.display = 'none';
     }
 
     // 할 일: 1분마다·날짜가 바뀔 때 다시 그린다 (날짜가 바뀌면 renderTodo 안에서 체크를 비움)
@@ -2091,7 +2479,6 @@
       minuteKey = mk;
       renderTodo();
     }
-    stepMarquees();
     pinTick();
     allTick();
     idleTick();
@@ -2110,79 +2497,52 @@
   }
 
   // ---------------------------------------------------------------
-  // 레이아웃: 방향은 innerWidth > innerHeight (A3-6)
+  // 레이아웃 (A5-6): 방향은 innerWidth > innerHeight (A3-6). 가로 1024×748, 세로 768×1004 기준
   // ---------------------------------------------------------------
-  var PAD = 16, CALL_H = 124, DIGI_H = 56, SCH_H = 40 + SHOW_CARDS * 64;
+  var PAD = 24, CALL_H = 124;
   function place(node, x, y, w, h) {
     node.style.left = Math.round(x) + 'px';
     node.style.top = Math.round(y) + 'px';
     node.style.width = Math.round(w) + 'px';
     if (h !== null) { node.style.height = Math.round(h) + 'px'; }
   }
-  function placeDitto(x, y, w, h) {
-    var box = $('ditto'), frame = $('frame'), bubble = $('bubble');
-    place(box, x, y, w, h);
-    var ih = h, iw = Math.round(h * 0.8);
-    if (iw > w) { iw = w; ih = Math.round(w * 1.25); }
-    var isTime = bubble.className.indexOf('time') >= 0 ? ' time' : '';
-    if (w - iw >= 300) {
-      // 옆 자리가 넉넉하면 그림 오른쪽에 말풍선
-      var bw = Math.min(380, w - iw - 28);
-      var left = Math.round((w - (iw + 28 + bw)) / 2);
-      place(frame, left, (h - ih) / 2, iw, ih);
-      bubble.className = 'side' + isTime;
-      place(bubble, left + iw + 28, 0, bw, null);
-      bubble.style.top = Math.round((h - bubble.offsetHeight) / 2) + 'px';
-    } else {
-      // 아니면 그림 위쪽에 겹쳐서
-      var fx = Math.round((w - iw) / 2), fy = Math.round((h - ih) / 2);
-      place(frame, fx, fy, iw, ih);
-      bubble.className = 'top' + isTime;
-      bubble.style.width = 'auto';
-      bubble.style.maxWidth = (iw - 32) + 'px';
-      bubble.style.left = (fx + 16) + 'px';
-      bubble.style.top = (fy + 16) + 'px';
-    }
-  }
   function layout() {
-    var W = window.innerWidth, H = window.innerHeight;
+    W = window.innerWidth; H = window.innerHeight;
     document.body.style.width = W + 'px';
     document.body.style.height = H + 'px';
-    var landscape = W > H;
-    document.body.className = landscape ? 'landscape' : 'portrait';
+    landscape = W > H;
+    applyBodyClass();
 
     var callY = H - PAD - CALL_H;
     var callW = (W - PAD * 3) / 2;
     placeCallGroup(0, PAD, callY, callW);
     placeCallGroup(1, PAD * 2 + callW, callY, callW);
 
-    var topH = callY - PAD * 2; // 위쪽 영역 높이
-    var c;
+    var c, ctl = $('ctl'), cl;
     if (landscape) {
-      // 왼쪽 55%: 메타몽 / 오른쪽: 시계 → 디지털 → 일정
-      var leftW = Math.round(W * 0.55) - PAD - PAD / 2;
-      var rx = PAD + leftW + PAD, rw = W - rx - PAD;
-      placeDitto(PAD, PAD, leftW, topH);
-      c = Math.min(300, rw, topH - DIGI_H - SCH_H - 16);
-      place($('clock'), rx + (rw - c) / 2, PAD, c, c);
-      place($('digital'), rx, PAD + c + 4, rw, DIGI_H);
-      place($('schedule'), rx, PAD + topH - SCH_H, rw, SCH_H);
+      // 왼쪽: 시계 → 디지털 → 날짜 → 조작 / 오른쪽: 제목 줄 → 카드 3개 / 아래: 통화
+      c = 360;
+      place($('clock'), PAD, PAD, c, c);
+      place($('digital'), PAD, 392, c, 84);
+      place($('dateline'), PAD, 486, c, 32);
+      place($('schedule'), W - 472, PAD, 448, null);
+      ctl.style.left = PAD + 'px'; ctl.style.top = '532px';
     } else {
-      // 세로: 메타몽 → 시계 → 디지털 → 일정 → 통화
-      var cw = W - PAD * 2;
-      var schY = callY - PAD - SCH_H;
-      var digiY = schY - 8 - DIGI_H;
-      var avail = digiY - 8 - PAD;
-      c = Math.min(300, Math.round(avail * 0.48));
-      var dittoH = avail - c - 12;
-      placeDitto(PAD, PAD, cw, dittoH);
-      place($('clock'), (W - c) / 2, PAD + dittoH + 12, c, c);
-      place($('digital'), PAD, digiY, cw, DIGI_H);
-      place($('schedule'), PAD, schY, cw, SCH_H);
+      // 세로: 시계(가운데) → 디지털 → 날짜 → 제목 줄 → 카드 3개 → 통화 / 조작은 시계 왼쪽 빈 자리
+      c = 320;
+      place($('clock'), (W - c) / 2, PAD, c, c);
+      place($('digital'), 0, 354, W, 76);
+      place($('dateline'), 0, 440, W, 30);
+      place($('schedule'), PAD, 488, W - PAD * 2, null);
+      ctl.style.left = PAD + 'px'; ctl.style.top = PAD + 'px';
     }
-    // 숨은 진입: 가로·세로 모두 오른쪽 위 모서리 (시계 탭·통화 버튼·말풍선과 겹치지 않는 곳)
+    cl = $('clock');
+    place($('glow'), cl.offsetLeft - c * 0.3, cl.offsetTop - c * 0.3, c * 1.6, c * 1.6);
+    // 숨은 진입: 가로·세로 모두 오른쪽 위 모서리
     place($('corner'), W - CORNER, 0, CORNER, CORNER);
-    setupMarquees();
+    drawCtl();
+    buildWalls();
+    ensureSprites();
   }
   function onResize() {
     layout();
@@ -2280,6 +2640,7 @@
   loadSettings();
   loadLock();
   loadDone();
+  loadView();
   buildClock();
   buildCalls();
   buildUI();
@@ -2289,9 +2650,11 @@
   $('clock').addEventListener('click', function () {
     tapUntil = new Date().getTime() + TAP_MS;
     render();
-    layout(); // 말풍선 길이가 바뀌므로 위치를 다시 맞춘다
-    setTimeout(function () { render(); layout(); }, TAP_MS + 50);
+    setTimeout(render, TAP_MS + 50);
   });
+  bindButton('cnt-minus', function () { setCount(view.n - 1); });
+  bindButton('cnt-plus', function () { setCount(view.n + 1); });
+  bindButton('hide-btn', toggleHide);
   window.addEventListener('resize', onResize);
   window.addEventListener('orientationchange', onResize);
 
@@ -2306,7 +2669,7 @@
     .catch(function () { /* 기본 구간 + 자리표시로 계속 동작 */ })
     .then(function () {
       state.manifestDone = true;
-      state.key = null; // 구간 다시 계산·이미지 다시 고르기
+      state.key = null; // 구간 다시 계산·포켓몬 다시 고르기
       render();
       layout();
     });
@@ -2343,7 +2706,7 @@
       for (var i = 0; i < cards.length; i++) {
         var c = cards[i];
         if (c.className.indexOf('msg') >= 0) { out.push(c.textContent); continue; }
-        out.push((c.className.indexOf('first') >= 0 ? '*' : '') + c.childNodes[1].textContent + ' ' + c.childNodes[3].textContent);
+        out.push((c.className.indexOf('first') >= 0 ? '*' : '') + c.querySelector('.c-text').textContent + ' ' + c.querySelector('.c-time').textContent);
       }
       return { title: $('sch-title').textContent, left: $('sch-left').textContent, cards: out, done: done };
     },
@@ -2352,7 +2715,8 @@
     checkRestore: checkRestore,
     sha256: sha256,
     timers: function () {
-      return { tick: timer !== null, press: press.timer !== null, marquees: marquees.length, idleBinds: idleBinds,
+      var pt = 0; for (var q = 0; q < pokes.length; q++) { if (pokes[q].timer) { pt++; } }
+      return { tick: timer !== null, press: press.timer !== null, pokes: pokes.length, pokeTimers: pt, bg: bgTimer !== null, idleBinds: idleBinds,
         callMsg: (callMsgTimer[0] !== null ? 1 : 0) + (callMsgTimer[1] !== null ? 1 : 0) };
     },
     // 통화 버튼 상태: 링크 문자열·글자·눌림 영역 (화면에 실제로 붙은 값)

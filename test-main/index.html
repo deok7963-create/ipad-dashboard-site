@@ -35,7 +35,7 @@
   body.p-night #glow { opacity: 0.35; }
 
   /* 포켓몬 층 (UI 아래). 이동은 transform만 바꾼다 */
-  #stage { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none; }
+  #stage { position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; }
   .poke {
     position: absolute; left: 0; top: 0; pointer-events: none;
     -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0);
@@ -2286,6 +2286,7 @@
     if (c.y < 90) { cls += ' below'; }
     p.bubble.textContent = text;
     p.bubble.className = cls;
+    p.el.style.zIndex = 3;   // 말하는 동안은 UI 위로 올려 말풍선이 글자에 가려지지 않게
     restartAnim(p.bubble, 'show');
   }
   function onTap(p) {
@@ -2318,8 +2319,8 @@
     p.img.addEventListener('click', function () { onTap(p); }, false);
     p.hop.addEventListener('webkitAnimationEnd', endAnim, false);
     p.hop.addEventListener('animationend', endAnim, false);
-    p.bubble.addEventListener('webkitAnimationEnd', endAnim, false);
-    p.bubble.addEventListener('animationend', endAnim, false);
+    p.bubble.addEventListener('webkitAnimationEnd', function (e) { endAnim(e); p.el.style.zIndex = ''; }, false);
+    p.bubble.addEventListener('animationend', function (e) { endAnim(e); p.el.style.zIndex = ''; }, false);
     p.fade.style.opacity = 0;
     $('stage').appendChild(p.el);
     var s0 = pickTarget(p);
