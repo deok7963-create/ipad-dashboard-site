@@ -269,6 +269,31 @@
     -webkit-box-sizing: border-box; box-sizing: border-box;
   }
   #all-ov { z-index: 50; }
+  #all-ov .ov-body { top: 136px; }
+  .ov-tabs { position: absolute; left: 0; right: 0; top: 80px; height: 56px; background: #e9e4da; }
+  .otab {
+    display: inline-block; margin: 8px 0 0 24px; height: 40px; line-height: 40px; padding: 0 30px;
+    border-radius: 20px; background: #fff; color: #222; font-size: 24px; font-weight: bold; cursor: pointer;
+  }
+  .otab.on { background: #3a3f4b; color: #fff; }
+  /* 위클리 표 (보기 전용) */
+  .wk-daily { margin: 0 0 12px; padding: 10px 14px; background: #fff; border: 2px solid #e2ddd4; border-radius: 12px; font-size: 20px; line-height: 28px; color: #222; }
+  .wk-daily b { margin-right: 10px; }
+  table.wk { width: 100%; table-layout: fixed; border-collapse: collapse; background: #fff; }
+  .wk th, .wk td { border: 1px solid #e2ddd4; vertical-align: top; padding: 8px 6px; }
+  .wk th { font-size: 22px; line-height: 26px; text-align: center; background: #f0ebe2; color: #222; }
+  .wk th small { display: block; font-size: 15px; font-weight: normal; color: #666; }
+  .wk th.sat { color: #1c6fd1; }
+  .wk th.sun { color: #c92a2a; }
+  .wk th.today { background: #f0a640; color: #fff; }
+  .wk th.today small { color: #fff; }
+  .wk td { height: 320px; }
+  .wk td.today { background: #fff4dc; }
+  .wk td.past { opacity: 0.5; }
+  .wk-it { margin-bottom: 10px; font-size: 18px; line-height: 23px; color: #222; word-wrap: break-word; }
+  .wk-it .wk-t { display: block; font-size: 14px; color: #666; }
+  .wk-it.dn { color: #888; text-decoration: line-through; }
+  .wk-none { color: #aaa; text-align: center; font-size: 16px; }
   #all-body .card { margin-top: 10px; height: 84px; background: #fff; border: 2px solid #e2ddd4; border-radius: 14px; color: #222; }
   #all-body .card.msg { line-height: 80px; }
   #all-body .chk { border-color: #a39a8c; }
@@ -438,6 +463,7 @@
 <!-- 오늘 할 일 전체 보기 (아이용, PIN 없음) -->
 <div id="all-ov" class="ov">
   <div class="ov-head"><span id="all-title" class="ov-title">오늘 할 일</span><span id="all-close" class="bigbtn">닫기</span></div>
+  <div class="ov-tabs"><span id="all-tab-today" class="otab on">오늘</span><span id="all-tab-week" class="otab">위클리</span></div>
   <div id="all-body" class="ov-body"></div>
 </div>
 
@@ -553,7 +579,7 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.3.7';
+  var VERSION = '4.4.0';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
@@ -1311,7 +1337,7 @@
     var total = t.items.length;
     $('sch-title').textContent = total ? '오늘 할 일 (' + t.doneN + '/' + total + ')' : '오늘 할 일';
     $('sch-left').textContent = t.rest.length > SHOW_CARDS ? '남은 일 ' + t.rest.length + '개' : '';
-    $('sch-all').style.display = total ? 'inline-block' : 'none';
+    $('sch-all').style.display = (total || weekHasAny()) ? 'inline-block' : 'none';
     var box = $('sch-cards');
     clearEl(box);
     if (!total) {
@@ -1328,8 +1354,77 @@
   }
 
   // --- 전체 보기 창 (아이용): 오늘 할 일 전부, 체크한 것은 흐리게 + ✓ ---
-  var allOpen = false, allLast = 0;
+  var allOpen = false, allLast = 0, allTab = 'today';
+  var WK_NAMES = ['월', '화', '수', '목', '금', '토', '일'];
+  // 이번 주(월~일) 7일의 Date
+  function weekDates() {
+    var d = now(), off = (d.getDay() + 6) % 7, out = [], i;
+    for (i = 0; i < 7; i++) { out.push(new Date(d.getFullYear(), d.getMonth(), d.getDate() - off + i)); }
+    return out;
+  }
+  // 이번 주에 요일·날짜 일정(매일 루틴 제외)이 하나라도 있는가
+  function weekHasAny() {
+    var days = weekDates(), i, j, list;
+    for (i = 0; i < days.length; i++) {
+      list = itemsFor(days[i]);
+      for (j = 0; j < list.length; j++) { if (list[j].repeat !== 'daily') { return true; } }
+    }
+    return false;
+  }
+  function renderWeek() {
+    var days = weekDates(), todayS = dateStr(now()), body = $('all-body'), i, j, list, it, daily = [], tr, th, td, row, tbl, tb;
+    ensureDoneDate(todayS);
+    $('all-title').textContent = '위클리 ' + (days[0].getMonth() + 1) + '/' + days[0].getDate() + ' ~ ' + (days[6].getMonth() + 1) + '/' + days[6].getDate();
+    clearEl(body);
+    list = itemsFor(days[0]);
+    for (j = 0; j < list.length; j++) { if (list[j].repeat === 'daily') { daily.push(list[j].text); } }
+    if (daily.length) {
+      row = el('div', 'wk-daily');
+      row.appendChild(el('b', '', '매일'));
+      row.appendChild(document.createTextNode(daily.join(' · ')));
+      body.appendChild(row);
+    }
+    tbl = el('table', 'wk');
+    tr = el('tr', '');
+    for (i = 0; i < 7; i++) {
+      th = el('th', (i === 5 ? 'sat' : (i === 6 ? 'sun' : '')) + (dateStr(days[i]) === todayS ? ' today' : ''), WK_NAMES[i]);
+      th.appendChild(el('small', '', (days[i].getMonth() + 1) + '/' + days[i].getDate()));
+      tr.appendChild(th);
+    }
+    tb = el('thead', ''); tb.appendChild(tr); tbl.appendChild(tb);
+    tr = el('tr', '');
+    for (i = 0; i < 7; i++) {
+      var ds = dateStr(days[i]);
+      td = el('td', ds === todayS ? 'today' : (ds < todayS ? 'past' : ''));
+      list = itemsFor(days[i]);
+      var n = 0;
+      for (j = 0; j < list.length; j++) {
+        it = list[j];
+        if (it.repeat === 'daily') { continue; }
+        n++;
+        row = el('div', 'wk-it' + (ds === todayS && isDone(it.id) ? ' dn' : ''));
+        row.appendChild(el('span', 'wk-t', it.time));
+        row.appendChild(document.createTextNode((ds === todayS && isDone(it.id) ? '✓ ' : '') + it.text));
+        td.appendChild(row);
+      }
+      if (!n) { td.appendChild(el('div', 'wk-none', '-')); }
+      tr.appendChild(td);
+    }
+    tb = el('tbody', ''); tb.appendChild(tr); tbl.appendChild(tb);
+    body.appendChild(tbl);
+  }
+  function paintTabs() {
+    $('all-tab-today').className = 'otab' + (allTab === 'today' ? ' on' : '');
+    $('all-tab-week').className = 'otab' + (allTab === 'week' ? ' on' : '');
+  }
+  function setTab(name) {
+    allTab = name; allLast = realNow();
+    paintTabs();
+    renderAll();
+    $('all-body').scrollTop = 0;
+  }
   function renderAll(t) {
+    if (allTab === 'week') { renderWeek(); return; }
     if (!t) { t = todayInfo(); }
     var total = t.items.length;
     $('all-title').textContent = '오늘 할 일 (' + t.doneN + '/' + total + ')';
@@ -1343,7 +1438,8 @@
     }
   }
   function openAll() {
-    allOpen = true; allLast = realNow();
+    allOpen = true; allLast = realNow(); allTab = 'today';
+    paintTabs();
     show('all-ov', true);
     renderAll();
     $('all-body').scrollTop = 0;
@@ -1859,6 +1955,8 @@
     bindTap($('all-body'), function (t) { allLast = realNow(); return onCheckTap(t, $('all-body')); });
     $('all-body').addEventListener('scroll', function () { allLast = realNow(); }, false);
     bindButton('all-close', closeAll);
+    bindButton('all-tab-today', function () { setTab('today'); });
+    bindButton('all-tab-week', function () { setTab('week'); });
 
     // PIN 키패드
     bindTap($('pin-keys'), function (t) {
