@@ -122,8 +122,11 @@
   }
   .callmsg .in { display: inline-block; vertical-align: middle; line-height: 1.25; padding: 0 12px; word-break: keep-all; }
 
-  /* 숨은 진입 영역 (보이지 않음) */
-  #corner { position: absolute; z-index: 20; background: rgba(0, 0, 0, 0); }
+  /* 설정 진입 영역: 위치를 알 수 있게 옅은 점선 표시만 한다(터치는 그대로 5초 길게 누르기) */
+  #corner { position: absolute; z-index: 20; background: rgba(0, 0, 0, 0); box-sizing: border-box;
+    border-left: 3px dashed rgba(42, 31, 87, 0.30); border-bottom: 3px dashed rgba(42, 31, 87, 0.30);
+    border-bottom-left-radius: 28px; }
+  #frame.dark #corner { border-left-color: rgba(255, 255, 255, 0.35); border-bottom-color: rgba(255, 255, 255, 0.35); }
 
   /* 덮개 공통 */
   .ov {
@@ -427,7 +430,7 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.2.1';
+  var VERSION = '4.2.2';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
