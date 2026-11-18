@@ -122,6 +122,7 @@ body.op70 .face, body.op70 .card, body.op70 .digi span:before, body.op70 .date s
 body.op55 .face, body.op55 .card, body.op55 .digi span:before, body.op55 .date span:before, body.op55 .title span:before { background: rgba(255,255,255,0.55); }
 body.op40 .face, body.op40 .card, body.op40 .digi span:before, body.op40 .date span:before, body.op40 .title span:before { background: rgba(255,255,255,0.40); }
 body.op25 .face, body.op25 .card, body.op25 .digi span:before, body.op25 .date span:before, body.op25 .title span:before { background: rgba(255,255,255,0.25); }
+body.op0 .face, body.op0 .card, body.op0 .digi span:before, body.op0 .date span:before, body.op0 .title span:before { background: rgba(255,255,255,0); }
 /* 밤(배경 교체): 카드·시계판 #2E3768, 글자 #F3F0FF, 윤곽선 #8E96D6, 강조 #FFD166, 초침 #FF8FA3 (A5-6 표, 시험용) */
 body.night .face, body.night .card, body.night .digi span:before, body.night .date span:before, body.night .title span:before { background: #2E3768; }
 body.night.op85 .face, body.night.op85 .card, body.night.op85 .digi span:before, body.night.op85 .date span:before, body.night.op85 .title span:before { background: rgba(46,55,104,0.85); }
@@ -129,6 +130,7 @@ body.night.op70 .face, body.night.op70 .card, body.night.op70 .digi span:before,
 body.night.op55 .face, body.night.op55 .card, body.night.op55 .digi span:before, body.night.op55 .date span:before, body.night.op55 .title span:before { background: rgba(46,55,104,0.55); }
 body.night.op40 .face, body.night.op40 .card, body.night.op40 .digi span:before, body.night.op40 .date span:before, body.night.op40 .title span:before { background: rgba(46,55,104,0.40); }
 body.night.op25 .face, body.night.op25 .card, body.night.op25 .digi span:before, body.night.op25 .date span:before, body.night.op25 .title span:before { background: rgba(46,55,104,0.25); }
+body.night.op0 .face, body.night.op0 .card, body.night.op0 .digi span:before, body.night.op0 .date span:before, body.night.op0 .title span:before { background: rgba(46,55,104,0); }
 body.night .face, body.night .card, body.night .card .chk { border-color: #8E96D6; }
 body.night .card.first { border-color: #FFD166; }
 body.night .card, body.night .digi, body.night .date, body.night .title { color: #F3F0FF; }
@@ -232,7 +234,7 @@ body.bdNone .face, body.bdNone .card { border-color: transparent !important; box
   // 이동 방식(IPD-TASK-014): 'pass' = 통과(길은 벽 무시, 쉬는 곳만 빈 곳) / 'wall' = 013 벽 / 'off' = 011 방식
   var MOVES = ['pass', 'wall', 'off'];
   var MOVE_NAME = { pass: '통과', wall: '벽', off: '끔' };
-  var OPACITIES = [100, 85, 70, 55, 40, 25];   // UI 배경 불투명도(%) — 배경색만, 글자·바늘·테두리는 그대로
+  var OPACITIES = [100, 85, 70, 55, 40, 25, 0];   // UI 배경 불투명도(%) — 배경색만, 글자·바늘·테두리는 그대로
   var state = { count: 3, speed: 'normal', stopped: false, night: false, cover: true, move: 'pass', ui: 55, bd: 'thick', showWalls: false };
   var pokes = [];
   var W = 0, H = 0, land = true;
