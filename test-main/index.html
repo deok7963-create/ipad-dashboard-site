@@ -162,7 +162,10 @@
   #sch-head { position: relative; height: 52px; line-height: 52px; white-space: nowrap; }
   #sch-title { font-size: 27px; font-weight: bold; }
   #sch-right { position: absolute; right: 0; top: 0; }
-  #sch-left { font-size: 18px; font-weight: bold; margin-right: 8px; vertical-align: middle; }
+  #sch-left { position: absolute; font-size: 20px; font-weight: bold; }
+  body.portrait #sch-left { right: 128px; top: 0; line-height: 52px; }
+  body.landscape #sch-left { left: 0; top: 80px; line-height: 60px; }
+  body.landscape #sch-right { right: 76px; }   /* 오른쪽 위 설정 진입 영역(100×100)을 피한다 */
   .sbtn {
     display: inline-block; height: 44px; line-height: 44px; padding: 0 16px;
     border-radius: 22px; background: #e4ded2; color: #444;
@@ -170,6 +173,7 @@
   }
   #sch-cards { margin-top: 24px; }
   body.portrait #sch-cards { margin-top: 16px; }
+  body.landscape #sch-cards { margin-top: 100px; }   /* 제목 줄 아래 − ＋ 한 줄 자리 */
   .card {
     position: relative; margin-top: 14px; background: none; border: 0;
     overflow: hidden; -webkit-box-sizing: border-box; box-sizing: border-box;
@@ -207,7 +211,7 @@
   }
   .cbtn.wide { padding: 0 22px; font-size: 24px; }
   .cbtn.down { opacity: 0.6; }
-  #cnt-label { display: inline-block; width: 64px; height: 60px; line-height: 60px; text-align: center; font-size: 22px; font-weight: bold; vertical-align: top; }
+  #cnt-plus { margin-left: 16px; }
 
   /* 통화 버튼: 그룹(엄마·아빠) = 영상(왼쪽, 넓게) + 음성(오른쪽, 좁게). 진짜 링크 <a> (IPD-TASK-006) */
   .callgrp { position: absolute; }
@@ -418,10 +422,10 @@
 <div id="digital" class="box"><span id="d-time"></span></div>
 <div id="dateline" class="box"><span id="d-date"></span></div>
 <div id="ctl" class="box">
-  <div class="crow"><span id="cnt-minus" class="cbtn">－</span><span id="cnt-label"></span><span id="cnt-plus" class="cbtn">＋</span></div>
+  <div class="crow"><span id="cnt-minus" class="cbtn">－</span><span id="cnt-plus" class="cbtn">＋</span></div>
 </div>
 <div id="schedule" class="box">
-  <div id="sch-head"><span id="sch-title">오늘 할 일</span><span id="sch-right"><span id="sch-left"></span><span id="sch-all" class="sbtn">전체 보기</span></span></div>
+  <div id="sch-head"><span id="sch-title">오늘 할 일</span><span id="sch-right"><span id="sch-all" class="sbtn">전체 보기</span></span><span id="sch-left"></span></div>
   <div id="sch-cards"></div>
 </div>
 <div id="call-0" class="callgrp mom"><a id="call-0-v" class="call video"></a><a id="call-0-a" class="call audio"></a><div id="call-0-msg" class="callmsg"></div></div>
@@ -548,7 +552,7 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.3.1';
+  var VERSION = '4.3.2';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
@@ -2405,7 +2409,6 @@
 
   // 아이용 조작: 포켓몬 수 0~5. 0이 되면 60초 뒤 3마리로 돌아온다(0은 저장하지 않는다)
   function drawCtl() {
-    $('cnt-label').textContent = view.n + '마리';
     $('cnt-minus').style.opacity = view.n <= MIN_N ? 0.35 : 1;
     $('cnt-plus').style.opacity = view.n >= MAX_N ? 0.35 : 1;
   }
@@ -2514,7 +2517,7 @@
       place($('digital'), PAD, 392, c, 84);
       place($('dateline'), PAD, 486, c, 32);
       place($('schedule'), W - 472, PAD, 448, null);
-      ctl.style.left = PAD + 'px'; ctl.style.top = '532px';
+      ctl.style.left = (W - PAD - 136) + 'px'; ctl.style.top = '104px';
     } else {
       // 세로: 시계(가운데) → 디지털 → 날짜 → 제목 줄 → 카드 3개 → 통화 / 조작은 시계 왼쪽 빈 자리
       c = 320;
@@ -2522,7 +2525,7 @@
       place($('digital'), 0, 354, W, 76);
       place($('dateline'), 0, 440, W, 30);
       place($('schedule'), PAD, 488, W - PAD * 2, null);
-      ctl.style.left = PAD + 'px'; ctl.style.top = PAD + 'px';
+      ctl.style.left = (W - PAD - 136) + 'px'; ctl.style.top = '104px';
     }
     cl = $('clock');
     place($('glow'), cl.offsetLeft - c * 0.3, cl.offsetTop - c * 0.3, c * 1.6, c * 1.6);
@@ -2636,7 +2639,14 @@
   render();
   layout();
 
+  // 시계를 누르면 포켓몬 한 마리가 지금 시각을 대답한다. 포켓몬이 0마리일 때만 시계 위 말풍선으로 알려 준다
   $('clock').addEventListener('click', function () {
+    if (pokes.length) {
+      var p = pokes[Math.floor(Math.random() * pokes.length)], d = now();
+      jump(p);
+      showBubble(p, timeSentence(d.getHours(), d.getMinutes()));
+      return;
+    }
     tapUntil = new Date().getTime() + TAP_MS;
     render();
     setTimeout(render, TAP_MS + 50);
