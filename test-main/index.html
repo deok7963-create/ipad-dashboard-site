@@ -554,7 +554,7 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.3.3';
+  var VERSION = '4.3.4';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
@@ -2563,7 +2563,7 @@
       var v = $('call-' + j + '-v'), a = $('call-' + j + '-a');
       // 영상·음성 모두 "아이콘 + 이름". 넓은 진한 버튼 = 영상, 좁은 연한 버튼 = 음성 (폭이 모자라면 아이콘 / 이름 두 줄)
       callLabel(v, '📹 ', c.label); // 📹
-      callLabel(a, '📞 ', c.label); // 📞
+      callLabel(a, '📞', '');       // 📞 음성은 아이콘만 (색으로 엄마·아빠 구분)
       var hv = facetimeUrl(c.target, false), ha = facetimeUrl(c.target, true);
       setHref(v, hv);
       setHref(a, ha);
@@ -2579,6 +2579,7 @@
   // 한 줄에 들어가는 가장 큰 글자(32→26px)를 고르고, 안 되면 두 줄로 나눈다(26px까지, 그래도 넘치면 22px)
   function fitCall(a, w) {
     var inn = a.firstChild, second = inn.childNodes[1], room = w - 20, sizes = [32, 30, 28, 26], k;
+    if (!second.textContent) { a.style.fontSize = '46px'; return; }   // 아이콘만 있는 버튼
     second.style.display = 'inline';
     for (k = 0; k < sizes.length; k++) {
       a.style.fontSize = sizes[k] + 'px';
