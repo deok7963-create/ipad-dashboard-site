@@ -378,21 +378,15 @@
   .c-row .off { color: #a33; }
   #ed-count { margin-left: 8px; vertical-align: middle; }
   #ed-count.over { color: #c0392b; font-weight: bold; }
-  .seg, .day, .ico {
+  .seg, .day {
     display: inline-block; height: 52px; line-height: 52px; margin: 4px 8px 4px 0; padding: 0 16px;
     border-radius: 12px; background: #fff; border: 2px solid #ccc; font-size: 22px;
     vertical-align: middle; cursor: pointer;
     -webkit-box-sizing: border-box; box-sizing: border-box;
   }
   .day { width: 56px; padding: 0; text-align: center; }
-  .ico { width: 60px; padding: 0; text-align: center; font-size: 30px; }
-  .ico.none { width: auto; padding: 0 12px; font-size: 20px; }
-  .seg.on, .day.on, .ico.on { background: #3f7fd0; border-color: #3f7fd0; color: #fff; }
+  .seg.on, .day.on { background: #3f7fd0; border-color: #3f7fd0; color: #fff; }
   .ed-sub { display: block; margin-left: 80px; }
-  /* 아이콘 점검(임시) */
-  .icheck { display: inline-block; width: 120px; margin: 6px 6px 6px 0; padding: 8px 0; text-align: center; background: #f6f3ee; border-radius: 12px; vertical-align: top; }
-  .icheck b { display: block; font-size: 48px; line-height: 60px; font-weight: normal; }
-  .icheck span { display: block; font-size: 15px; color: #666; }
 
   /* PIN */
   #pin-ov { z-index: 70; background: #2f3542; color: #fff; text-align: center; }
@@ -580,7 +574,7 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.4.0';
+  var VERSION = '4.4.1';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
@@ -1787,11 +1781,6 @@
     for (i = 0; i < nodes.length; i++) {
       nodes[i].className = 'day' + (ed.days.indexOf(+nodes[i].getAttribute('data-d')) >= 0 ? ' on' : '');
     }
-    nodes = $('editor').querySelectorAll('[data-icon]');
-    for (i = 0; i < nodes.length; i++) {
-      var v = nodes[i].getAttribute('data-icon');
-      nodes[i].className = 'ico' + (v === '' ? ' none' : '') + (v === ed.icon ? ' on' : '');
-    }
     show('ed-days-row', ed.kind === 'weekday');
     show('ed-date-row', ed.kind === 'date');
     drawCount();
@@ -2549,10 +2538,31 @@
 
   // 1초 타이머는 하나만: 다음 초 경계에 맞춰 setTimeout을 다시 건다.
   var timer = null;
+  // 그리다가 오류가 나도 다음 예약은 반드시 한다(시계가 멈추지 않게). 오류는 마지막 한 건만 기록한다.
+  var lastError = '', errCount = 0;
+  window.onerror = function (msg) { errCount++; lastError = String(msg).slice(0, 200); return false; };
   function tick() {
     timer = null;
-    render();
+    try { render(); } catch (e) { errCount++; lastError = String(e && e.message ? e.message : e).slice(0, 200); }
+    try { updateCheck(now()); } catch (e2) { /* 무시 */ }
     timer = setTimeout(tick, 1000 - (new Date().getTime() % 1000) + 20);
+  }
+  // 하루 한 번 새벽(3시대)에 배포된 버전을 확인해 다르면 스스로 새로고침한다.
+  // 설정·PIN·전체 보기 창이 열려 있으면 건너뛰고 같은 시간대 안에서 다시 시도한다.
+  var updDone = '';
+  function updateCheck(d) {
+    var ds = dateStr(d);
+    if (updDone === ds || d.getHours() !== 3) { return; }
+    if (idleLimit() || allOpen) { return; }
+    updDone = ds;
+    if (typeof fetch !== 'function') { return; }
+    var url = String(location.href).split('#')[0].split('?')[0];
+    fetch(url + '?u=' + new Date().getTime()).then(function (res) {
+      return res.ok ? res.text() : '';
+    }).then(function (t) {
+      var m = /var VERSION = '([0-9.]+)'/.exec(t || '');
+      if (m && m[1] !== VERSION && !idleLimit() && !allOpen) { location.reload(); }
+    }).catch(function () { /* 네트워크가 없으면 다음 날 다시 */ });
   }
   function restartTimer() {
     if (timer !== null) { clearTimeout(timer); timer = null; }
@@ -2775,6 +2785,8 @@
       };
     },
     sentence: timeSentence,
+    errors: function () { return { count: errCount, last: lastError }; },
+    updateCheck: function (d) { updDone = ''; updateCheck(d || now()); return updDone; },
     // 메인 할 일 카드 상태
     todo: function () {
       var cards = $('sch-cards').childNodes, out = [];
