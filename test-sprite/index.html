@@ -9,7 +9,9 @@
 <!--
   IPD-TASK-011 시험 페이지. 메인 화면에서 링크하지 않는다.
   목적: iPad 4(iOS 10.3.4)에서 포켓몬이 카드 뒤로 돌아다니는 화면이 부드러운지, 오래 켜 둬도 괜찮은지 잰다.
-  IPD-TASK-013 보정: 화면 요소를 벽으로 삼아 포켓몬이 부딪혀 튕긴다("벽: 켬/끔"으로 011 방식과 비교, "벽 보기").
+  IPD-TASK-013 보정: 화면 요소를 벽으로 삼아 포켓몬이 부딪혀 튕긴다("벽 보기").
+  IPD-TASK-014 보정 2: 이동 방식 3가지(통과 = 벽 무시하고 UI 뒤로 지나감, 쉬는 곳만 빈 곳 / 벽 = 013 / 끔 = 011)와
+  "UI 투명도"(시계판·카드·제목·시각·날짜의 배경색만 100/85/70/55%). 밤에는 카드·시계판도 밤 색.
   제약: 순수 HTML/CSS/JS(ES5). 외부 파일 없음(같은 폴더의 assets 그림만).
 -->
 <style>
@@ -95,9 +97,9 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
 #ui > * { position: absolute; pointer-events: auto; box-sizing: border-box; }
 .face { border-radius: 50%; background: #fff; border: 4px solid #2A1F57; box-shadow: 0 6px 0 rgba(42,31,87,0.25); }
 .face svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
-.digi { text-align: center; color: #fff; font-weight: bold; }
-.date { text-align: center; color: #fff; font-weight: bold; }
-.title { color: #fff; font-weight: bold; font-size: 30px; }
+.digi { text-align: center; font-weight: bold; }
+.date { text-align: center; font-weight: bold; }
+.title { font-weight: bold; font-size: 30px; }
 .card {
   background: #fff; border: 4px solid #2A1F57; border-radius: 26px;
   box-shadow: 0 6px 0 rgba(42,31,87,0.25); color: #2A1F57; font-size: 28px; font-weight: bold;
@@ -106,6 +108,38 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
 .card.first { border-color: #5B3FC4; }
 .card .chk { position: absolute; left: 16px; top: 50%; width: 48px; height: 48px; margin-top: -28px; border-radius: 50%; border: 4px solid #2A1F57; }
 .card .ico { position: absolute; left: 76px; top: 50%; width: 52px; height: 52px; margin-top: -26px; border-radius: 14px; background: #EDE8FF; }
+/* ── UI 반투명(IPD-TASK-014) ──
+   배경색만 rgba로 투명하게 한다. 요소 opacity는 쓰지 않는다(글자·바늘·테두리는 불투명 그대로).
+   디지털 시각·날짜·제목은 글자(span) 뒤에 둥근 판(:before)을 깔고 글자색을 카드 글자색으로 바꾼다.
+   판은 span 폭을 바꾸지 않게 절대 위치로 둔다(벽은 013처럼 글자 폭 그대로). 통화 버튼은 불투명 그대로. */
+.digi span, .date span, .title span { position: relative; z-index: 0; display: inline-block; }
+.digi span:before, .date span:before, .title span:before {
+  content: ''; position: absolute; z-index: -1; left: -14px; right: -14px; top: 0; bottom: 0;
+  border-radius: 16px; background: #fff;
+}
+.digi, .date, .title { color: #2A1F57; }
+body.op85 .face, body.op85 .card, body.op85 .digi span:before, body.op85 .date span:before, body.op85 .title span:before { background: rgba(255,255,255,0.85); }
+body.op70 .face, body.op70 .card, body.op70 .digi span:before, body.op70 .date span:before, body.op70 .title span:before { background: rgba(255,255,255,0.70); }
+body.op55 .face, body.op55 .card, body.op55 .digi span:before, body.op55 .date span:before, body.op55 .title span:before { background: rgba(255,255,255,0.55); }
+body.op85 .card .ico { background: rgba(237,232,255,0.85); }
+body.op70 .card .ico { background: rgba(237,232,255,0.70); }
+body.op55 .card .ico { background: rgba(237,232,255,0.55); }
+/* 밤(배경 교체): 카드·시계판 #2E3768, 글자 #F3F0FF, 윤곽선 #8E96D6, 강조 #FFD166, 초침 #FF8FA3 (A5-6 표, 시험용) */
+body.night .face, body.night .card, body.night .digi span:before, body.night .date span:before, body.night .title span:before { background: #2E3768; }
+body.night.op85 .face, body.night.op85 .card, body.night.op85 .digi span:before, body.night.op85 .date span:before, body.night.op85 .title span:before { background: rgba(46,55,104,0.85); }
+body.night.op70 .face, body.night.op70 .card, body.night.op70 .digi span:before, body.night.op70 .date span:before, body.night.op70 .title span:before { background: rgba(46,55,104,0.70); }
+body.night.op55 .face, body.night.op55 .card, body.night.op55 .digi span:before, body.night.op55 .date span:before, body.night.op55 .title span:before { background: rgba(46,55,104,0.55); }
+body.night .card .ico { background: #3E4886; }
+body.night.op85 .card .ico { background: rgba(62,72,134,0.85); }
+body.night.op70 .card .ico { background: rgba(62,72,134,0.70); }
+body.night.op55 .card .ico { background: rgba(62,72,134,0.55); }
+body.night .face, body.night .card, body.night .card .chk { border-color: #8E96D6; }
+body.night .card.first { border-color: #FFD166; }
+body.night .card, body.night .digi, body.night .date, body.night .title { color: #F3F0FF; }
+body.night #hHour, body.night #ticks line { stroke: #F3F0FF; }
+body.night #hMin { stroke: #FFD166; }
+body.night #hSec { stroke: #FF8FA3; }
+body.night #hub { fill: #F3F0FF; }
 .call { border-radius: 26px; color: #fff; font-size: 34px; font-weight: bold; text-align: center; border: 4px solid rgba(0,0,0,0.15); }
 .mom { background: #D6336C; } .dad { background: #1C6FD1; }
 
@@ -120,12 +154,12 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
   background: rgba(0,0,0,0.6); white-space: nowrap; overflow: hidden; text-align: center;
 }
 #bar button {
-  display: inline-block; height: 32px; margin: 4px 2px; padding: 0 9px; vertical-align: top;
+  display: inline-block; height: 32px; margin: 4px 1px; padding: 0 5px; vertical-align: top;
   font-size: 13px; color: #fff; background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.4); border-radius: 6px; -webkit-appearance: none;
 }
 #bar button.sel { background: #FFD166; color: #1B2147; }
-#bar .sep { display: inline-block; width: 8px; }
+#bar .sep { display: inline-block; width: 4px; }
 
 /* ── 벽 보기(IPD-TASK-013): 위치만 쓰는 윤곽선, 애니메이션 없음 ── */
 #wallView { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 9; pointer-events: none; display: none; }
@@ -148,7 +182,7 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
       <line id="hHour" x1="100" y1="100" x2="100" y2="55" stroke="#2A1F57" stroke-width="9" stroke-linecap="round"/>
       <line id="hMin" x1="100" y1="100" x2="100" y2="28" stroke="#5B3FC4" stroke-width="5" stroke-linecap="round"/>
       <line id="hSec" x1="100" y1="112" x2="100" y2="22" stroke="#E5484D" stroke-width="2" stroke-linecap="round"/>
-      <circle cx="100" cy="100" r="5" fill="#2A1F57"/>
+      <circle id="hub" cx="100" cy="100" r="5" fill="#2A1F57"/>
     </svg>
   </div>
   <div class="digi" id="digi"><span id="digiT">00:00</span></div>
@@ -168,7 +202,7 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
 <div id="bar">
   <button id="n1">1마리</button><button id="n3">3마리</button><button id="n5">5마리</button><span class="sep"></span>
   <button id="bBg">배경 교체</button><button id="bStop">멈춤</button><button id="bSpeed">속도: 보통</button><button id="bCover">카드 가림: 켬</button><span class="sep"></span>
-  <button id="bWall">벽: 켬</button><button id="bWallView">벽 보기</button><span class="sep"></span>
+  <button id="bWall">이동: 통과</button><button id="bWallView">벽 보기</button><button id="bOp">UI 투명도: 85%</button><span class="sep"></span>
   <button id="bReset">기록 초기화</button>
 </div>
 
@@ -195,7 +229,11 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
   var PICK_TRIES = 20;       // 목표 고르기 최대 시도
   var AWAY_TRIES = 8;        // 부딪힌 뒤 처음 몇 번은 벽에서 멀어지는 쪽만
 
-  var state = { count: 3, speed: 'normal', stopped: false, night: false, cover: true, walls: true, showWalls: false };
+  // 이동 방식(IPD-TASK-014): 'pass' = 통과(길은 벽 무시, 쉬는 곳만 빈 곳) / 'wall' = 013 벽 / 'off' = 011 방식
+  var MOVES = ['pass', 'wall', 'off'];
+  var MOVE_NAME = { pass: '통과', wall: '벽', off: '끔' };
+  var OPACITIES = [100, 85, 70, 55];   // UI 배경 불투명도(%) — 배경색만, 글자·바늘·테두리는 그대로
+  var state = { count: 3, speed: 'normal', stopped: false, night: false, cover: true, move: 'pass', ui: 85, showWalls: false };
   var pokes = [];
   var W = 0, H = 0, land = true;
   var clock = { cx: 0, cy: 0, r: 0 };
@@ -237,7 +275,8 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
     }
     place(glow, clock.cx - clock.r * 1.6, clock.cy - clock.r * 1.6, clock.r * 3.2, clock.r * 3.2);
     buildWalls();
-    if (state.walls) { relocateAll(); }
+    if (state.move === 'wall') { relocateAll(); }
+    else if (state.move === 'pass') { relocateEdge(); }   // 통과: 화면 밖만 안으로(벽 안이어도 둔다)
   }
 
   // ───────── 벽 (IPD-TASK-013) ─────────
@@ -313,6 +352,20 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
       f = nearestFree(p, c.x, c.y);
       setPos(p, f.x, f.y, 0);
       p.tx = f.x; p.ty = f.y; p.away = null;
+      p.el.className = 'poke';
+      if (!state.stopped) { schedule(p, rand(300, 1500), walk); }
+    }
+  }
+  // 통과 모드의 회전·크기 변경 뒤: 화면 밖(가장자리 여백 밖)에 있는 포켓몬만 즉시 안으로. 안에 있으면 그대로 둔다.
+  function relocateEdge() {
+    var i, p, c, b;
+    for (i = 0; i < pokes.length; i++) {
+      p = pokes[i];
+      c = currentXY(p); b = bounds(p);
+      if (inBounds(c.x, c.y, b)) { continue; }
+      if (p.timer) { clearTimeout(p.timer); p.timer = 0; }
+      setPos(p, clamp(c.x, b.x0, b.x1), clamp(c.y, b.y0, b.y1), 0);
+      p.tx = p.x; p.ty = p.y; p.away = null;
       p.el.className = 'poke';
       if (!state.stopped) { schedule(p, rand(300, 1500), walk); }
     }
@@ -400,12 +453,27 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
     }
     return wallOk;
   }
-  function pickTarget(p) { return state.walls ? pickTargetWall(p) : pickTargetOld(p); }
+  // 통과(IPD-TASK-014): 쉬는 곳(목표)만 벽과 안 겹치는 곳에서 20번 고른다. 140px 간격은 되도록.
+  // 벽만 피한 후보도 없으면 마지막 후보(아무 곳)를 쓴다 — 통과 모드는 제자리에 멈추지 않는다.
+  function pickTargetPass(p) {
+    var b = bounds(p), x, y, i, wallOk = null;
+    for (i = 0; i < PICK_TRIES; i++) {
+      x = rand(b.x0, b.x1); y = rand(b.y0, b.y1);
+      if (hitWall(x, y, p)) { continue; }
+      if (!nearOthers(x, y, p)) { return { x: x, y: y }; }
+      if (!wallOk) { wallOk = { x: x, y: y }; }
+    }
+    return wallOk || { x: x, y: y };
+  }
+  function pickTarget(p) {
+    if (state.move === 'pass') { return pickTargetPass(p); }
+    return state.move === 'wall' ? pickTargetWall(p) : pickTargetOld(p);
+  }
   // 직선 경로를 PATH_STEP 간격으로 한 번 확인한다(걷기 시작할 때만, 프레임마다 하지 않음).
   // 벽에 닿는 첫 지점의 바로 앞(벽 지점)에서 멈추고 bump=true. 지금 자리가 이미 벽 안이면 검사하지 않는다(빠져나가게).
   function planPath(p, x0, y0, tx, ty) {
     var dx = tx - x0, dy = ty - y0, dist = Math.sqrt(dx * dx + dy * dy), k, n, f, pf;
-    if (!state.walls || dist < 1 || hitWall(x0, y0, p)) { return { x: tx, y: ty, bump: false }; }
+    if (state.move !== 'wall' || dist < 1 || hitWall(x0, y0, p)) { return { x: tx, y: ty, bump: false }; }
     n = Math.ceil(dist / PATH_STEP);
     for (k = 1; k <= n; k++) {
       f = Math.min(1, k * PATH_STEP / dist);
@@ -534,7 +602,12 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
     p.sq.addEventListener('animationend', endAnim, false);
     $('stage').appendChild(p.el);
     var b = bounds(p), s;
-    if (state.walls) {
+    if (state.move === 'pass') {
+      // 통과: 처음 자리도 쉬는 곳 규칙(빈 곳, 간격은 되도록)
+      s = pickTargetPass(p);
+      setPos(p, s.x, s.y, 0);
+      p.tx = s.x; p.ty = s.y;
+    } else if (state.move === 'wall') {
       // 처음 자리도 벽과 안 겹치는 곳(먼저 뽑힌 포켓몬과의 간격도 되도록)
       s = pickTargetWall(p);
       if (!s) { s = nearestFree(p, rand(b.x0, b.x1), rand(b.y0, b.y1)); }
@@ -653,7 +726,8 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
     for (i = 0; i < meas.recent.length; i++) { if (meas.recent[i] < min10) { min10 = meas.recent[i]; } }
     $('stats').textContent =
       '포켓몬 ' + pokes.length + '마리' + (state.stopped ? ' (멈춤)' : '') + ' · ' + (state.speed === 'slow' ? '느림' : '보통') +
-      ' · 가림 ' + (state.cover ? '켬' : '끔') + ' · 벽 ' + (state.walls ? '켬' : '끔') + '\n' +
+      ' · 가림 ' + (state.cover ? '켬' : '끔') + '\n' +
+      '이동 ' + MOVE_NAME[state.move] + ' · UI 투명도 ' + state.ui + '%' + (state.night ? ' · 밤' : ' · 낮') + '\n' +
       '부딪힘(누적) ' + bumpTotal + '\n' +
       '평균 fps   ' + avg.toFixed(1) + '\n' +
       '최저(10초) ' + (min10 === 999 ? '-' : min10.toFixed(1)) + '\n' +
@@ -674,7 +748,8 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
     $('bStop').textContent = state.stopped ? '움직이기' : '멈춤';
     $('bSpeed').textContent = '속도: ' + (state.speed === 'slow' ? '느림' : '보통');
     $('bCover').textContent = '카드 가림: ' + (state.cover ? '켬' : '끔');
-    $('bWall').textContent = '벽: ' + (state.walls ? '켬' : '끔');
+    $('bWall').textContent = '이동: ' + MOVE_NAME[state.move];
+    $('bOp').textContent = 'UI 투명도: ' + state.ui + '%';
     sel('bWallView', state.showWalls);
   }
   function setCount(n) {
@@ -682,6 +757,10 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
     spawn(n);
     resetSeg();
     refreshBar();
+  }
+  // body의 class 하나로 가림·밤·UI 투명도를 정한다(CSS가 배경색만 바꿈, 요소 opacity는 건드리지 않음)
+  function applyUiClass() {
+    document.body.className = (state.cover ? '' : 'uiUnder ') + (state.night ? 'night ' : '') + 'op' + state.ui;
   }
   function bind(id, fn) { $(id).addEventListener('click', fn, false); }
 
@@ -691,18 +770,26 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
   bind('bBg', function () {
     state.night = !state.night;
     $('bgNight').className = state.night ? 'bg on' : 'bg';
+    applyUiClass();   // 카드·시계판도 밤 색으로(같은 투명도)
     refreshBar();
   });
   bind('bStop', function () { setStopped(!state.stopped); resetSeg(); refreshBar(); });
   bind('bSpeed', function () { state.speed = state.speed === 'slow' ? 'normal' : 'slow'; resetSeg(); refreshBar(); });
   bind('bCover', function () {
     state.cover = !state.cover;
-    document.body.className = state.cover ? '' : 'uiUnder';
+    applyUiClass();
     resetSeg(); refreshBar();
   });
   bind('bWall', function () {
-    state.walls = !state.walls;
-    if (state.walls) { relocateAll(); }   // 끔일 때 카드 뒤에 있던 포켓몬을 빈 곳으로
+    // 통과 → 벽 → 끔 → 통과. 벽으로 바꿀 때만 벽 안의 포켓몬을 빈 곳으로 옮긴다(013과 같음).
+    // 통과·끔으로 바꿀 때는 위치·타이머를 그대로 둔다(다음 걷기부터 새 규칙).
+    state.move = MOVES[(MOVES.indexOf(state.move) + 1) % MOVES.length];
+    if (state.move === 'wall') { relocateAll(); }
+    resetSeg(); refreshBar();
+  });
+  bind('bOp', function () {
+    state.ui = OPACITIES[(OPACITIES.indexOf(state.ui) + 1) % OPACITIES.length];
+    applyUiClass();
     resetSeg(); refreshBar();
   });
   bind('bWallView', function () {
@@ -733,6 +820,7 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
   // ───────── 시작 ─────────
   loadStore();
   buildTicks();
+  applyUiClass();
   layout();
   drawClock();
   setCount(3);
@@ -748,6 +836,8 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
     hitWall: hitWall,
     pickTarget: pickTarget,
     planPath: planPath,
+    currentXY: currentXY,
+    bumps: function () { return bumpTotal; },
     bounds: bounds,
     state: state
   };
