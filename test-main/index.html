@@ -58,8 +58,10 @@
     border: 3px solid #2A1F57; opacity: 0; pointer-events: none;
     -webkit-box-sizing: border-box; box-sizing: border-box;
   }
+  .bubble.one { width: auto; margin-left: 0; white-space: nowrap; -webkit-transform: translateX(-50%); transform: translateX(-50%); }
   .bubble.fold-l { left: 0; margin-left: 0; }
   .bubble.fold-r { left: auto; right: 0; margin-left: 0; }
+  .bubble.one.fold-l, .bubble.one.fold-r { -webkit-transform: none; transform: none; }
   .bubble.below { bottom: auto; top: 100%; margin-bottom: 0; margin-top: 6px; }
   .bubble.show { -webkit-animation: bubbleLife 4s linear 1; animation: bubbleLife 4s linear 1; }
   @-webkit-keyframes breathe { 0%,100% { -webkit-transform: scale(1,1); } 50% { -webkit-transform: scale(1.02,1.03); } }
@@ -552,7 +554,7 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.3.2';
+  var VERSION = '4.3.3';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
@@ -2295,7 +2297,8 @@
   }
   function showBubble(p, text) {
     var c = currentXY(p), cx = c.x + p.w / 2, cls = 'bubble';
-    if (cx < 130) { cls += ' fold-l'; } else if (cx > W - 130) { cls += ' fold-r'; }
+    if (String(text).length <= 14) { cls += ' one'; }   // 짧은 말은 한 줄로
+    if (cx < 170) { cls += ' fold-l'; } else if (cx > W - 170) { cls += ' fold-r'; }
     if (c.y < 90) { cls += ' below'; }
     p.bubble.textContent = text;
     p.bubble.className = cls;
