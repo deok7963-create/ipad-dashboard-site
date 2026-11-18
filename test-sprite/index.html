@@ -103,11 +103,10 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
 .card {
   background: #fff; border: 4px solid #2A1F57; border-radius: 26px;
   box-shadow: 0 6px 0 rgba(42,31,87,0.25); color: #2A1F57; font-size: 28px; font-weight: bold;
-  padding: 0 20px 0 140px; overflow: hidden;
+  padding: 0 20px 0 82px; overflow: hidden;
 }
 .card.first { border-color: #5B3FC4; }
 .card .chk { position: absolute; left: 16px; top: 50%; width: 48px; height: 48px; margin-top: -28px; border-radius: 50%; border: 4px solid #2A1F57; }
-.card .ico { position: absolute; left: 76px; top: 50%; width: 52px; height: 52px; margin-top: -26px; border-radius: 14px; background: #EDE8FF; }
 /* ── UI 반투명(IPD-TASK-014) ──
    배경색만 rgba로 투명하게 한다. 요소 opacity는 쓰지 않는다(글자·바늘·테두리는 불투명 그대로).
    디지털 시각·날짜·제목은 글자(span) 뒤에 둥근 판(:before)을 깔고 글자색을 카드 글자색으로 바꾼다.
@@ -123,11 +122,6 @@ body.op70 .face, body.op70 .card, body.op70 .digi span:before, body.op70 .date s
 body.op55 .face, body.op55 .card, body.op55 .digi span:before, body.op55 .date span:before, body.op55 .title span:before { background: rgba(255,255,255,0.55); }
 body.op40 .face, body.op40 .card, body.op40 .digi span:before, body.op40 .date span:before, body.op40 .title span:before { background: rgba(255,255,255,0.40); }
 body.op25 .face, body.op25 .card, body.op25 .digi span:before, body.op25 .date span:before, body.op25 .title span:before { background: rgba(255,255,255,0.25); }
-body.op85 .card .ico { background: rgba(237,232,255,0.85); }
-body.op70 .card .ico { background: rgba(237,232,255,0.70); }
-body.op55 .card .ico { background: rgba(237,232,255,0.55); }
-body.op40 .card .ico { background: rgba(237,232,255,0.40); }
-body.op25 .card .ico { background: rgba(237,232,255,0.25); }
 /* 밤(배경 교체): 카드·시계판 #2E3768, 글자 #F3F0FF, 윤곽선 #8E96D6, 강조 #FFD166, 초침 #FF8FA3 (A5-6 표, 시험용) */
 body.night .face, body.night .card, body.night .digi span:before, body.night .date span:before, body.night .title span:before { background: #2E3768; }
 body.night.op85 .face, body.night.op85 .card, body.night.op85 .digi span:before, body.night.op85 .date span:before, body.night.op85 .title span:before { background: rgba(46,55,104,0.85); }
@@ -135,12 +129,6 @@ body.night.op70 .face, body.night.op70 .card, body.night.op70 .digi span:before,
 body.night.op55 .face, body.night.op55 .card, body.night.op55 .digi span:before, body.night.op55 .date span:before, body.night.op55 .title span:before { background: rgba(46,55,104,0.55); }
 body.night.op40 .face, body.night.op40 .card, body.night.op40 .digi span:before, body.night.op40 .date span:before, body.night.op40 .title span:before { background: rgba(46,55,104,0.40); }
 body.night.op25 .face, body.night.op25 .card, body.night.op25 .digi span:before, body.night.op25 .date span:before, body.night.op25 .title span:before { background: rgba(46,55,104,0.25); }
-body.night .card .ico { background: #3E4886; }
-body.night.op85 .card .ico { background: rgba(62,72,134,0.85); }
-body.night.op70 .card .ico { background: rgba(62,72,134,0.70); }
-body.night.op55 .card .ico { background: rgba(62,72,134,0.55); }
-body.night.op40 .card .ico { background: rgba(62,72,134,0.40); }
-body.night.op25 .card .ico { background: rgba(62,72,134,0.25); }
 body.night .face, body.night .card, body.night .card .chk { border-color: #8E96D6; }
 body.night .card.first { border-color: #FFD166; }
 body.night .card, body.night .digi, body.night .date, body.night .title { color: #F3F0FF; }
@@ -200,9 +188,9 @@ body.bdNone .face, body.bdNone .card { border-color: transparent !important; box
   <div class="digi" id="digi"><span id="digiT">00:00</span></div>
   <div class="date" id="date"><span id="dateT">-</span></div>
   <div class="title" id="title"><span id="titleT">오늘 할 일 (0/3)</span></div>
-  <div class="card first" id="c0"><span class="chk"></span><span class="ico"></span><span class="txt">가짜 할 일 하나</span></div>
-  <div class="card" id="c1"><span class="chk"></span><span class="ico"></span><span class="txt">가짜 할 일 둘</span></div>
-  <div class="card" id="c2"><span class="chk"></span><span class="ico"></span><span class="txt">가짜 할 일 셋</span></div>
+  <div class="card first" id="c0"><span class="chk"></span><span class="txt">가짜 할 일 하나</span></div>
+  <div class="card" id="c1"><span class="chk"></span><span class="txt">가짜 할 일 둘</span></div>
+  <div class="card" id="c2"><span class="chk"></span><span class="txt">가짜 할 일 셋</span></div>
   <div class="call mom" id="mom">엄마 (가짜)</div>
   <div class="call dad" id="dad">아빠 (가짜)</div>
 </div>
