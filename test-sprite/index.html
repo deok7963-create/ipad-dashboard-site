@@ -11,7 +11,7 @@
   목적: iPad 4(iOS 10.3.4)에서 포켓몬이 카드 뒤로 돌아다니는 화면이 부드러운지, 오래 켜 둬도 괜찮은지 잰다.
   IPD-TASK-013 보정: 화면 요소를 벽으로 삼아 포켓몬이 부딪혀 튕긴다("벽 보기").
   IPD-TASK-014 보정 2: 이동 방식 3가지(통과 = 벽 무시하고 UI 뒤로 지나감, 쉬는 곳만 빈 곳 / 벽 = 013 / 끔 = 011)와
-  "UI 투명도"(시계판·카드·제목·시각·날짜의 배경색만 100/85/70/55%). 밤에는 카드·시계판도 밤 색.
+  "UI 투명도"(시계판·카드·제목·시각·날짜의 배경색만 100/85/70/55/40/25%). 밤에는 카드·시계판도 밤 색.
   제약: 순수 HTML/CSS/JS(ES5). 외부 파일 없음(같은 폴더의 assets 그림만).
 -->
 <style>
@@ -121,18 +121,26 @@ body.uiUnder #stage { z-index: 3; }   /* 카드 가림 끔: 포켓몬이 카드 
 body.op85 .face, body.op85 .card, body.op85 .digi span:before, body.op85 .date span:before, body.op85 .title span:before { background: rgba(255,255,255,0.85); }
 body.op70 .face, body.op70 .card, body.op70 .digi span:before, body.op70 .date span:before, body.op70 .title span:before { background: rgba(255,255,255,0.70); }
 body.op55 .face, body.op55 .card, body.op55 .digi span:before, body.op55 .date span:before, body.op55 .title span:before { background: rgba(255,255,255,0.55); }
+body.op40 .face, body.op40 .card, body.op40 .digi span:before, body.op40 .date span:before, body.op40 .title span:before { background: rgba(255,255,255,0.40); }
+body.op25 .face, body.op25 .card, body.op25 .digi span:before, body.op25 .date span:before, body.op25 .title span:before { background: rgba(255,255,255,0.25); }
 body.op85 .card .ico { background: rgba(237,232,255,0.85); }
 body.op70 .card .ico { background: rgba(237,232,255,0.70); }
 body.op55 .card .ico { background: rgba(237,232,255,0.55); }
+body.op40 .card .ico { background: rgba(237,232,255,0.40); }
+body.op25 .card .ico { background: rgba(237,232,255,0.25); }
 /* 밤(배경 교체): 카드·시계판 #2E3768, 글자 #F3F0FF, 윤곽선 #8E96D6, 강조 #FFD166, 초침 #FF8FA3 (A5-6 표, 시험용) */
 body.night .face, body.night .card, body.night .digi span:before, body.night .date span:before, body.night .title span:before { background: #2E3768; }
 body.night.op85 .face, body.night.op85 .card, body.night.op85 .digi span:before, body.night.op85 .date span:before, body.night.op85 .title span:before { background: rgba(46,55,104,0.85); }
 body.night.op70 .face, body.night.op70 .card, body.night.op70 .digi span:before, body.night.op70 .date span:before, body.night.op70 .title span:before { background: rgba(46,55,104,0.70); }
 body.night.op55 .face, body.night.op55 .card, body.night.op55 .digi span:before, body.night.op55 .date span:before, body.night.op55 .title span:before { background: rgba(46,55,104,0.55); }
+body.night.op40 .face, body.night.op40 .card, body.night.op40 .digi span:before, body.night.op40 .date span:before, body.night.op40 .title span:before { background: rgba(46,55,104,0.40); }
+body.night.op25 .face, body.night.op25 .card, body.night.op25 .digi span:before, body.night.op25 .date span:before, body.night.op25 .title span:before { background: rgba(46,55,104,0.25); }
 body.night .card .ico { background: #3E4886; }
 body.night.op85 .card .ico { background: rgba(62,72,134,0.85); }
 body.night.op70 .card .ico { background: rgba(62,72,134,0.70); }
 body.night.op55 .card .ico { background: rgba(62,72,134,0.55); }
+body.night.op40 .card .ico { background: rgba(62,72,134,0.40); }
+body.night.op25 .card .ico { background: rgba(62,72,134,0.25); }
 body.night .face, body.night .card, body.night .card .chk { border-color: #8E96D6; }
 body.night .card.first { border-color: #FFD166; }
 body.night .card, body.night .digi, body.night .date, body.night .title { color: #F3F0FF; }
@@ -202,7 +210,7 @@ body.night #hub { fill: #F3F0FF; }
 <div id="bar">
   <button id="n1">1마리</button><button id="n3">3마리</button><button id="n5">5마리</button><span class="sep"></span>
   <button id="bBg">배경 교체</button><button id="bStop">멈춤</button><button id="bSpeed">속도: 보통</button><button id="bCover">카드 가림: 켬</button><span class="sep"></span>
-  <button id="bWall">이동: 통과</button><button id="bWallView">벽 보기</button><button id="bOp">UI 투명도: 85%</button><span class="sep"></span>
+  <button id="bWall">이동: 통과</button><button id="bWallView">벽 보기</button><button id="bOp">UI 투명도: 55%</button><span class="sep"></span>
   <button id="bReset">기록 초기화</button>
 </div>
 
@@ -232,8 +240,8 @@ body.night #hub { fill: #F3F0FF; }
   // 이동 방식(IPD-TASK-014): 'pass' = 통과(길은 벽 무시, 쉬는 곳만 빈 곳) / 'wall' = 013 벽 / 'off' = 011 방식
   var MOVES = ['pass', 'wall', 'off'];
   var MOVE_NAME = { pass: '통과', wall: '벽', off: '끔' };
-  var OPACITIES = [100, 85, 70, 55];   // UI 배경 불투명도(%) — 배경색만, 글자·바늘·테두리는 그대로
-  var state = { count: 3, speed: 'normal', stopped: false, night: false, cover: true, move: 'pass', ui: 85, showWalls: false };
+  var OPACITIES = [100, 85, 70, 55, 40, 25];   // UI 배경 불투명도(%) — 배경색만, 글자·바늘·테두리는 그대로
+  var state = { count: 3, speed: 'normal', stopped: false, night: false, cover: true, move: 'pass', ui: 55, showWalls: false };
   var pokes = [];
   var W = 0, H = 0, land = true;
   var clock = { cx: 0, cy: 0, r: 0 };
