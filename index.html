@@ -80,9 +80,39 @@
   @-webkit-keyframes bubbleLife { 0% { opacity: 0; } 5% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
   @keyframes bubbleLife { 0% { opacity: 0; } 5% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
 
+  /* 시간 막대 (4.5.0): 흰 판 위 어두운 글자라 어느 시간대 배경에서도 읽힌다. 줄어드는 것은 transform만 바꾼다 */
+  #cd { display: none; box-sizing: border-box; padding: 10px 16px 12px; border-radius: 18px; background: rgba(255,255,255,0.92); color: #222; border: 3px solid #2E9E4F; }
+  #cd-row { position: relative; height: 46px; line-height: 46px; white-space: nowrap; }
+  #cd-name { position: absolute; left: 0; right: 130px; overflow: hidden; text-overflow: ellipsis; font-size: 26px; font-weight: bold; }
+  #cd-min { position: absolute; right: 0; top: 0; font-size: 40px; font-weight: bold; }
+  #cd-track { height: 24px; margin-top: 6px; border-radius: 12px; background: #E4DFD6; overflow: hidden; }
+  #cd-fill { height: 100%; width: 100%; border-radius: 12px; background: #2E9E4F; -webkit-transform-origin: 0 50%; transform-origin: 0 50%;
+    -webkit-transition: -webkit-transform 0.8s linear; transition: transform 0.8s linear; }
+  #cd.y { border-color: #D99A00; } #cd.y #cd-fill { background: #F2B01E; }
+  #cd.o { border-color: #E8590C; } #cd.o #cd-fill { background: #F76707; }
+  #cd.r { border-color: #D6001C; background: #FFF0F0; } #cd.r #cd-fill { background: #D6001C; } #cd.r #cd-min { color: #C20019; }
+  body.portrait #cd { padding: 8px 16px 10px; }
+  body.portrait #cd-row { height: 40px; line-height: 40px; }
+  body.portrait #cd-min { font-size: 36px; }
+  body.portrait #cd-track { height: 20px; border-radius: 10px; }
+  body.p-night #cd { background: rgba(30,36,84,0.94); color: #F4F1FF; }
+  body.p-night #cd-track { background: #3A4380; }
+  body.p-night #cd.r { background: #4A1E34; } body.p-night #cd.r #cd-min { color: #FF9AA8; }
+  /* D-day 칩 */
+  #dday { display: none; }
+  .dd { box-sizing: border-box; text-align: center; border-radius: 16px; background: rgba(255,255,255,0.9); color: #222; padding: 4px 10px 6px; }
+  .dd-n { display: block; font-size: 18px; line-height: 22px; font-weight: bold; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dd-c { display: block; font-size: 30px; line-height: 34px; font-weight: bold; color: #B0185A; }
+  body.landscape .dd { display: inline-block; vertical-align: top; width: 174px; margin-right: 12px; }
+  body.landscape .dd + .dd { margin-right: 0; }
+  body.portrait .dd { display: block; width: 192px; margin-bottom: 10px; }
+  body.portrait .dd-c { font-size: 32px; line-height: 38px; }
+  body.p-night .dd { background: rgba(30,36,84,0.94); color: #F4F1FF; }
+  body.p-night .dd-n { color: #D7D2F5; } body.p-night .dd-c { color: #FFD166; }
+  .c-rem { position: absolute; right: 14px; top: 50%; margin-top: 24px; width: 92px; line-height: 18px; font-size: 15px; font-weight: bold; text-align: right; white-space: nowrap; opacity: 0.9; }
   /* 위에 올라오는 화면 요소 (UI 층). 상자는 터치를 막지 않고, 눌러야 하는 것만 받는다 */
   .box, .callgrp { z-index: 2; }
-  #clock, #digital, #dateline, #schedule, #ctl { pointer-events: none; }
+  #clock, #digital, #dateline, #schedule, #ctl, #cd, #dday { pointer-events: none; }
   #clock, .chk-hit, .sbtn, #ctl .cbtn, .callgrp { pointer-events: auto; }
   #clock { cursor: pointer; }
   #clock svg { display: block; width: 100%; height: 100%; }
@@ -361,8 +391,8 @@
   #ed-text { width: 380px; }
   #ed-time, #ed-date { width: 220px; }
   /* 통화 대상 편집 칸 (할 일 편집 칸과 같은 자리·방식) */
-  #ceditor { display: none; margin: 8px 0 16px; padding: 14px 20px 18px; background: #fff7e0; border: 3px solid #f0a640; border-radius: 16px; }
-  #ceditor h3 { margin: 14px 0 0; font-size: 22px; color: #555; }
+  #ceditor, #dditor { display: none; margin: 8px 0 16px; padding: 14px 20px 18px; background: #fff7e0; border: 3px solid #f0a640; border-radius: 16px; }
+  #ceditor h3, #dditor h3 { margin: 14px 0 0; font-size: 22px; color: #555; }
   .lab2 { display: inline-block; width: 110px; font-size: 22px; font-weight: bold; vertical-align: middle; }
   .ce-in {
     font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
@@ -371,6 +401,8 @@
     -webkit-box-sizing: border-box; box-sizing: border-box;
   }
   .ce-label { width: 160px; }
+  .dd-text { width: 240px; }
+  .dd-date { width: 220px; }
   .ce-target { width: 460px; }
   .c-row { font-size: 22px; padding: 6px 0; }
   .c-row b { display: inline-block; width: 80px; }
@@ -450,6 +482,8 @@
   <div id="sch-head"><span id="sch-title">오늘 할 일</span><span id="sch-right"><span id="sch-all" class="sbtn">전체 보기</span></span><span id="sch-left"></span></div>
   <div id="sch-cards"></div>
 </div>
+<div id="cd" class="box"><div id="cd-row"><span id="cd-name"></span><span id="cd-min"></span></div><div id="cd-track"><div id="cd-fill"></div></div></div>
+<div id="dday" class="box"></div>
 <div id="call-0" class="callgrp mom"><a id="call-0-v" class="call video"></a><a id="call-0-a" class="call audio"></a><div id="call-0-msg" class="callmsg"></div></div>
 <div id="call-1" class="callgrp dad"><a id="call-1-v" class="call video"></a><a id="call-1-a" class="call audio"></a><div id="call-1-msg" class="callmsg"></div></div>
 <div id="corner"></div>
@@ -472,6 +506,7 @@
       <div id="ed-err" class="err"></div>
       <div class="ed-row"><span class="lab">글</span><input id="ed-text" type="text" autocomplete="off" autocorrect="off"><span id="ed-count" class="small"></span></div>
       <div class="ed-row"><span class="lab">시각</span><input id="ed-time" type="time"></div>
+      <div class="ed-row"><span class="lab">막대</span><span class="seg on" data-bar="on">보이기</span><span class="seg" data-bar="off">끄기</span><span class="small"> 시각 60분 전부터 줄어드는 막대</span></div>
       <div class="ed-row"><span class="lab">종류</span><span class="seg" data-kind="daily">매일 (루틴)</span><span class="seg" data-kind="weekday">요일 (루틴)</span><span class="seg" data-kind="date">날짜 (일정)</span></div>
       <div id="ed-days-row" class="ed-row"><span class="lab">요일</span><span class="day" data-d="1">월</span><span class="day" data-d="2">화</span><span class="day" data-d="3">수</span><span class="day" data-d="4">목</span><span class="day" data-d="5">금</span><span class="day" data-d="6">토</span><span class="day" data-d="0">일</span><span class="ed-sub"><span class="seg" data-quick="wk">평일</span><span class="seg" data-quick="we">주말</span></span></div>
       <div id="ed-date-row" class="ed-row"><span class="lab">날짜</span><input id="ed-date" type="date"></div>
@@ -489,6 +524,19 @@
       <div class="ed-row"><span class="lab2">이름</span><input id="ce-label-1" class="ce-in ce-label" type="text" autocomplete="off" autocorrect="off"><span class="small"> 4자까지</span></div>
       <div class="ed-row"><span class="lab2">번호·ID</span><input id="ce-target-1" class="ce-in ce-target" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
       <div class="ed-row"><span id="ce-save" class="btn primary">저장</span><span id="ce-cancel" class="btn">취소</span></div>
+    </div>
+
+    <div id="dditor">
+      <div style="font-size:26px;font-weight:bold">D-day 바꾸기</div>
+      <p class="small">이름은 8자까지예요. 화면에는 "이름까지 N밤"으로 나와요. 이름과 날짜를 비우면 그 칸은 꺼져요. 날짜가 지나면 저절로 사라져요.</p>
+      <div id="dd-err" class="err"></div>
+      <h3>첫째</h3>
+      <div class="ed-row"><span class="lab2">이름</span><input id="dd-text-0" class="ce-in dd-text" type="text" autocomplete="off" autocorrect="off"></div>
+      <div class="ed-row"><span class="lab2">날짜</span><input id="dd-date-0" class="ce-in dd-date" type="date"></div>
+      <h3>둘째</h3>
+      <div class="ed-row"><span class="lab2">이름</span><input id="dd-text-1" class="ce-in dd-text" type="text" autocomplete="off" autocorrect="off"></div>
+      <div class="ed-row"><span class="lab2">날짜</span><input id="dd-date-1" class="ce-in dd-date" type="date"></div>
+      <div class="ed-row"><span id="dd-save" class="btn primary">저장</span><span id="dd-cancel" class="btn">취소</span></div>
     </div>
 
     <div id="sec-sched" class="sec">
@@ -528,7 +576,18 @@
       <span id="call-edit" class="btn primary">바꾸기</span>
       <div id="call-msg" class="ok"></div>
     </div>
-    <div class="sec"><h2>화면 옵션</h2><p>다음 작업에서 만들어요.</p></div>
+    <div id="sec-dd" class="sec">
+      <h2>D-day</h2>
+      <div id="dd-rows"></div>
+      <span id="dd-edit" class="btn primary">바꾸기</span>
+      <div id="dd-msg" class="ok"></div>
+    </div>
+    <div class="sec">
+      <h2>화면 옵션</h2>
+      <p>쉬는 날(공휴일·방학·결석)에는 오늘 하루만 시간 막대를 끌 수 있어요. 내일은 저절로 다시 켜져요.</p>
+      <span id="skip-btn" class="btn primary"></span>
+      <div id="skip-msg" class="ok"></div>
+    </div>
 
     <div id="set-ver" class="small"></div>
   </div>
@@ -573,7 +632,7 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.4.1';
+  var VERSION = '4.5.0';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
@@ -615,6 +674,8 @@
   var MAX_DATED = 40;     // 일정(특정 날짜) 최대, 루틴과 따로 센다
   var MAX_TEXT = 14;      // 글 최대 글자 수
   var SHOW_CARDS = 3;     // 메인 카드 최대 개수
+  var MAX_DD = 2, MAX_DD_TEXT = 8;   // D-day 최대 개수, 이름 최대 글자 수
+  var CD_WINDOW = 60, CD_LATE = 15;  // 시간 막대: 시각 60분 전부터, 시각이 지나도 15분까지
   var LOCK_FAILS = 5, LOCK_MS = 30000;
   var PRESS_MS = 5000, PRESS_MOVE = 10;  // 숨은 진입: 5초, 10px 넘게 움직이면 취소
   var CORNER = 100;                      // 숨은 진입 영역 크기
@@ -745,6 +806,7 @@
       ],
       periods: ps,
       schedule: [],
+      ddays: [],
       ui: { secondHand: true, analogSize: 'large' }
     };
   }
@@ -808,6 +870,7 @@
     if (typeof it.text !== 'string' || !it.text.trim()) { return '글이 비어 있어요'; }
     if (textLen(it.text.trim()) > MAX_TEXT) { return '글이 ' + MAX_TEXT + '자를 넘어요'; }
     if (it.icon !== undefined && it.icon !== null && (typeof it.icon !== 'string' || it.icon.length > 8)) { return '아이콘이 틀려요'; }
+    if (it.noBar !== undefined && typeof it.noBar !== 'boolean') { return '시간 막대 끄기(noBar) 값이 틀려요'; }
     if (it.repeat === 'weekday') {
       if (!isArray(it.days) || it.days.length === 0) { return '요일(days)이 없어요'; }
       for (var i = 0; i < it.days.length; i++) {
@@ -823,11 +886,21 @@
     if (it.repeat === 'weekday') {
       for (var d = 0; d <= 6; d++) { if (it.days.indexOf(d) >= 0) { days.push(d); } }
     }
-    return {
+    var o = {
       id: it.id, repeat: it.repeat, days: days,
       date: it.repeat === 'date' ? it.date : null,
       time: it.time, icon: it.icon || '', text: it.text.trim()
     };
+    if (it.noBar === true) { o.noBar = true; }   // 켜 있는 기본값은 적지 않는다(옛 백업과 같은 모양 유지)
+    return o;
+  }
+  // D-day 한 칸 검사: 이름(8자 이내)과 날짜
+  function checkDday(x) {
+    if (!isObj(x)) { return '항목 모양이 틀려요'; }
+    if (typeof x.text !== 'string' || !x.text.trim()) { return '이름이 비어 있어요'; }
+    if (textLen(x.text.trim()) > MAX_DD_TEXT) { return '이름이 ' + MAX_DD_TEXT + '자를 넘어요'; }
+    if (!validDate(x.date)) { return '날짜 형식이 틀려요 (예: 2027-03-02)'; }
+    return '';
   }
 
   // 설정 전체 검사 + 기본값 병합. errors: 틀린 부분, missing: 빠져서 기본값으로 채운 항목
@@ -874,6 +947,18 @@
         }
         if (overR) { errors.push('루틴이 ' + MAX_ROUTINE + '개를 넘어요'); }
         if (overD) { errors.push('일정이 ' + MAX_DATED + '개를 넘어요'); }
+      }
+    }
+    if (obj.ddays !== undefined) {   // 선택 항목: 없어도 '빠진 항목' 안내를 하지 않는다(옛 백업 호환)
+      if (!isArray(obj.ddays)) {
+        errors.push('ddays가 목록 [ ] 이 아니에요');
+      } else {
+        for (var di = 0; di < obj.ddays.length; di++) {
+          var dd = obj.ddays[di], de = checkDday(dd);
+          if (de) { errors.push('D-day ' + (di + 1) + '번째: ' + de); continue; }
+          if (s.ddays.length >= MAX_DD) { errors.push('D-day가 ' + MAX_DD + '개를 넘어요'); break; }
+          s.ddays.push({ text: dd.text.trim(), date: dd.date });
+        }
       }
     }
     if (obj.contacts !== undefined) {
@@ -951,12 +1036,13 @@
   function lockLeft() { return Math.max(0, lockState.until - realNow()); }
 
   // --- 오늘 체크 상태 ---
-  var done = { date: '', ids: [] };
+  var done = { date: '', ids: [], skip: false };   // skip: 오늘만 시간 막대 끄기(날짜가 바뀌면 저절로 꺼짐)
   function loadDone() {
     var r = readJSON(KEY_DONE);
-    done = { date: '', ids: [] };
+    done = { date: '', ids: [], skip: false };
     if (r.ok && isObj(r.value) && typeof r.value.date === 'string' && isArray(r.value.ids)) {
       done.date = r.value.date;
+      done.skip = r.value.skip === true;
       for (var i = 0; i < r.value.ids.length; i++) {
         if (typeof r.value.ids[i] === 'string') { done.ids.push(r.value.ids[i]); }
       }
@@ -966,7 +1052,7 @@
   // 날짜가 바뀌면 체크를 비운다
   function ensureDoneDate(today) {
     if (done.date !== today) {
-      done = { date: today, ids: [] };
+      done = { date: today, ids: [], skip: false };
       saveDone();
     }
   }
@@ -1311,8 +1397,99 @@
     return { items: items, rest: rest, doneN: doneN };
   }
 
+  // --- 시간 막대 (4.5.0): 아직 안 한 일 중 시각이 가장 가까운 하나만, 시각 60분 전부터 줄어든다 ---
+  var cdLast = null, cdSaid = {};
+  function cdPick(t, d) {
+    if (done.skip) { return null; }
+    var nowMin = d.getHours() * 60 + d.getMinutes();
+    for (var i = 0; i < t.rest.length; i++) {      // t.rest는 시각순
+      var it = t.rest[i];
+      if (it.noBar) { continue; }
+      var diff = toMin(it.time) - nowMin;
+      if (diff > CD_WINDOW) { break; }             // 뒤로 갈수록 더 멀다
+      if (diff >= -CD_LATE) { return { it: it, diff: diff }; }
+    }
+    return null;
+  }
+  function cdStage(diff) { return diff <= 0 ? ' r' : (diff <= 10 ? ' o' : (diff <= 20 ? ' y' : '')); }
+  function setScaleX(node, r) {
+    node.style.webkitTransform = 'scaleX(' + r + ')';
+    node.style.transform = 'scaleX(' + r + ')';
+  }
+  function renderCd(c) {
+    var box = $('cd');
+    if (!c) { box.style.display = 'none'; return; }
+    box.className = 'box' + cdStage(c.diff);
+    box.style.display = 'block';
+    $('cd-name').textContent = c.it.text;
+    $('cd-min').textContent = c.diff > 0 ? c.diff + '분' : '지금!';
+    setScaleX($('cd-fill'), c.diff > 0 ? Math.min(1, c.diff / CD_WINDOW) : 1);
+  }
+  function placeCd() {
+    var box = $('cd');
+    if (box.style.display === 'none' || !W) { return; }
+    var s = $('schedule');
+    place(box, landscape ? W - 472 : PAD, s.offsetTop + s.offsetHeight + (landscape ? 14 : 12), landscape ? 448 : W - PAD * 2, landscape ? 104 : 90);
+  }
+  // 포켓몬이 재촉하는 말 (정해진 남은 시간에 한 번씩)
+  function cdPhrase(diff, text) {
+    if (diff === 30) { return text + '까지 30분 남았어!'; }
+    if (diff === 20) { return text + '까지 20분! 서두르자!'; }
+    if (diff === 10) { return text + '까지 10분! 얼른얼른!'; }
+    if (diff === 5) { return '5분 남았어! 서두르자!'; }
+    if (diff === 0) { return text + ' 시간이야! 가자 가자!'; }
+    if (diff === -5) { return '5분 지났어! 얼른 가자!'; }
+    if (diff === -10) { return '많이 늦었어! 빨리빨리!'; }
+    return '';
+  }
+  function cdSpeak(c) {
+    if (!c || !pokes.length) { return; }
+    var s = cdPhrase(c.diff, c.it.text);
+    if (!s) { return; }
+    var key = done.date + '|' + c.it.id + '|' + c.diff;
+    if (cdSaid[key]) { return; }
+    cdSaid[key] = true;
+    var alive = [], i;
+    for (i = 0; i < pokes.length; i++) { if (pokes[i].alive) { alive.push(pokes[i]); } }
+    if (!alive.length) { return; }
+    var p = alive[Math.floor(Math.random() * alive.length)];
+    jump(p);
+    showBubble(p, s);
+  }
+  function remainText(it, d) {
+    var diff = toMin(it.time) - (d.getHours() * 60 + d.getMinutes());
+    if (diff <= 0) { return ''; }
+    return diff < 60 ? diff + '분 뒤' : Math.floor(diff / 60) + '시간 뒤';
+  }
+
+  // --- D-day ("N밤") ---
+  function renderDday(d) {
+    var box = $('dday'), today = dayNumber(d.getFullYear(), d.getMonth(), d.getDate()), arr = [], i;
+    clearEl(box);
+    for (i = 0; i < settings.ddays.length; i++) {
+      var dd = settings.ddays[i], p = dd.date.split('-');
+      var n = dayNumber(+p[0], +p[1] - 1, +p[2]) - today;
+      if (n >= 0) { arr.push({ dd: dd, n: n }); }
+    }
+    arr.sort(function (a, b) { return a.n - b.n; });
+    if (!arr.length) { box.style.display = 'none'; return; }
+    for (i = 0; i < arr.length && i < MAX_DD; i++) {
+      var chip = el('div', 'dd');
+      chip.appendChild(el('span', 'dd-n', arr[i].n === 0 ? arr[i].dd.text : arr[i].dd.text + '까지'));
+      chip.appendChild(el('span', 'dd-c', arr[i].n === 0 ? '오늘!' : arr[i].n + '밤'));
+      box.appendChild(chip);
+    }
+    box.style.display = 'block';
+    placeDday();
+  }
+  function placeDday() {
+    var box = $('dday');
+    if (box.style.display === 'none' || !W) { return; }
+    if (landscape) { place(box, PAD, 524, 360, null); } else { place(box, PAD, 100, 192, null); }
+  }
+
   // 카드 = [체크 원] [글 최대 2줄] [시각]. 맨 위(아직 안 한 첫 일)는 "다음" 표시. 아이콘 칸 없음(v1.28)
-  function makeCard(it, isDoneCard, isFirst) {
+  function makeCard(it, isDoneCard, isFirst, rem) {
     var card = el('div', 'card' + (isDoneCard ? ' done' : '') + (isFirst ? ' first' : ''));
     var hit = el('div', 'chk-hit');
     hit.setAttribute('data-chk', it.id);
@@ -1320,6 +1497,7 @@
     card.appendChild(hit);
     if (isFirst) { card.appendChild(el('span', 'c-next', '다음')); }
     card.appendChild(el('span', 'c-time', it.time));
+    if (isFirst && rem) { card.appendChild(el('span', 'c-rem', rem)); }
     var box = el('span', 'c-textbox');
     box.appendChild(el('span', 'c-text', it.text));
     card.appendChild(box);
@@ -1329,8 +1507,11 @@
   function renderTodo() {
     var t = todayInfo();
     var total = t.items.length;
+    var nowD = now(), cdp = cdPick(t, nowD);
+    cdLast = cdp;
+    var lim = (!landscape && cdp) ? SHOW_CARDS - 1 : SHOW_CARDS;   // 세로는 자리가 모자라 막대가 있으면 카드를 2장으로
     $('sch-title').textContent = total ? '오늘 할 일 (' + t.doneN + '/' + total + ')' : '오늘 할 일';
-    $('sch-left').textContent = t.rest.length > SHOW_CARDS ? '남은 일 ' + t.rest.length + '개' : '';
+    $('sch-left').textContent = t.rest.length > lim ? '남은 일 ' + t.rest.length + '개' : '';
     $('sch-all').style.display = (total || weekHasAny()) ? 'inline-block' : 'none';
     var box = $('sch-cards');
     clearEl(box);
@@ -1339,10 +1520,13 @@
     } else if (!t.rest.length) {
       box.appendChild(el('div', 'card msg', '다 했어요! 🎉')); // 🎉
     } else {
-      for (var i = 0; i < t.rest.length && i < SHOW_CARDS; i++) {
-        box.appendChild(makeCard(t.rest[i], false, i === 0));
+      for (var i = 0; i < t.rest.length && i < lim; i++) {
+        box.appendChild(makeCard(t.rest[i], false, i === 0, i === 0 ? remainText(t.rest[0], nowD) : ''));
       }
     }
+    renderCd(cdp);
+    placeCd();
+    renderDday(nowD);
     if (allOpen) { renderAll(t); }
     if (typeof buildWalls === 'function') { buildWalls(); }
   }
@@ -1466,7 +1650,9 @@
     pastSel = {};
     closeEditor();
     closeCallEditor();
+    closeDdEditor();
     $('call-msg').textContent = '';
+    $('dd-msg').textContent = ''; $('skip-msg').textContent = '';
     $('add-msg').textContent = ''; $('past-msg').textContent = '';
     $('restore-msg').textContent = ''; $('restore-msg').className = '';
     $('pin-change-msg').textContent = '';
@@ -1483,6 +1669,7 @@
     setOpen = false; firstRun = false;
     closeEditor();
     closeCallEditor(); // 저장하지 않은 통화 대상 입력은 버린다
+    closeDdEditor();
     show('set-ov', false);
     window.scrollTo(0, 0);
     renderTodo();
@@ -1524,7 +1711,7 @@
     var info = el('div', 'item-info' + (past ? ' past' : ''));
     info.appendChild(el('span', 'i-time', it.time));
     info.appendChild(el('span', 'i-text', it.text));
-    info.appendChild(el('div', 'i-when', describe(it)));
+    info.appendChild(el('div', 'i-when', describe(it) + (it.noBar ? ' · 시간 막대 끔' : '')));
     row.appendChild(info);
     var bx = el('div', 'item-btns');
     var b1 = el('span', 'btn', '고치기'); b1.setAttribute('data-edit', it.id);
@@ -1597,6 +1784,80 @@
     $('backup-ta').value = JSON.stringify(settings, null, 2);
     $('set-ver').textContent = '버전 ' + VERSION;
     renderCallRows();
+    renderDdRows();
+    drawSkip();
+  }
+
+  // --- D-day (설정) ---
+  function renderDdRows() {
+    var box = $('dd-rows'), d = now(), i;
+    clearEl(box);
+    var today = dayNumber(d.getFullYear(), d.getMonth(), d.getDate());
+    for (i = 0; i < MAX_DD; i++) {
+      var dd = settings.ddays[i], row = el('div', 'c-row');
+      if (dd) {
+        var b = el('b', '', dd.text); b.style.width = 'auto'; b.style.marginRight = '14px';
+        row.appendChild(b);
+        var p = dd.date.split('-'), n = dayNumber(+p[0], +p[1] - 1, +p[2]) - today;
+        row.appendChild(el('span', '', dd.date + (n >= 0 ? ' (' + (n === 0 ? '오늘' : n + '밤') + ')' : ' (지났어요)')));
+      } else {
+        row.appendChild(el('span', 'off', '비어 있음'));
+      }
+      box.appendChild(row);
+    }
+  }
+  function openDdEditor() {
+    closeEditor(); closeCallEditor();
+    $('dd-err').textContent = ''; $('dd-msg').textContent = '';
+    for (var j = 0; j < MAX_DD; j++) {
+      var dd = settings.ddays[j];
+      $('dd-text-' + j).value = dd ? dd.text : '';
+      $('dd-date-' + j).value = dd ? dd.date : '';
+    }
+    show('dditor', true);
+    $('set-body').scrollTop = 0;
+  }
+  function closeDdEditor() {
+    show('dditor', false);
+    for (var j = 0; j < MAX_DD; j++) { $('dd-text-' + j).value = ''; $('dd-date-' + j).value = ''; }
+  }
+  function saveDdEditor() {
+    var errs = [], out = [];
+    for (var j = 0; j < MAX_DD; j++) {
+      var tx = $('dd-text-' + j).value.trim(), dt = String($('dd-date-' + j).value || '');
+      if (!tx && !dt) { continue; }
+      var e = (!tx || !dt) ? '이름과 날짜를 둘 다 넣어 주세요' : checkDday({ text: tx, date: dt });
+      if (e) { errs.push((j + 1) + '번째: ' + e); continue; }
+      out.push({ text: tx, date: dt });
+    }
+    if (errs.length) {
+      $('dd-err').textContent = '저장하지 않았어요. ' + errs.join(' / ');
+      $('set-body').scrollTop = 0;
+      return false;
+    }
+    settings.ddays = out;
+    var ok = saveSettings();
+    var a = document.activeElement;
+    if (a && a.blur && a.tagName === 'INPUT') { a.blur(); }
+    closeDdEditor();
+    renderSettings();
+    renderDday(now());
+    $('dd-msg').className = ok ? 'ok' : 'err';
+    $('dd-msg').textContent = ok ? '저장했어요.' : '바꿨지만 저장하지 못했어요. 새로고침하면 사라질 수 있어요.';
+    return true;
+  }
+  // --- 오늘만 시간 막대 끄기 (설정 > 화면 옵션) ---
+  function drawSkip() {
+    ensureDoneDate(dateStr(now()));
+    $('skip-btn').textContent = done.skip ? '시간 막대 다시 켜기' : '오늘만 시간 막대 끄기';
+  }
+  function toggleSkip() {
+    ensureDoneDate(dateStr(now()));
+    done.skip = !done.skip;
+    saveDone();
+    drawSkip();
+    renderTodo();
+    $('skip-msg').textContent = done.skip ? '오늘은 시간 막대를 꺼 뒀어요. 내일은 저절로 켜져요.' : '시간 막대를 다시 켰어요.';
   }
 
   // --- 통화 대상 (설정) ---
@@ -1612,7 +1873,7 @@
     }
   }
   function openCallEditor() {
-    closeEditor();
+    closeEditor(); closeDdEditor();
     $('ce-err').textContent = '';
     $('call-msg').textContent = '';
     for (var j = 0; j < 2; j++) {
@@ -1739,7 +2000,7 @@
   }
 
   // --- 편집 ---
-  var ed = { id: null, kind: 'daily', days: [], icon: '' };
+  var ed = { id: null, kind: 'daily', days: [], icon: '', noBar: false };
   function newId() {
     var id;
     do { id = 's' + realNow().toString(36) + Math.floor(Math.random() * 1296).toString(36); } while (findItem(id));
@@ -1747,17 +2008,17 @@
   }
   function openEditor(id, kind) {
     var it = id ? findItem(id) : null;
-    closeCallEditor();
+    closeCallEditor(); closeDdEditor();
     $('ed-err').textContent = '';
     $('add-msg').textContent = '';
     if (it) {
-      ed.id = it.id; ed.kind = it.repeat; ed.days = it.days.slice(0); ed.icon = it.icon || '';
+      ed.id = it.id; ed.kind = it.repeat; ed.days = it.days.slice(0); ed.icon = it.icon || ''; ed.noBar = it.noBar === true;
       $('ed-text').value = it.text;
       $('ed-time').value = it.time;
       $('ed-date').value = it.date || dateStr(now());
       $('ed-title').textContent = (it.repeat === 'date' ? '일정' : '루틴') + ' 고치기';
     } else {
-      ed.id = null; ed.kind = kind; ed.days = (kind === 'weekday') ? [1, 2, 3, 4, 5] : []; ed.icon = '';
+      ed.id = null; ed.kind = kind; ed.days = (kind === 'weekday') ? [1, 2, 3, 4, 5] : []; ed.icon = ''; ed.noBar = false;
       $('ed-text').value = '';
       $('ed-time').value = '08:00';
       $('ed-date').value = dateStr(now());
@@ -1780,6 +2041,8 @@
     for (i = 0; i < nodes.length; i++) {
       nodes[i].className = 'day' + (ed.days.indexOf(+nodes[i].getAttribute('data-d')) >= 0 ? ' on' : '');
     }
+    nodes = $('editor').querySelectorAll('[data-bar]');
+    for (i = 0; i < nodes.length; i++) { nodes[i].className = 'seg' + ((nodes[i].getAttribute('data-bar') === 'off') === ed.noBar ? ' on' : ''); }
     show('ed-days-row', ed.kind === 'weekday');
     show('ed-date-row', ed.kind === 'date');
     drawCount();
@@ -1799,7 +2062,7 @@
       id: ed.id || newId(), repeat: ed.kind,
       days: ed.kind === 'weekday' ? days : [],
       date: ed.kind === 'date' ? String($('ed-date').value || '') : null,
-      time: time, icon: ed.icon, text: text
+      time: time, icon: ed.icon, text: text, noBar: ed.noBar
     };
     var err = '';
     if (!text) { err = '글을 써 주세요.'; }
@@ -1963,6 +2226,10 @@
     bindButton('ed-cancel', closeEditor);
     bindButton('ed-del', function () { if (ed.id) { askDelete(ed.id); } });
     bindButton('call-edit', openCallEditor);
+    bindButton('dd-edit', openDdEditor);
+    bindButton('dd-save', saveDdEditor);
+    bindButton('dd-cancel', closeDdEditor);
+    bindButton('skip-btn', toggleSkip);
     bindButton('ce-save', saveCallEditor);
     bindButton('ce-cancel', closeCallEditor);
     // 메인 통화 버튼: 진짜 링크라 기본 동작(iOS가 FaceTime을 연다)은 막지 않는다. 대상이 없을 때만 막는다.
@@ -1976,6 +2243,8 @@
       if ((n = findUp(t, box, 'data-kind'))) {
         ed.kind = n.getAttribute('data-kind');
         if (ed.kind === 'weekday' && !ed.days.length) { ed.days = [1, 2, 3, 4, 5]; }
+      } else if ((n = findUp(t, box, 'data-bar'))) {
+        ed.noBar = n.getAttribute('data-bar') === 'off';
       } else if ((n = findUp(t, box, 'data-quick'))) {
         ed.days = n.getAttribute('data-quick') === 'wk' ? [1, 2, 3, 4, 5] : [0, 6];
       } else if ((n = findUp(t, box, 'data-d'))) {
@@ -2245,6 +2514,8 @@
     addWall(list, rectOf($('sch-head')));
     cards = $('sch-cards').childNodes;
     for (i = 0; i < cards.length; i++) { addWall(list, rectOf(cards[i])); }
+    addWall(list, rectOf($('cd')));
+    addWall(list, rectOf($('dday')));
     addWall(list, rectOf($('call-0')));
     addWall(list, rectOf($('call-1')));
     addWall(list, rectOf($('ctl')));
@@ -2529,6 +2800,7 @@
     if (mk !== minuteKey) {
       minuteKey = mk;
       renderTodo();
+      cdSpeak(cdLast);
     }
     pinTick();
     allTick();
@@ -2613,6 +2885,8 @@
     // 숨은 진입: 가로·세로 모두 오른쪽 위 모서리
     place($('corner'), W - CORNER, 0, CORNER, CORNER);
     drawCtl();
+    placeCd();
+    placeDday();
     buildWalls();
     ensureSprites();
   }
@@ -2797,6 +3071,13 @@
       return { title: $('sch-title').textContent, left: $('sch-left').textContent, cards: out, done: done };
     },
     settings: function () { return JSON.parse(JSON.stringify(settings)); },
+    cd: function () {
+      var b = $('cd'), r = b.getBoundingClientRect(), f = $('cd-fill');
+      return { shown: b.style.display === 'block', cls: b.className, name: $('cd-name').textContent, min: $('cd-min').textContent,
+        fill: f.style.transform || f.style.webkitTransform || '', rect: [r.left, r.top, r.width, r.height], skip: done.skip,
+        dday: $('dday').textContent, ddayShown: $('dday').style.display === 'block', rem: (function () { var e = document.querySelector('.c-rem'); return e ? e.textContent : ''; })() };
+    },
+    cdPhrase: cdPhrase,
     checkItem: checkItem,
     checkRestore: checkRestore,
     sha256: sha256,
