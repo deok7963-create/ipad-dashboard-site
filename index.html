@@ -80,35 +80,33 @@
   @-webkit-keyframes bubbleLife { 0% { opacity: 0; } 5% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
   @keyframes bubbleLife { 0% { opacity: 0; } 5% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
 
-  /* 시간 막대 (4.5.0): 흰 판 위 어두운 글자라 어느 시간대 배경에서도 읽힌다. 줄어드는 것은 transform만 바꾼다 */
-  #cd { display: none; box-sizing: border-box; padding: 10px 16px 12px; border-radius: 18px; background: rgba(255,255,255,0.92); color: #222; border: 3px solid #2E9E4F; }
+  /* 시간 막대 (4.5.1): 판 없이 투명(카드와 같은 글자색). 막대 트랙은 윤곽선을 둬서 배경에서도 보인다. 줄어드는 것은 transform만 바꾼다 */
+  #cd { display: none; box-sizing: border-box; padding: 10px 16px 12px; border-radius: 18px; background: none; color: inherit; border: 0; }
   #cd-row { position: relative; height: 46px; line-height: 46px; white-space: nowrap; }
   #cd-name { position: absolute; left: 0; right: 130px; overflow: hidden; text-overflow: ellipsis; font-size: 26px; font-weight: bold; }
   #cd-min { position: absolute; right: 0; top: 0; font-size: 40px; font-weight: bold; }
-  #cd-track { height: 24px; margin-top: 6px; border-radius: 12px; background: #E4DFD6; overflow: hidden; }
+  #cd-track { -webkit-box-sizing: border-box; box-sizing: border-box; height: 24px; margin-top: 6px; border-radius: 12px; background: rgba(0,0,0,0.14); border: 2px solid rgba(0,0,0,0.4); overflow: hidden; }
   #cd-fill { height: 100%; width: 100%; border-radius: 12px; background: #2E9E4F; -webkit-transform-origin: 0 50%; transform-origin: 0 50%;
     -webkit-transition: -webkit-transform 0.8s linear; transition: transform 0.8s linear; }
-  #cd.y { border-color: #D99A00; } #cd.y #cd-fill { background: #F2B01E; }
-  #cd.o { border-color: #E8590C; } #cd.o #cd-fill { background: #F76707; }
-  #cd.r { border-color: #D6001C; background: #FFF0F0; } #cd.r #cd-fill { background: #D6001C; } #cd.r #cd-min { color: #C20019; }
+  #cd.y #cd-fill { background: #F2B01E; }
+  #cd.o #cd-fill { background: #F76707; }
+  #cd.r #cd-fill { background: #D6001C; } #cd.r #cd-min { color: #C20019; }
   body.portrait #cd { padding: 8px 16px 10px; }
   body.portrait #cd-row { height: 40px; line-height: 40px; }
   body.portrait #cd-min { font-size: 36px; }
   body.portrait #cd-track { height: 20px; border-radius: 10px; }
-  body.p-night #cd { background: rgba(30,36,84,0.94); color: #F4F1FF; }
-  body.p-night #cd-track { background: #3A4380; }
-  body.p-night #cd.r { background: #4A1E34; } body.p-night #cd.r #cd-min { color: #FF9AA8; }
+  body.p-night #cd-track { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.55); }
+  body.p-night #cd.r #cd-min { color: #FF9AA8; }
   /* D-day 칩 */
   #dday { display: none; }
-  .dd { box-sizing: border-box; text-align: center; border-radius: 16px; background: rgba(255,255,255,0.9); color: #222; padding: 4px 10px 6px; }
-  .dd-n { display: block; font-size: 18px; line-height: 22px; font-weight: bold; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .dd-c { display: block; font-size: 30px; line-height: 34px; font-weight: bold; color: #B0185A; }
+  .dd { box-sizing: border-box; text-align: center; border-radius: 16px; background: none; color: inherit; padding: 4px 10px 6px; }
+  .dd-n { display: block; font-size: 18px; line-height: 22px; font-weight: bold; color: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dd-c { display: block; font-size: 30px; line-height: 34px; font-weight: bold; color: inherit; }
   body.landscape .dd { display: inline-block; vertical-align: top; width: 174px; margin-right: 12px; }
   body.landscape .dd + .dd { margin-right: 0; }
   body.portrait .dd { display: block; width: 192px; margin-bottom: 10px; }
   body.portrait .dd-c { font-size: 32px; line-height: 38px; }
-  body.p-night .dd { background: rgba(30,36,84,0.94); color: #F4F1FF; }
-  body.p-night .dd-n { color: #D7D2F5; } body.p-night .dd-c { color: #FFD166; }
+  body.p-night .dd-c { color: #FFD166; }
   .c-rem { position: absolute; right: 14px; top: 50%; margin-top: 24px; width: 92px; line-height: 18px; font-size: 15px; font-weight: bold; text-align: right; white-space: nowrap; opacity: 0.9; }
   /* 위에 올라오는 화면 요소 (UI 층). 상자는 터치를 막지 않고, 눌러야 하는 것만 받는다 */
   .box, .callgrp { z-index: 2; }
@@ -632,7 +630,7 @@
   //  부: 새 작업 요청서로 기능을 더할 때 (수는 0으로)
   //  수: 같은 작업 안의 보정·버그 수정
   // 이전 기록: 2 = TASK-004, 3 = TASK-005, 4 = TASK-005 보정(복사·PIN 복구) → 4.0.1부터 이 형식
-  var VERSION = '4.5.0';
+  var VERSION = '4.5.1';
   var BASE = 'assets/ditto/';
 
   // ---------------------------------------------------------------
